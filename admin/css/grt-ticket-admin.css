@@ -82,6 +82,11 @@
     background: #f0f0f1;
     z-index: 9999;
     display: flex;
+    box-sizing: border-box;
+}
+
+.grt-chat-container * {
+    box-sizing: border-box;
 }
 
 /* Adjust for collapsed admin menu */
@@ -242,9 +247,10 @@
 
 /* Chat Input */
 .grt-chat-input-container {
-    padding: 20px;
+    padding: 15px;
     background: #fff;
     border-top: 1px solid #ddd;
+    flex-shrink: 0;
 }
 
 .grt-chat-input-wrapper {
@@ -255,14 +261,15 @@
 
 .grt-chat-input {
     flex: 1;
-    padding: 12px;
+    padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
     resize: vertical;
-    min-height: 50px;
+    min-height: 40px;
     max-height: 150px;
     font-family: inherit;
     font-size: 14px;
+    line-height: 1.5;
 }
 
 .grt-chat-input:focus {

@@ -247,6 +247,24 @@ class GRT_Ticket_Database {
 	}
 
 	/**
+	 * Get a message by ID.
+	 *
+	 * @since    1.0.0
+	 * @param    int $message_id    Message ID.
+	 * @return   object|null        Message object or null.
+	 */
+	public static function get_message( $message_id ) {
+		global $wpdb;
+
+		return $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM " . self::get_messages_table() . " WHERE id = %d",
+				$message_id
+			)
+		);
+	}
+
+	/**
 	 * Get messages for a ticket.
 	 *
 	 * @since    1.0.0

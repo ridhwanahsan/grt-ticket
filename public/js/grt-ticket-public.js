@@ -212,7 +212,14 @@
                         $('#grt-chat-attachment').val('');
                         $('#grt-attachment-preview').hide();
                         $('#grt-preview-image').attr('src', '');
-                        loadNewMessages();
+                        
+                        // If we received the new message object, append it directly
+                        if (response.data.chat_message) {
+                            appendMessages([response.data.chat_message]);
+                            scrollToBottom();
+                        } else {
+                            loadNewMessages();
+                        }
                     } else {
                         alert(response.data.message || 'Failed to send message.');
                     }
@@ -276,11 +283,28 @@
         function createMessageHtml(msg) {
             const senderClass = msg.sender_type === 'admin' ? 'admin' : 'user';
             const time = formatTime(msg.created_at);
+            let attachmentHtml = '';
+
+            if (msg.attachment_url) {
+                attachmentHtml = `
+                    <div class="grt-message-attachment">
+                        <a href="${escapeHtml(msg.attachment_url)}" target="_blank">
+                            <img src="${escapeHtml(msg.attachment_url)}" alt="Attachment" style="max-width: 300px; border-radius: 8px;">
+                        </a>
+                    </div>
+                `;
+            }
+
+            let messageBubble = '';
+            if (msg.message) {
+                messageBubble = `<div class="grt-message-bubble">${escapeHtml(msg.message)}</div>`;
+            }
 
             return `
                 <div class="grt-chat-message ${senderClass}" data-message-id="${msg.id}">
                     <div class="grt-message-sender">${escapeHtml(msg.sender_name)}</div>
-                    <div class="grt-message-bubble">${escapeHtml(msg.message)}</div>
+                    ${messageBubble}
+                    ${attachmentHtml}
                     <div class="grt-message-time">${time}</div>
                 </div>
             `;

@@ -192,11 +192,19 @@ class GRT_Ticket_Ajax {
 		}
 
 		// Prepare message data
+		$message_content = ! empty( $_POST['message'] ) ? $_POST['message'] : '';
+		
+		// If message is empty but we have an attachment, use a placeholder or empty string
+		// We ensure it's not null, but let's make sure it's at least an empty string
+		if ( empty( $message_content ) && $attachment_url ) {
+			$message_content = ''; // Empty string is valid for TEXT NOT NULL
+		}
+
 		$message_data = array(
 			'ticket_id'   => $ticket_id,
 			'sender_type' => $sender_type,
 			'sender_name' => $sender_name,
-			'message'     => ! empty( $_POST['message'] ) ? $_POST['message'] : '',
+			'message'     => $message_content,
 		);
 
 		if ( $attachment_url ) {
@@ -207,9 +215,12 @@ class GRT_Ticket_Ajax {
 		$message_id = GRT_Ticket_Database::add_message( $message_data );
 
 		if ( $message_id ) {
+			$new_message = GRT_Ticket_Database::get_message( $message_id );
+			
 			wp_send_json_success( array(
-				'message'    => __( 'Message sent successfully!', 'grt-ticket' ),
-				'message_id' => $message_id,
+				'message'      => __( 'Message sent successfully!', 'grt-ticket' ),
+				'message_id'   => $message_id,
+				'chat_message' => $new_message,
 			) );
 		} else {
 			wp_send_json_error( array( 'message' => __( 'Failed to send message. Please try again.', 'grt-ticket' ) ) );
