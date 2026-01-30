@@ -3,7 +3,7 @@ Contributors: ridhwanahsan
 Tags: support, ticket, chat, email piping, helpdesk
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -27,6 +27,11 @@ GRT Ticket is a complete support ticket system for WordPress, providing real-tim
 4. Add the shortcode `[grt_ticket_form]` to any page to display the ticket submission form.
 
 == Changelog ==
+
+= 1.0.4 =
+* UI Improvements: Enhanced login form styling.
+* Security: Improved password handling for guest ticket submissions.
+* Fix: Minor bug fixes and performance improvements.
 
 = 1.0.3 =
 * UI Improvements: Updated ticket form layout and styling.
