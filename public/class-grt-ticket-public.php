@@ -59,6 +59,17 @@ class GRT_Ticket_Public {
 	}
 
 	/**
+	 * Hide admin bar for non-admin users.
+	 *
+	 * @since    1.0.0
+	 */
+	public function hide_admin_bar_for_non_admins() {
+		if ( ! current_user_can( 'manage_options' ) && ! is_admin() ) {
+			show_admin_bar( false );
+		}
+	}
+
+	/**
 	 * Register the stylesheets for the public-facing side of the site.
 	 *
 	 * @since    1.0.0
