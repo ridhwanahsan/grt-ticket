@@ -83,6 +83,9 @@ class GRT_Ticket {
 		// The class responsible for defining all actions that occur in the public-facing side of the site.
 		require_once GRT_TICKET_PLUGIN_DIR . 'public/class-grt-ticket-public.php';
 
+		// The class responsible for email piping.
+		require_once GRT_TICKET_PLUGIN_DIR . 'includes/class-grt-ticket-email-piping.php';
+
 		$this->loader = new GRT_Ticket_Loader();
 	}
 
@@ -111,6 +114,30 @@ class GRT_Ticket {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_admin_menu' );
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_settings' );
+
+		// Email Piping Hooks
+		if ( class_exists( 'GRT_Ticket_Email_Piping' ) ) {
+			$plugin_piping = new GRT_Ticket_Email_Piping();
+			$this->loader->add_action( 'grt_ticket_check_emails_cron', $plugin_piping, 'check_emails' );
+			$this->loader->add_filter( 'cron_schedules', $this, 'add_cron_schedules' );
+		} else {
+			error_log( 'GRT Ticket: GRT_Ticket_Email_Piping class not found.' );
+		}
+	}
+
+	/**
+	 * Add custom cron schedules.
+	 *
+	 * @since    1.0.0
+	 * @param    array $schedules List of current schedules.
+	 * @return   array Modified list of schedules.
+	 */
+	public function add_cron_schedules( $schedules ) {
+		$schedules['grt_5_min'] = array(
+			'interval' => 300,
+			'display'  => __( 'Every 5 Minutes', 'grt-ticket' ),
+		);
+		return $schedules;
 	}
 
 	/**

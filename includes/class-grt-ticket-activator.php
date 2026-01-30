@@ -80,6 +80,11 @@ class GRT_Ticket_Activator {
 		dbDelta( $sql_messages );
 		dbDelta( $sql_canned );
 
+		// Schedule cron job for email piping
+		if ( ! wp_next_scheduled( 'grt_ticket_check_emails_cron' ) ) {
+			wp_schedule_event( time(), 'grt_5_min', 'grt_ticket_check_emails_cron' );
+		}
+
 		// Add default canned responses if table is empty
 		$count_canned = $wpdb->get_var( "SELECT COUNT(*) FROM $table_canned" );
 		if ( 0 == $count_canned ) {

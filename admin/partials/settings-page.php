@@ -45,6 +45,17 @@ if ( isset( $_POST['grt_ticket_save_settings'] ) && check_admin_referer( 'grt_ti
 	update_option( 'grt_ticket_support_phone', sanitize_text_field( $_POST['grt_ticket_support_phone'] ) );
 	update_option( 'grt_ticket_sms_body', sanitize_textarea_field( $_POST['grt_ticket_sms_body'] ) );
 	
+	// Email Piping Settings
+	update_option( 'grt_ticket_enable_piping', isset( $_POST['grt_ticket_enable_piping'] ) ? 1 : 0 );
+	update_option( 'grt_ticket_imap_host', sanitize_text_field( $_POST['grt_ticket_imap_host'] ) );
+	update_option( 'grt_ticket_imap_port', absint( $_POST['grt_ticket_imap_port'] ) );
+	update_option( 'grt_ticket_imap_user', sanitize_email( $_POST['grt_ticket_imap_user'] ) );
+	// Only update password if provided (to avoid clearing it on empty save)
+	if ( ! empty( $_POST['grt_ticket_imap_pass'] ) ) {
+		update_option( 'grt_ticket_imap_pass', sanitize_text_field( $_POST['grt_ticket_imap_pass'] ) );
+	}
+	update_option( 'grt_ticket_imap_ssl', isset( $_POST['grt_ticket_imap_ssl'] ) ? 1 : 0 );
+
 	echo '<div class="notice notice-success"><p>' . esc_html__( 'Settings saved successfully!', 'grt-ticket' ) . '</p></div>';
 }
 
@@ -87,6 +98,14 @@ $enable_direct_call = get_option( 'grt_ticket_enable_direct_call', 0 );
 $enable_direct_sms = get_option( 'grt_ticket_enable_direct_sms', 0 );
 $support_phone = get_option( 'grt_ticket_support_phone', '' );
 $sms_body = get_option( 'grt_ticket_sms_body', 'Hello, I need help with my ticket.' );
+
+// Email Piping Options
+$enable_piping = get_option( 'grt_ticket_enable_piping', 0 );
+$imap_host = get_option( 'grt_ticket_imap_host', '' );
+$imap_port = get_option( 'grt_ticket_imap_port', 993 );
+$imap_user = get_option( 'grt_ticket_imap_user', '' );
+$imap_pass = get_option( 'grt_ticket_imap_pass', '' );
+$imap_ssl = get_option( 'grt_ticket_imap_ssl', 1 );
 ?>
 
 <div class="wrap grt-ticket-wrap">
@@ -98,6 +117,7 @@ $sms_body = get_option( 'grt_ticket_sms_body', 'Hello, I need help with my ticke
 	<h2 class="nav-tab-wrapper grt-settings-tabs">
 		<a href="#grt-tab-general" class="nav-tab nav-tab-active"><?php esc_html_e( 'General Settings', 'grt-ticket' ); ?></a>
 		<a href="#grt-tab-email" class="nav-tab"><?php esc_html_e( 'Email Notifications', 'grt-ticket' ); ?></a>
+		<a href="#grt-tab-piping" class="nav-tab"><?php esc_html_e( 'Email Piping (Reply via Email)', 'grt-ticket' ); ?></a>
 		<a href="#grt-tab-whatsapp" class="nav-tab"><?php esc_html_e( 'WhatsApp Integrations', 'grt-ticket' ); ?></a>
 		<a href="#grt-tab-contact" class="nav-tab"><?php esc_html_e( 'Direct Contact', 'grt-ticket' ); ?></a>
 	</h2>
@@ -192,6 +212,69 @@ $sms_body = get_option( 'grt_ticket_sms_body', 'Hello, I need help with my ticke
 				</tbody>
 			</table>
 		</div>
+
+	<!-- Email Piping Tab -->
+	<div id="grt-tab-piping" class="grt-tab-content">
+		<div class="grt-settings-section">
+			<h3><?php esc_html_e( 'Email Piping Configuration', 'grt-ticket' ); ?></h3>
+			<p class="description">
+				<?php esc_html_e( 'Allow users to reply to tickets directly from their email client. This feature uses IMAP to check for new emails.', 'grt-ticket' ); ?>
+				<br>
+				<strong><?php esc_html_e( 'Note for Gmail Users:', 'grt-ticket' ); ?></strong> 
+				<?php esc_html_e( 'You must use an "App Password" instead of your regular password. Go to Google Account > Security > 2-Step Verification > App Passwords.', 'grt-ticket' ); ?>
+			</p>
+
+			<table class="form-table">
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Enable Email Piping', 'grt-ticket' ); ?></th>
+					<td>
+						<label class="grt-switch">
+							<input type="checkbox" name="grt_ticket_enable_piping" id="grt_ticket_enable_piping" value="1" <?php checked( $enable_piping, 1 ); ?>>
+							<span class="slider round"></span>
+						</label>
+						<p class="description"><?php esc_html_e( 'Check this to enable checking email for replies.', 'grt-ticket' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="grt_ticket_imap_host"><?php esc_html_e( 'IMAP Host', 'grt-ticket' ); ?></label></th>
+					<td>
+						<input type="text" name="grt_ticket_imap_host" id="grt_ticket_imap_host" class="regular-text" value="<?php echo esc_attr( $imap_host ); ?>">
+						<p class="description"><?php esc_html_e( 'e.g., imap.gmail.com', 'grt-ticket' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="grt_ticket_imap_port"><?php esc_html_e( 'IMAP Port', 'grt-ticket' ); ?></label></th>
+					<td>
+						<input type="number" name="grt_ticket_imap_port" id="grt_ticket_imap_port" class="small-text" value="<?php echo esc_attr( $imap_port ); ?>">
+						<p class="description"><?php esc_html_e( 'Usually 993 for SSL.', 'grt-ticket' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="grt_ticket_imap_ssl"><?php esc_html_e( 'Use SSL', 'grt-ticket' ); ?></label></th>
+					<td>
+						<label>
+							<input type="checkbox" name="grt_ticket_imap_ssl" value="1" <?php checked( $imap_ssl, 1 ); ?>>
+							<?php esc_html_e( 'Enable SSL encryption', 'grt-ticket' ); ?>
+						</label>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="grt_ticket_imap_user"><?php esc_html_e( 'Email Address', 'grt-ticket' ); ?></label></th>
+					<td>
+						<input type="email" name="grt_ticket_imap_user" id="grt_ticket_imap_user" class="regular-text" value="<?php echo esc_attr( $imap_user ); ?>">
+						<p class="description"><?php esc_html_e( 'The email address to check (e.g., yourname@gmail.com).', 'grt-ticket' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="grt_ticket_imap_pass"><?php esc_html_e( 'Email Password / App Password', 'grt-ticket' ); ?></label></th>
+					<td>
+						<input type="password" name="grt_ticket_imap_pass" id="grt_ticket_imap_pass" class="regular-text" value="" placeholder="<?php echo ! empty( $imap_pass ) ? '********' : ''; ?>">
+						<p class="description"><?php esc_html_e( 'Leave empty to keep existing password.', 'grt-ticket' ); ?></p>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
 
 		<!-- WhatsApp Integrations Tab -->
 		<div id="grt-tab-whatsapp" class="grt-tab-content">

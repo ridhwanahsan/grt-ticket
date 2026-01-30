@@ -21,5 +21,7 @@ class GRT_Ticket_Deactivator {
 	public static function deactivate() {
 		// Cleanup tasks if needed
 		// Note: We don't drop tables on deactivation, only on uninstall
+		
+		wp_clear_scheduled_hook( 'grt_ticket_check_emails_cron' );
 	}
 }
