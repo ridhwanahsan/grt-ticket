@@ -1,87 +1,98 @@
-# GRT Ticket
+# GRT Ticket - Professional WordPress Support Ticket System
 
-A complete, professional WordPress support ticket system with real-time chat functionality, designed for seamless customer support.
+**Version:** 1.0.4  
+**Requires at least:** 5.0  
+**Tested up to:** 6.4  
+**Requires PHP:** 7.4  
+**License:** GPLv2 or later  
+
+A complete, professional support ticket system with real-time chat functionality, designed for seamless customer support directly within your WordPress site.
 
 ## Description
 
-GRT Ticket is a powerful support ticket management plugin for WordPress that provides a seamless experience for both administrators and users. Unlike standard contact forms, GRT Ticket offers a full-fledged ticketing system with a modern, full-screen chat interface, real-time message updates, and category-based ticket organization.
+GRT Ticket is a powerful, modern support ticket management plugin for WordPress that bridges the gap between simple contact forms and complex helpdesk software. It provides a **full-screen, real-time chat interface** for users and admins, making support feel personal and immediate.
 
-It is built with performance and modularity in mind, ensuring that assets are only loaded where necessary.
+Unlike standard ticketing plugins, GRT Ticket offers a distraction-free experience with a beautiful UI, AJAX-powered live updates, and smart features like guest submission and direct contact options.
 
-## Features
+## 🚀 Key Features
 
+### 🎨 User Experience (Frontend)
+*   **Full-Screen Live Chat**: A distraction-free, WhatsApp-like chat interface for real-time communication.
+*   **Modern Ticket Form**: Beautifully designed submission form with custom category icons and validation.
+*   **Guest Ticket Submission**: Users don't need an account to submit tickets. The system automatically creates an account and handles secure password generation.
+*   **User Dashboard**: Logged-in users can view their profile, track recent tickets, and see status updates.
+*   **File Attachments**: Support for image (JPG, PNG, GIF) and PDF uploads directly within the chat.
+*   **Responsive Design**: Fully optimized for mobile, tablet, and desktop devices.
+*   **Direct Contact Buttons**: Integrated "Call Us" and "SMS Us" buttons within the chat for immediate escalation.
+*   **User Ratings**: Built-in feedback system allowing users to rate their support experience (1-5 stars).
+*   **Clean Interface**: Automatically hides the WordPress Admin Bar for non-admin users to maintain a professional app-like feel.
 
-<img width="1917" height="904" alt="image" src="https://github.com/user-attachments/assets/9ac1849a-40e4-47c5-b864-ed1cc7671070" />
-<img width="1448" height="394" alt="image" src="https://github.com/user-attachments/assets/b5f15e43-3eb0-4204-98a3-b4d06f56709c" />
-<img width="1880" height="591" alt="image" src="https://github.com/user-attachments/assets/6ddb5ea5-174a-4333-861f-85c773ce9671" />
-<img width="1705" height="539" alt="image" src="https://github.com/user-attachments/assets/14054b67-c991-4a5a-9903-bd89131ab63d" />
-<img width="853" height="793" alt="image" src="https://github.com/user-attachments/assets/e0344a5e-f288-436d-a81f-f9bef8d11f9f" />
+### 🛠️ Ticket Management (Admin)
+*   **Admin Dashboard**: Visual overview of support performance, including ticket volume, open/closed counts, and average user ratings.
+*   **Ticket List**: Filterable list of all tickets with status (Open, Solved, Closed), priority, and category.
+*   **Priority System**: Categorize issues by Low, Medium, or High priority.
+*   **Canned Responses**: Create and manage pre-saved replies to answer common questions instantly.
+*   **Admin Chat Interface**: Reply to tickets using the same beautiful full-screen interface as users.
+*   **Status Management**: Easily mark tickets as Solved or Closed.
 
+### ⚙️ Integrations & Settings
+*   **Twilio Integration**: Get notified via SMS or WhatsApp when a new ticket is created (requires Twilio API credentials).
+*   **Email Piping**: (Beta) Reply to ticket notifications via email to update the chat.
+*   **Custom Categories**: Define your own support categories with custom icons.
+*   **Smart Asset Loading**: CSS and JS only load on plugin pages, ensuring no impact on your site's speed.
 
+## 📦 Installation
 
+1.  **Upload**: Upload the `grt-ticket` folder to the `/wp-content/plugins/` directory.
+2.  **Activate**: Activate the plugin through the 'Plugins' menu in WordPress.
+3.  **Setup Page**: Create a new page (e.g., "Support") and add the shortcode `[grt_ticket]`.
+4.  **Configure**: Go to **GRT Ticket > Settings** in your dashboard to configure:
+    *   Support Categories
+    *   Twilio API (Optional)
+    *   Direct Contact Numbers
+    *   Chat Poll Interval
 
+## 💻 Usage
 
-- **User-Friendly Ticket Submission**: Users can submit tickets through a beautiful, responsive form with custom categories and icons.
-- **Real-Time Chat Interface**: AJAX-powered chat system with automatic polling for new messages, ensuring live conversation capabilities.
-- **Full-Screen Experience**: A distraction-free, full-screen overlay for the chat interface on both frontend and admin panels.
-- **Guest Ticket Submission**: Auto-account creation for guest users with secure password handling.
-- **Smart Asset Loading**: Modular CSS and JS files are loaded only on relevant pages for optimal performance.
-- **Ticket Management**: Comprehensive admin panel to view, manage, and reply to support tickets.
-- **Status Tracking**: Clear status indicators (Open, Solved, Closed) for efficient workflow management.
-- **Priority System**: Prioritize tickets with Low, Medium, or High priority levels to handle urgent issues first.
-- **File Attachments**: Users and admins can share Images (JPG, PNG, GIF) and PDF files directly within the chat.
-- **Analytics Dashboard**: A dedicated admin dashboard to visualize ticket volume, resolution time, and user satisfaction ratings.
-- **User Ratings**: Users can rate the support experience and provide feedback after a ticket is solved.
-- **Canned Responses**: Admins can save and insert common replies to respond faster.
-- **Twilio Integration**: Send automated notifications via WhatsApp and SMS to admins when new tickets are created.
-- **Direct Contact Options**: Offer direct "Call Us" and "SMS Us" buttons within the chat interface for immediate support.
-- **Responsive Design**: Fully responsive interface that works perfectly on desktop, tablet, and mobile devices.
-- **Security First**: Built with WordPress security best practices (nonces, input sanitization, output escaping).
-
-## Installation
-1. **Upload**: Upload the `grt-ticket` folder to the `/wp-content/plugins/` directory.
-2. **Activate**: Activate the plugin through the 'Plugins' menu in WordPress.
-3. **Configure**: Go to **GRT Ticket > Settings** to configure your options (Categories, Twilio, Direct Contact).
-4. **Deploy**: Add the `[grt_ticket_form]` shortcode to any page to create the support portal.
-
-## Usage
-
-### Public Side (For Users)
-
-To display the ticket submission form and user dashboard, add the following shortcode to any page:
+### Displaying the Support Portal
+Add the following shortcode to any page to display the ticket form and user dashboard:
 
 ```shortcode
-[grt_ticket_form]
+[grt_ticket]
 ```
 
-- **Guest Users**: Will see a login prompt or a simplified submission form (if enabled).
-- **Logged-in Users**: Will see their profile, a list of their recent tickets, and the submission form.
-- **Chat Access**: Clicking on a ticket opens the full-screen live chat interface.
+*   **Guest Users**: Will see the ticket submission form and a "Login" tab.
+*   **Logged-in Users**: Will see their recent tickets list and profile details.
 
-### Admin Side (For Support Agents)
+### Managing Tickets
+1.  Navigate to **GRT Ticket > Tickets** in the WordPress Admin.
+2.  Click on a ticket to open the **Support Chat**.
+3.  Type your reply, attach files, or use a **Canned Response**.
+4.  Update the ticket status to **Solved** when finished.
 
-Navigate to **GRT Ticket** in your WordPress admin menu.
-
-1. **Dashboard**: Get an overview of your support performance with real-time statistics and rating breakdowns.
-2. **Tickets List**: View all submitted tickets with their status, priority, user details, and category.
-3. **Support Chat**: Select a ticket to enter the real-time chat interface.
-   - Reply to users instantly using text or attachments.
-   - Use **Canned Responses** for quick replies.
-   - Mark tickets as **Solved** when the issue is resolved.
-   - Delete spam or invalid tickets.
-4. **Settings**: Customize the plugin behavior.
-
-## Changelog
+## 📋 Changelog
 
 ### 1.0.4
-- UI Improvements: Enhanced login form styling.
-- Security: Improved password handling for guest ticket submissions.
-- Fix: Minor bug fixes and performance improvements.
+*   **New**: Added functionality to hide WordPress Admin Bar for non-admin users.
+*   **Improvement**: Enhanced CSS focus and hover states for better accessibility and visual feedback (Purple Theme).
+*   **Fix**: Resolved CSS conflicts with some themes overriding button styles.
+*   **Security**: Improved input validation and capability checks.
 
 ### 1.0.3
-- UI Improvements: Updated ticket form layout and styling.
-- Added guest ticket submission with auto-account creation.
-- Improved email piping and notifications.
+*   **Feature**: Added Guest Ticket Submission with auto-account creation.
+*   **Feature**: Introduced Twilio integration for SMS/WhatsApp notifications.
+*   **Update**: Refined email notification templates.
 
 ### 1.0.0
-- Initial release.
+*   Initial Release.
+
+## ❓ Frequently Asked Questions
+
+**Q: Can I customize the colors?**  
+A: The plugin currently uses a modern purple/blue gradient theme (`#667eea` to `#764ba2`). You can override these in your theme's CSS if needed.
+
+**Q: Does it work with any theme?**  
+A: Yes, GRT Ticket is designed to work independently of your theme's styling, using its own scoped CSS.
+
+**Q: Where are files stored?**  
+A: Uploaded files are securely stored in your WordPress Media Library and attached to the ticket.
