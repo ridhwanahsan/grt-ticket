@@ -38,6 +38,7 @@ class GRT_Ticket_Ajax {
 
 		// Check if user exists or create new one
 		$user_email = sanitize_email( $_POST['user_email'] );
+		$user_name = sanitize_text_field( $_POST['user_name'] );
 		$user_id = 0;
 		$new_account_created = false;
 		
@@ -84,8 +85,8 @@ class GRT_Ticket_Ajax {
 				// update user display name
 				wp_update_user( array(
 					'ID' => $user_id,
-					'display_name' => sanitize_text_field( $_POST['user_name'] ),
-					'first_name'   => sanitize_text_field( $_POST['user_name'] ),
+					'display_name' => $user_name,
+					'first_name'   => $user_name,
 				) );
 
 				// Send email with credentials
@@ -113,17 +114,25 @@ class GRT_Ticket_Ajax {
 			}
 		}
 
+		// Sanitize inputs
+		$theme_name = sanitize_text_field( $_POST['theme_name'] );
+		$license_code = sanitize_text_field( $_POST['license_code'] );
+		$category = sanitize_text_field( $_POST['category'] );
+		$title = sanitize_text_field( $_POST['title'] );
+		$description = wp_kses_post( $_POST['description'] ); // Allow HTML in description (it becomes the first message)
+		$priority = sanitize_text_field( $_POST['priority'] );
+
 		// Create ticket
 		$ticket_id = GRT_Ticket_Database::create_ticket( array(
 			'user_id'      => $user_id,
 			'user_email'   => $user_email,
-			'user_name'    => sanitize_text_field( $_POST['user_name'] ),
-			'theme_name'   => sanitize_text_field( $_POST['theme_name'] ),
-			'license_code' => sanitize_text_field( $_POST['license_code'] ),
-			'category'     => sanitize_text_field( $_POST['category'] ),
-			'title'        => sanitize_text_field( $_POST['title'] ),
-			'description'  => sanitize_text_field( $_POST['description'] ),
-			'priority'     => sanitize_text_field( $_POST['priority'] ),
+			'user_name'    => $user_name,
+			'theme_name'   => $theme_name,
+			'license_code' => $license_code,
+			'category'     => $category,
+			'title'        => $title,
+			'description'  => $description,
+			'priority'     => $priority,
 		) );
 
 		if ( $ticket_id ) {
@@ -134,12 +143,12 @@ class GRT_Ticket_Ajax {
 
 			if ( ! empty( $emails ) ) {
 				$site_name = get_bloginfo( 'name' );
-				$subject = sprintf( __( '[%s] New Ticket: %s', 'grt-ticket' ), $site_name, $_POST['title'] );
-				$message = sprintf( __( 'A new ticket has been created by %s.', 'grt-ticket' ), $_POST['user_name'] ) . "\r\n\r\n";
-				$message .= sprintf( __( 'Category: %s', 'grt-ticket' ), $_POST['category'] ) . "\r\n";
-				$message .= sprintf( __( 'Title: %s', 'grt-ticket' ), $_POST['title'] ) . "\r\n\r\n";
+				$subject = sprintf( __( '[%s] New Ticket: %s', 'grt-ticket' ), $site_name, $title );
+				$message = sprintf( __( 'A new ticket has been created by %s.', 'grt-ticket' ), $user_name ) . "\r\n\r\n";
+				$message .= sprintf( __( 'Category: %s', 'grt-ticket' ), $category ) . "\r\n";
+				$message .= sprintf( __( 'Title: %s', 'grt-ticket' ), $title ) . "\r\n\r\n";
 				$message .= sprintf( __( 'Description:', 'grt-ticket' ) ) . "\r\n";
-				$message .= wp_strip_all_tags( $_POST['description'] ) . "\r\n\r\n";
+				$message .= wp_strip_all_tags( $description ) . "\r\n\r\n";
 				$message .= sprintf( __( 'View Ticket: %s', 'grt-ticket' ), admin_url( 'admin.php?page=grt-ticket-chat&ticket_id=' . $ticket_id ) );
 
 				foreach ( $emails as $email ) {
@@ -149,14 +158,14 @@ class GRT_Ticket_Ajax {
 
 			// Email Confirmation to User
 			$site_name = get_bloginfo( 'name' );
-			$user_subject = sprintf( __( '[%s] Ticket #%d Created: %s', 'grt-ticket' ), $site_name, $ticket_id, $_POST['title'] );
-			$user_message = sprintf( __( 'Hello %s,', 'grt-ticket' ), $_POST['user_name'] ) . "\r\n\r\n";
+			$user_subject = sprintf( __( '[%s] Ticket #%d Created: %s', 'grt-ticket' ), $site_name, $ticket_id, $title );
+			$user_message = sprintf( __( 'Hello %s,', 'grt-ticket' ), $user_name ) . "\r\n\r\n";
 			$user_message .= sprintf( __( 'Thank you for contacting support. Your ticket #%d has been created successfully.', 'grt-ticket' ), $ticket_id ) . "\r\n\r\n";
 			$user_message .= sprintf( __( 'You can reply directly to this email to add more information to your ticket.', 'grt-ticket' ) ) . "\r\n\r\n";
 			$user_message .= sprintf( __( 'Ticket Details:', 'grt-ticket' ) ) . "\r\n";
-			$user_message .= sprintf( __( 'Subject: %s', 'grt-ticket' ), $_POST['title'] ) . "\r\n";
+			$user_message .= sprintf( __( 'Subject: %s', 'grt-ticket' ), $title ) . "\r\n";
 			$user_message .= sprintf( __( 'Description:', 'grt-ticket' ) ) . "\r\n";
-			$user_message .= wp_strip_all_tags( $_POST['description'] ) . "\r\n\r\n";
+			$user_message .= wp_strip_all_tags( $description ) . "\r\n\r\n";
 			
 			wp_mail( $user_email, $user_subject, $user_message );
 
@@ -164,9 +173,9 @@ class GRT_Ticket_Ajax {
 			$whatsapp_admin_number = get_option( 'grt_ticket_whatsapp_admin_number', '' );
 			if ( ! empty( $whatsapp_admin_number ) ) {
 				$wa_message = sprintf( "*New Ticket #%d*\n", $ticket_id );
-				$wa_message .= sprintf( "From: %s\n", $_POST['user_name'] );
-				$wa_message .= sprintf( "Title: %s\n", $_POST['title'] );
-				$wa_message .= sprintf( "Desc: %s\n", wp_strip_all_tags( $_POST['description'] ) );
+				$wa_message .= sprintf( "From: %s\n", $user_name );
+				$wa_message .= sprintf( "Title: %s\n", $title );
+				$wa_message .= sprintf( "Desc: %s\n", wp_strip_all_tags( $description ) );
 				$wa_message .= sprintf( "Link: %s", admin_url( 'admin.php?page=grt-ticket-chat&ticket_id=' . $ticket_id ) );
 
 				$this->send_twilio_whatsapp( $whatsapp_admin_number, $wa_message );
@@ -176,8 +185,8 @@ class GRT_Ticket_Ajax {
 			GRT_Ticket_Database::add_message( array(
 				'ticket_id'   => $ticket_id,
 				'sender_type' => 'user',
-				'sender_name' => sanitize_text_field( $_POST['user_name'] ),
-				'message'     => wp_kses_post( $_POST['description'] ),
+				'sender_name' => $user_name,
+				'message'     => $description,
 			) );
 
 			wp_send_json_success( array(

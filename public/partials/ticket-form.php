@@ -34,6 +34,10 @@ if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
 		
 		<!-- Tabs Navigation -->
 		<div class="grt-tabs-nav">
+			<div class="grt-ticket-header">
+					<h2><?php esc_html_e( 'Submit a Support Ticket', 'grt-ticket' ); ?></h2>
+					<p><?php esc_html_e( 'Select an issue category to get started', 'grt-ticket' ); ?></p>
+				</div>
 			<button class="grt-tab-link active" data-tab="grt-tab-submit"><?php esc_html_e( 'Submit a Support Ticket', 'grt-ticket' ); ?></button>
 			<?php if ( $is_logged_in ) : ?>
 				<button class="grt-tab-link" data-tab="grt-tab-profile"><?php printf( esc_html__( 'Your Profile: %s', 'grt-ticket' ), esc_html( $user_name ) ); ?></button>
@@ -43,15 +47,9 @@ if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
 			<?php endif; ?>
 		</div>
 
-		<div class="grt-tabs-content-wrapper">
+		<div class="grt-tabs-content-wrapper"> 
 			<!-- Tab 1: Submit Ticket (Default for all) -->
-			<div id="grt-tab-submit" class="grt-tab-content active">
-				
-				<div class="grt-ticket-header">
-					<h2><?php esc_html_e( 'Submit a Support Ticket', 'grt-ticket' ); ?></h2>
-					<p><?php esc_html_e( 'Select an issue category to get started', 'grt-ticket' ); ?></p>
-				</div>
-
+			<div id="grt-tab-submit" class="grt-tab-content active"> 
 				<div class="grt-category-selector">
 					<label><?php esc_html_e( 'What can we help you with?', 'grt-ticket' ); ?></label>
 					
