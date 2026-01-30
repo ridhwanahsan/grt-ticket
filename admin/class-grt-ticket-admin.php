@@ -56,9 +56,12 @@ class GRT_Ticket_Admin {
 			wp_register_style( $this->plugin_name . '-tickets-list', GRT_TICKET_PLUGIN_URL . 'admin/css/tickets-list.css', array(), $this->version, 'all' );
 			wp_register_style( $this->plugin_name . '-chat-interface', GRT_TICKET_PLUGIN_URL . 'admin/css/chat-interface.css', array(), $this->version, 'all' );
 			wp_register_style( $this->plugin_name . '-settings-page', GRT_TICKET_PLUGIN_URL . 'admin/css/settings-page.css', array(), $this->version, 'all' );
+			wp_register_style( $this->plugin_name . '-dashboard', GRT_TICKET_PLUGIN_URL . 'admin/css/dashboard.css', array(), $this->version, 'all' );
 
 			// Enqueue based on screen
-			if ( $screen->id === 'toplevel_page_grt-ticket' || $screen->id === 'grt-ticket_page_grt-ticket' ) {
+			if ( $screen->id === 'toplevel_page_grt-ticket' ) {
+				wp_enqueue_style( $this->plugin_name . '-dashboard' );
+			} elseif ( $screen->id === 'grt-ticket_page_grt-ticket-list' ) {
 				wp_enqueue_style( $this->plugin_name . '-tickets-list' );
 			} elseif ( strpos( $screen->id, 'grt-ticket-chat' ) !== false ) {
 				if ( isset( $_GET['ticket_id'] ) && intval( $_GET['ticket_id'] ) > 0 ) {
@@ -104,7 +107,9 @@ class GRT_Ticket_Admin {
 			);
 
 			// Enqueue based on screen
-			if ( $screen->id === 'toplevel_page_grt-ticket' || $screen->id === 'grt-ticket_page_grt-ticket' ) {
+			if ( $screen->id === 'toplevel_page_grt-ticket' ) {
+				// Dashboard scripts if needed
+			} elseif ( $screen->id === 'grt-ticket_page_grt-ticket-list' ) {
 				wp_enqueue_script( $this->plugin_name . '-tickets-list' );
 				wp_localize_script( $this->plugin_name . '-tickets-list', 'grtTicketAdmin', $data );
 			} elseif ( strpos( $screen->id, 'grt-ticket-chat' ) !== false ) {
@@ -135,18 +140,28 @@ class GRT_Ticket_Admin {
 			__( 'GRT Ticket', 'grt-ticket' ),
 			'manage_options',
 			'grt-ticket',
-			array( $this, 'display_tickets_page' ),
+			array( $this, 'display_dashboard_page' ), // Changed default to dashboard
 			'dashicons-tickets-alt',
 			30
 		);
 
-		// Tickets submenu (default)
+		// Dashboard submenu
+		add_submenu_page(
+			'grt-ticket',
+			__( 'Dashboard', 'grt-ticket' ),
+			__( 'Dashboard', 'grt-ticket' ),
+			'manage_options',
+			'grt-ticket',
+			array( $this, 'display_dashboard_page' )
+		);
+
+		// Tickets submenu
 		add_submenu_page(
 			'grt-ticket',
 			__( 'Tickets', 'grt-ticket' ),
 			__( 'Tickets', 'grt-ticket' ),
 			'manage_options',
-			'grt-ticket',
+			'grt-ticket-list',
 			array( $this, 'display_tickets_page' )
 		);
 
@@ -169,6 +184,16 @@ class GRT_Ticket_Admin {
 			'grt-ticket-settings',
 			array( $this, 'display_settings_page' )
 		);
+	}
+
+	/**
+	 * Display dashboard page.
+	 *
+	 * @since    1.0.0
+	 */
+	public function display_dashboard_page() {
+		$stats = GRT_Ticket_Database::get_dashboard_stats();
+		include GRT_TICKET_PLUGIN_DIR . 'admin/partials/dashboard.php';
 	}
 
 	/**
