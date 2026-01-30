@@ -25,6 +25,75 @@ class GRT_Ticket_Database {
 	}
 
 	/**
+	 * Get the canned responses table name.
+	 *
+	 * @since    1.0.0
+	 * @return   string    Table name with prefix.
+	 */
+	private static function get_canned_responses_table() {
+		global $wpdb;
+		return $wpdb->prefix . 'grt_canned_responses';
+	}
+
+	/**
+	 * Get all canned responses.
+	 *
+	 * @since    1.0.0
+	 * @return   array    Array of canned response objects.
+	 */
+	public static function get_canned_responses() {
+		global $wpdb;
+
+		return $wpdb->get_results( "SELECT * FROM " . self::get_canned_responses_table() . " ORDER BY title ASC" );
+	}
+
+	/**
+	 * Add a canned response.
+	 *
+	 * @since    1.0.0
+	 * @param    string $title       Title/Shortcut.
+	 * @param    string $response    Response content.
+	 * @return   int|false           ID on success, false on failure.
+	 */
+	public static function add_canned_response( $title, $response ) {
+		global $wpdb;
+
+		$result = $wpdb->insert(
+			self::get_canned_responses_table(),
+			array(
+				'title'    => sanitize_text_field( $title ),
+				'response' => wp_kses_post( $response ),
+			),
+			array( '%s', '%s' )
+		);
+
+		if ( $result ) {
+			return $wpdb->insert_id;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Delete a canned response.
+	 *
+	 * @since    1.0.0
+	 * @param    int $id    Canned response ID.
+	 * @return   bool       True on success, false on failure.
+	 */
+	public static function delete_canned_response( $id ) {
+		global $wpdb;
+
+		$result = $wpdb->delete(
+			self::get_canned_responses_table(),
+			array( 'id' => $id ),
+			array( '%d' )
+		);
+
+		return (bool) $result;
+	}
+
+	/**
 	 * Get the messages table name.
 	 *
 	 * @since    1.0.0

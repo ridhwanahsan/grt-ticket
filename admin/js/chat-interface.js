@@ -84,6 +84,25 @@
             $('#grt-preview-image').attr('src', '');
         });
 
+        // Canned response selection
+        $('#grt-canned-response-select').on('change', function () {
+            const content = $(this).val();
+            if (content) {
+                const $textarea = $('#grt-chat-input');
+                const currentVal = $textarea.val();
+                
+                if (currentVal) {
+                    $textarea.val(currentVal + '\n' + content);
+                } else {
+                    $textarea.val(content);
+                }
+                
+                // Reset select
+                $(this).val('');
+                $textarea.focus();
+            }
+        });
+
         // Start polling for new messages
         startPolling();
 

@@ -80,6 +80,19 @@ $is_solved = 'solved' === $ticket->status || 'closed' === $ticket->status;
 		<?php else : ?>
 			<div class="grt-chat-input-container">
 				<div class="grt-chat-input-wrapper">
+					<?php
+					// Get canned responses
+					$canned_responses = GRT_Ticket_Database::get_canned_responses();
+					if ( ! empty( $canned_responses ) ) :
+					?>
+						<select id="grt-canned-response-select" class="grt-canned-response-select" style="margin-bottom: 10px; width: 100%; max-width: 300px;">
+							<option value=""><?php esc_html_e( 'Insert Saved Reply...', 'grt-ticket' ); ?></option>
+							<?php foreach ( $canned_responses as $response ) : ?>
+								<option value="<?php echo esc_attr( $response->response ); ?>"><?php echo esc_html( $response->title ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					<?php endif; ?>
+
 					<input type="file" id="grt-chat-attachment" accept="image/*" style="display: none;">
 					<button type="button" id="grt-chat-attach-btn" class="grt-chat-attach-btn" title="<?php esc_attr_e( 'Attach Image', 'grt-ticket' ); ?>">📎</button>
 					<div id="grt-attachment-preview" class="grt-attachment-preview" style="display: none;">

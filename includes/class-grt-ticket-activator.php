@@ -63,9 +63,39 @@ class GRT_Ticket_Activator {
 			KEY created_at (created_at)
 		) $charset_collate;";
 
+		// Table for canned responses
+		$table_canned = $wpdb->prefix . 'grt_canned_responses';
+		$sql_canned = "CREATE TABLE $table_canned (
+			id bigint(20) NOT NULL AUTO_INCREMENT,
+			title varchar(100) NOT NULL,
+			response text NOT NULL,
+			created_at datetime DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY  (id)
+		) $charset_collate;";
+
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta( $sql_tickets );
 		dbDelta( $sql_messages );
+		dbDelta( $sql_canned );
+
+		// Add default canned responses if table is empty
+		$count_canned = $wpdb->get_var( "SELECT COUNT(*) FROM $table_canned" );
+		if ( 0 == $count_canned ) {
+			$wpdb->insert(
+				$table_canned,
+				array(
+					'title'    => 'Hello',
+					'response' => "Hello,\n\nThank you for reaching out to us. We have received your ticket and are looking into it.\n\nBest regards,\nSupport Team",
+				)
+			);
+			$wpdb->insert(
+				$table_canned,
+				array(
+					'title'    => 'Closing Ticket',
+					'response' => "Hello,\n\nSince we haven't heard back from you in a while, we are marking this ticket as resolved. Feel free to open a new ticket if you need further assistance.\n\nBest regards,\nSupport Team",
+				)
+			);
+		}
 
 		// Set default options
 		$default_categories = array(

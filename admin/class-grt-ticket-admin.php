@@ -200,6 +200,34 @@ class GRT_Ticket_Admin {
 	}
 
 	/**
+	 * Display canned responses page.
+	 *
+	 * @since    1.0.0
+	 */
+	public function display_canned_responses_page() {
+		// Handle form submission
+		if ( isset( $_POST['grt_add_canned_response'] ) && check_admin_referer( 'grt_add_canned_response', 'grt_canned_response_nonce' ) ) {
+			$title = isset( $_POST['title'] ) ? sanitize_text_field( $_POST['title'] ) : '';
+			$response = isset( $_POST['response'] ) ? wp_kses_post( $_POST['response'] ) : '';
+			
+			if ( ! empty( $title ) && ! empty( $response ) ) {
+				GRT_Ticket_Database::add_canned_response( $title, $response );
+				echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Canned response added.', 'grt-ticket' ) . '</p></div>';
+			} else {
+				echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'Please fill in all fields.', 'grt-ticket' ) . '</p></div>';
+			}
+		}
+
+		if ( isset( $_GET['action'] ) && 'delete' === $_GET['action'] && isset( $_GET['id'] ) && check_admin_referer( 'grt_delete_canned_response' ) ) {
+			GRT_Ticket_Database::delete_canned_response( (int) $_GET['id'] );
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Canned response deleted.', 'grt-ticket' ) . '</p></div>';
+		}
+
+		$canned_responses = GRT_Ticket_Database::get_canned_responses();
+		include GRT_TICKET_PLUGIN_DIR . 'admin/partials/canned-responses.php';
+	}
+
+	/**
 	 * Display settings page.
 	 *
 	 * @since    1.0.0
