@@ -28,6 +28,7 @@ if ( isset( $_POST['grt_ticket_save_settings'] ) && check_admin_referer( 'grt_ti
 	update_option( 'grt_ticket_categories', json_encode( $categories_data ) );
 	
 	update_option( 'grt_ticket_admin_name', sanitize_text_field( $_POST['grt_ticket_admin_name'] ) );
+	update_option( 'grt_ticket_notification_emails', sanitize_textarea_field( $_POST['grt_ticket_notification_emails'] ) );
 	update_option( 'grt_ticket_per_page', absint( $_POST['grt_ticket_per_page'] ) );
 	update_option( 'grt_ticket_poll_interval', absint( $_POST['grt_ticket_poll_interval'] ) );
 	
@@ -57,6 +58,7 @@ if ( empty( $categories ) ) {
 }
 
 $admin_name = get_option( 'grt_ticket_admin_name', 'Support Team' );
+$notification_emails = get_option( 'grt_ticket_notification_emails', get_option( 'admin_email' ) );
 $per_page = get_option( 'grt_ticket_per_page', 20 );
 $poll_interval = get_option( 'grt_ticket_poll_interval', 3000 );
 ?>
@@ -194,6 +196,16 @@ $poll_interval = get_option( 'grt_ticket_poll_interval', 3000 );
 					<td>
 						<input type="text" name="grt_ticket_admin_name" id="grt_ticket_admin_name" value="<?php echo esc_attr( $admin_name ); ?>" class="regular-text">
 						<p class="description"><?php esc_html_e( 'The name that will be displayed for admin messages in the chat.', 'grt-ticket' ); ?></p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row">
+						<label for="grt_ticket_notification_emails"><?php esc_html_e( 'Notification Emails', 'grt-ticket' ); ?></label>
+					</th>
+					<td>
+						<textarea name="grt_ticket_notification_emails" id="grt_ticket_notification_emails" rows="3" class="large-text code"><?php echo esc_textarea( $notification_emails ); ?></textarea>
+						<p class="description"><?php esc_html_e( 'Enter email addresses separated by commas to receive notifications about new tickets and messages.', 'grt-ticket' ); ?></p>
 					</td>
 				</tr>
 

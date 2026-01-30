@@ -113,6 +113,26 @@ class GRT_Ticket_Ajax {
 		) );
 
 		if ( $ticket_id ) {
+			// Email Notification to Admins
+			$emails_str = get_option( 'grt_ticket_notification_emails', get_option( 'admin_email' ) );
+			$emails = array_map( 'trim', explode( ',', $emails_str ) );
+			$emails = array_filter( $emails, 'is_email' );
+
+			if ( ! empty( $emails ) ) {
+				$site_name = get_bloginfo( 'name' );
+				$subject = sprintf( __( '[%s] New Ticket: %s', 'grt-ticket' ), $site_name, $_POST['title'] );
+				$message = sprintf( __( 'A new ticket has been created by %s.', 'grt-ticket' ), $_POST['user_name'] ) . "\r\n\r\n";
+				$message .= sprintf( __( 'Category: %s', 'grt-ticket' ), $_POST['category'] ) . "\r\n";
+				$message .= sprintf( __( 'Title: %s', 'grt-ticket' ), $_POST['title'] ) . "\r\n\r\n";
+				$message .= sprintf( __( 'Description:', 'grt-ticket' ) ) . "\r\n";
+				$message .= wp_strip_all_tags( $_POST['description'] ) . "\r\n\r\n";
+				$message .= sprintf( __( 'View Ticket: %s', 'grt-ticket' ), admin_url( 'admin.php?page=grt-ticket-chat&ticket_id=' . $ticket_id ) );
+
+				foreach ( $emails as $email ) {
+					wp_mail( $email, $subject, $message );
+				}
+			}
+
 			// Add initial message
 			GRT_Ticket_Database::add_message( array(
 				'ticket_id'   => $ticket_id,
@@ -215,6 +235,37 @@ class GRT_Ticket_Ajax {
 		$message_id = GRT_Ticket_Database::add_message( $message_data );
 
 		if ( $message_id ) {
+			// Email Notification Logic
+			$site_name = get_bloginfo( 'name' );
+			
+			if ( $sender_type === 'user' ) {
+				// Notify Admins
+				$emails_str = get_option( 'grt_ticket_notification_emails', get_option( 'admin_email' ) );
+				$emails = array_map( 'trim', explode( ',', $emails_str ) );
+				$emails = array_filter( $emails, 'is_email' );
+				
+				if ( ! empty( $emails ) ) {
+					$subject = sprintf( __( '[%s] New Message on Ticket #%d', 'grt-ticket' ), $site_name, $ticket_id );
+					$body = sprintf( __( 'New message from %s:', 'grt-ticket' ), $sender_name ) . "\r\n\r\n";
+					$body .= wp_strip_all_tags( $message_content ) . "\r\n\r\n";
+					$body .= sprintf( __( 'View Ticket: %s', 'grt-ticket' ), admin_url( 'admin.php?page=grt-ticket-chat&ticket_id=' . $ticket_id ) );
+					
+					foreach ( $emails as $email ) {
+						wp_mail( $email, $subject, $body );
+					}
+				}
+			} else {
+				// Notify User (if admin replied)
+				if ( is_email( $ticket->user_email ) ) {
+					$subject = sprintf( __( '[%s] Update on Ticket #%d', 'grt-ticket' ), $site_name, $ticket_id );
+					$body = sprintf( __( 'Hello %s,', 'grt-ticket' ), $ticket->user_name ) . "\r\n\r\n";
+					$body .= sprintf( __( 'You have received a new reply from support:', 'grt-ticket' ) ) . "\r\n\r\n";
+					$body .= wp_strip_all_tags( $message_content ) . "\r\n\r\n";
+					
+					wp_mail( $ticket->user_email, $subject, $body );
+				}
+			}
+
 			$new_message = GRT_Ticket_Database::get_message( $message_id );
 			
 			wp_send_json_success( array(
