@@ -10,6 +10,17 @@ It is built with performance and modularity in mind, ensuring that assets are on
 
 ## Features
 
+
+<img width="1917" height="904" alt="image" src="https://github.com/user-attachments/assets/9ac1849a-40e4-47c5-b864-ed1cc7671070" />
+<img width="1448" height="394" alt="image" src="https://github.com/user-attachments/assets/b5f15e43-3eb0-4204-98a3-b4d06f56709c" />
+<img width="1880" height="591" alt="image" src="https://github.com/user-attachments/assets/6ddb5ea5-174a-4333-861f-85c773ce9671" />
+<img width="1705" height="539" alt="image" src="https://github.com/user-attachments/assets/14054b67-c991-4a5a-9903-bd89131ab63d" />
+<img width="853" height="793" alt="image" src="https://github.com/user-attachments/assets/e0344a5e-f288-436d-a81f-f9bef8d11f9f" />
+
+
+
+
+
 - **User-Friendly Ticket Submission**: Users can submit tickets through a beautiful, responsive form with custom categories and icons.
 - **Real-Time Chat Interface**: AJAX-powered chat system with automatic polling for new messages, ensuring live conversation capabilities.
 - **Full-Screen Experience**: A distraction-free, full-screen overlay for the chat interface on both frontend and admin panels.
