@@ -64,9 +64,17 @@ class GRT_Ticket_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_styles() {
-		wp_enqueue_style(
-			$this->plugin_name,
-			GRT_TICKET_PLUGIN_URL . 'public/css/grt-ticket-public.css',
+		// Register styles
+		wp_register_style(
+			$this->plugin_name . '-ticket-form',
+			GRT_TICKET_PLUGIN_URL . 'public/css/ticket-form.css',
+			array(),
+			$this->version,
+			'all'
+		);
+		wp_register_style(
+			$this->plugin_name . '-chat-interface',
+			GRT_TICKET_PLUGIN_URL . 'public/css/chat-interface.css',
 			array(),
 			$this->version,
 			'all'
@@ -79,23 +87,30 @@ class GRT_Ticket_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_scripts() {
-		wp_enqueue_script(
-			$this->plugin_name,
-			GRT_TICKET_PLUGIN_URL . 'public/js/grt-ticket-public.js',
+		// Register scripts
+		wp_register_script(
+			$this->plugin_name . '-ticket-form',
+			GRT_TICKET_PLUGIN_URL . 'public/js/ticket-form.js',
+			array( 'jquery' ),
+			$this->version,
+			false
+		);
+		wp_register_script(
+			$this->plugin_name . '-chat-interface',
+			GRT_TICKET_PLUGIN_URL . 'public/js/chat-interface.js',
 			array( 'jquery' ),
 			$this->version,
 			false
 		);
 
-		wp_localize_script(
-			$this->plugin_name,
-			'grtTicketPublic',
-			array(
-				'ajax_url'      => admin_url( 'admin-ajax.php' ),
-				'nonce'         => wp_create_nonce( 'grt_ticket_nonce' ),
-				'poll_interval' => get_option( 'grt_ticket_poll_interval', 3000 ),
-			)
+		$data = array(
+			'ajax_url'      => admin_url( 'admin-ajax.php' ),
+			'nonce'         => wp_create_nonce( 'grt_ticket_nonce' ),
+			'poll_interval' => get_option( 'grt_ticket_poll_interval', 3000 ),
 		);
+
+		wp_localize_script( $this->plugin_name . '-ticket-form', 'grtTicketPublic', $data );
+		wp_localize_script( $this->plugin_name . '-chat-interface', 'grtTicketPublic', $data );
 	}
 
 	/**
@@ -152,6 +167,10 @@ class GRT_Ticket_Public {
 	 * @return   string    Form HTML.
 	 */
 	private function render_ticket_form() {
+		// Enqueue assets
+		wp_enqueue_style( $this->plugin_name . '-ticket-form' );
+		wp_enqueue_script( $this->plugin_name . '-ticket-form' );
+
 		// Prepare data for the form template
 		$current_user = wp_get_current_user();
 		$is_logged_in = is_user_logged_in();
@@ -181,6 +200,10 @@ class GRT_Ticket_Public {
 	 * @return   string                Chat HTML.
 	 */
 	private function render_chat_interface( $ticket_id, $user_email = '' ) {
+		// Enqueue assets
+		wp_enqueue_style( $this->plugin_name . '-chat-interface' );
+		wp_enqueue_script( $this->plugin_name . '-chat-interface' );
+
 		$ticket = GRT_Ticket_Database::get_ticket( $ticket_id );
 		
 		if ( ! $ticket ) {

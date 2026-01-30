@@ -1,0 +1,77 @@
+/* GRT Ticket Admin - Settings Page Styles */
+
+.grt-settings-form {
+    background: #fff;
+    padding: 20px;
+    max-width: 800px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.grt-settings-form table {
+    width: 100%;
+}
+
+.grt-settings-form th {
+    width: 200px;
+    text-align: left;
+    padding: 15px 10px 15px 0;
+    vertical-align: top;
+}
+
+.grt-settings-form td {
+    padding: 15px 0;
+}
+
+.grt-settings-form input[type="text"],
+.grt-settings-form input[type="number"],
+.grt-settings-form textarea {
+    width: 100%;
+    max-width: 500px;
+}
+
+.grt-settings-form textarea {
+    height: 100px;
+}
+
+.grt-settings-form .description {
+    display: block;
+    margin-top: 5px;
+    color: #666;
+    font-size: 13px;
+}
+
+/* Category Image Upload */
+.grt-category-item {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #f9f9f9;
+    padding: 15px;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+}
+
+.grt-image-upload-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.grt-image-preview {
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.grt-image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}

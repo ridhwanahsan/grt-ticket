@@ -52,13 +52,24 @@ class GRT_Ticket_Admin {
 		$screen = get_current_screen();
 		
 		if ( strpos( $screen->id, 'grt-ticket' ) !== false ) {
-			wp_enqueue_style(
-				$this->plugin_name,
-				GRT_TICKET_PLUGIN_URL . 'admin/css/grt-ticket-admin.css',
-				array(),
-				$this->version,
-				'all'
-			);
+			// Register styles
+			wp_register_style( $this->plugin_name . '-tickets-list', GRT_TICKET_PLUGIN_URL . 'admin/css/tickets-list.css', array(), $this->version, 'all' );
+			wp_register_style( $this->plugin_name . '-chat-interface', GRT_TICKET_PLUGIN_URL . 'admin/css/chat-interface.css', array(), $this->version, 'all' );
+			wp_register_style( $this->plugin_name . '-settings-page', GRT_TICKET_PLUGIN_URL . 'admin/css/settings-page.css', array(), $this->version, 'all' );
+
+			// Enqueue based on screen
+			if ( $screen->id === 'toplevel_page_grt-ticket' || $screen->id === 'grt-ticket_page_grt-ticket' ) {
+				wp_enqueue_style( $this->plugin_name . '-tickets-list' );
+			} elseif ( strpos( $screen->id, 'grt-ticket-chat' ) !== false ) {
+				if ( isset( $_GET['ticket_id'] ) && intval( $_GET['ticket_id'] ) > 0 ) {
+					wp_enqueue_style( $this->plugin_name . '-chat-interface' );
+				} else {
+					// Chat selection page uses tickets list styles (table, status, buttons)
+					wp_enqueue_style( $this->plugin_name . '-tickets-list' );
+				}
+			} elseif ( strpos( $screen->id, 'grt-ticket-settings' ) !== false ) {
+				wp_enqueue_style( $this->plugin_name . '-settings-page' );
+			}
 		}
 	}
 
@@ -72,23 +83,35 @@ class GRT_Ticket_Admin {
 		
 		if ( strpos( $screen->id, 'grt-ticket' ) !== false ) {
 			wp_enqueue_media();
-			wp_enqueue_script(
-				$this->plugin_name,
-				GRT_TICKET_PLUGIN_URL . 'admin/js/grt-ticket-admin.js',
-				array( 'jquery' ),
-				$this->version,
-				false
+
+			// Register scripts
+			wp_register_script( $this->plugin_name . '-tickets-list', GRT_TICKET_PLUGIN_URL . 'admin/js/tickets-list.js', array( 'jquery' ), $this->version, false );
+			wp_register_script( $this->plugin_name . '-chat-interface', GRT_TICKET_PLUGIN_URL . 'admin/js/chat-interface.js', array( 'jquery' ), $this->version, false );
+			wp_register_script( $this->plugin_name . '-settings-page', GRT_TICKET_PLUGIN_URL . 'admin/js/settings-page.js', array( 'jquery' ), $this->version, false );
+
+			$data = array(
+				'ajax_url'      => admin_url( 'admin-ajax.php' ),
+				'nonce'         => wp_create_nonce( 'grt_ticket_nonce' ),
+				'poll_interval' => get_option( 'grt_ticket_poll_interval', 3000 ),
 			);
 
-			wp_localize_script(
-				$this->plugin_name,
-				'grtTicketAdmin',
-				array(
-					'ajax_url'      => admin_url( 'admin-ajax.php' ),
-					'nonce'         => wp_create_nonce( 'grt_ticket_nonce' ),
-					'poll_interval' => get_option( 'grt_ticket_poll_interval', 3000 ),
-				)
-			);
+			// Enqueue based on screen
+			if ( $screen->id === 'toplevel_page_grt-ticket' || $screen->id === 'grt-ticket_page_grt-ticket' ) {
+				wp_enqueue_script( $this->plugin_name . '-tickets-list' );
+				wp_localize_script( $this->plugin_name . '-tickets-list', 'grtTicketAdmin', $data );
+			} elseif ( strpos( $screen->id, 'grt-ticket-chat' ) !== false ) {
+				if ( isset( $_GET['ticket_id'] ) && intval( $_GET['ticket_id'] ) > 0 ) {
+					wp_enqueue_script( $this->plugin_name . '-chat-interface' );
+					wp_localize_script( $this->plugin_name . '-chat-interface', 'grtTicketAdmin', $data );
+				} else {
+					// Chat selection page uses tickets list scripts (delete button)
+					wp_enqueue_script( $this->plugin_name . '-tickets-list' );
+					wp_localize_script( $this->plugin_name . '-tickets-list', 'grtTicketAdmin', $data );
+				}
+			} elseif ( strpos( $screen->id, 'grt-ticket-settings' ) !== false ) {
+				wp_enqueue_script( $this->plugin_name . '-settings-page' );
+				wp_localize_script( $this->plugin_name . '-settings-page', 'grtTicketAdmin', $data );
+			}
 		}
 	}
 

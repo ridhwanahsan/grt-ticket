@@ -1,0 +1,72 @@
+/* GRT Ticket Admin - Tickets List Styles */
+
+.grt-ticket-wrap {
+    margin: 20px 20px 0 0;
+}
+
+.grt-ticket-header {
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-left: 4px solid #2271b1;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.grt-ticket-header h1 {
+    margin: 0 0 10px 0;
+    font-size: 24px;
+}
+
+/* Tickets Table */
+.grt-tickets-table {
+    width: 100%;
+    background: #fff;
+    border-collapse: collapse;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.grt-tickets-table th,
+.grt-tickets-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.grt-tickets-table th {
+    background: #f9f9f9;
+    font-weight: 600;
+    color: #23282d;
+}
+
+.grt-tickets-table tr:hover {
+    background: #f9f9f9;
+}
+
+.grt-ticket-status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.grt-ticket-status.status-open {
+    background: #d4edda;
+    color: #155724;
+}
+
+.grt-ticket-status.status-solved {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.grt-ticket-status.status-closed {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.grt-ticket-actions a {
+    text-decoration: none;
+    margin-right: 10px;
+}
