@@ -114,6 +114,7 @@ class GRT_Ticket {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_admin_menu' );
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_settings' );
+		$this->loader->add_filter( 'plugin_action_links_' . GRT_TICKET_PLUGIN_BASENAME, $plugin_admin, 'add_plugin_action_links' );
 
 		// Email Piping Hooks
 		if ( class_exists( 'GRT_Ticket_Email_Piping' ) ) {

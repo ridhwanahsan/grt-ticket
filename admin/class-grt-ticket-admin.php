@@ -44,6 +44,19 @@ class GRT_Ticket_Admin {
 	}
 
 	/**
+	 * Add settings link to plugin list table.
+	 *
+	 * @since    1.0.0
+	 * @param    array $links    Existing links.
+	 * @return   array           Modified links.
+	 */
+	public function add_plugin_action_links( $links ) {
+		$settings_link = '<a href="admin.php?page=grt-ticket-settings">' . __( 'Settings', 'grt-ticket' ) . '</a>';
+		array_unshift( $links, $settings_link );
+		return $links;
+	}
+
+	/**
 	 * Register the stylesheets for the admin area.
 	 *
 	 * @since    1.0.0
