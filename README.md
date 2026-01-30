@@ -17,6 +17,8 @@ It is built with performance and modularity in mind, ensuring that assets are on
 - **Ticket Management**: Comprehensive admin panel to view, manage, and reply to support tickets.
 - **Status Tracking**: Clear status indicators (Open, Solved, Closed) for efficient workflow management.
 - **File Attachments**: Users and admins can share images within the chat.
+- **Twilio Integration**: Send automated notifications via WhatsApp and SMS to admins when new tickets are created.
+- **Direct Contact Options**: Offer direct "Call Us" and "SMS Us" buttons within the chat interface for immediate support.
 - **Responsive Design**: Fully responsive interface that works perfectly on desktop, tablet, and mobile devices.
 - **Security First**: Built with WordPress security best practices (nonces, input sanitization, output escaping).
 
@@ -24,7 +26,7 @@ It is built with performance and modularity in mind, ensuring that assets are on
 
 1. **Upload**: Upload the `grt-ticket` folder to the `/wp-content/plugins/` directory.
 2. **Activate**: Activate the plugin through the 'Plugins' menu in WordPress.
-3. **Configure**: Go to **GRT Ticket > Settings** to configure your options.
+3. **Configure**: Go to **GRT Ticket > Settings** to configure your options (Categories, Twilio, Direct Contact).
 4. **Deploy**: Add the `[grt_ticket]` shortcode to any page to create the support portal.
 
 ## Usage
