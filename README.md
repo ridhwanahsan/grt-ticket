@@ -14,11 +14,17 @@ GRT Ticket is a powerful, modern support ticket management plugin for WordPress 
 
 Unlike standard ticketing plugins, GRT Ticket offers a distraction-free experience with a beautiful UI, AJAX-powered live updates, and smart features like guest submission and direct contact options.
 
-<img width="1917" height="904" alt="image" src="https://github.com/user-attachments/assets/9ac1849a-40e4-47c5-b864-ed1cc7671070" />
-<img width="1448" height="394" alt="image" src="https://github.com/user-attachments/assets/b5f15e43-3eb0-4204-98a3-b4d06f56709c" />
-<img width="1880" height="591" alt="image" src="https://github.com/user-attachments/assets/6ddb5ea5-174a-4333-861f-85c773ce9671" />
-<img width="1705" height="539" alt="image" src="https://github.com/user-attachments/assets/14054b67-c991-4a5a-9903-bd89131ab63d" />
-<img width="853" height="793" alt="image" src="https://github.com/user-attachments/assets/e0344a5e-f288-436d-a81f-f9bef8d11f9f" />
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/9ac1849a-40e4-47c5-b864-ed1cc7671070" width="100%" alt="GRT Ticket Dashboard" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
+  <br /><br />
+  <img src="https://github.com/user-attachments/assets/b5f15e43-3eb0-4204-98a3-b4d06f56709c" width="100%" alt="Ticket List" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
+  <br /><br />
+  <img src="https://github.com/user-attachments/assets/6ddb5ea5-174a-4333-861f-85c773ce9671" width="100%" alt="Chat Interface" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
+  <br /><br />
+  <img src="https://github.com/user-attachments/assets/14054b67-c991-4a5a-9903-bd89131ab63d" width="100%" alt="User View" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
+  <br /><br />
+  <img src="https://github.com/user-attachments/assets/e0344a5e-f288-436d-a81f-f9bef8d11f9f" width="48%" alt="Mobile View" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
+</p>
 
 ## 🚀 Key Features
 
