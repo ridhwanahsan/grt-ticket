@@ -32,6 +32,19 @@ if ( isset( $_POST['grt_ticket_save_settings'] ) && check_admin_referer( 'grt_ti
 	update_option( 'grt_ticket_per_page', absint( $_POST['grt_ticket_per_page'] ) );
 	update_option( 'grt_ticket_poll_interval', absint( $_POST['grt_ticket_poll_interval'] ) );
 	
+	// WhatsApp Settings
+	update_option( 'grt_ticket_enable_whatsapp', isset( $_POST['grt_ticket_enable_whatsapp'] ) ? 1 : 0 );
+	update_option( 'grt_ticket_twilio_sid', sanitize_text_field( $_POST['grt_ticket_twilio_sid'] ) );
+	update_option( 'grt_ticket_twilio_token', sanitize_text_field( $_POST['grt_ticket_twilio_token'] ) );
+	update_option( 'grt_ticket_twilio_from', sanitize_text_field( $_POST['grt_ticket_twilio_from'] ) );
+	update_option( 'grt_ticket_whatsapp_admin_number', sanitize_text_field( $_POST['grt_ticket_whatsapp_admin_number'] ) );
+
+	// Direct Contact Settings
+	update_option( 'grt_ticket_enable_direct_call', isset( $_POST['grt_ticket_enable_direct_call'] ) ? 1 : 0 );
+	update_option( 'grt_ticket_enable_direct_sms', isset( $_POST['grt_ticket_enable_direct_sms'] ) ? 1 : 0 );
+	update_option( 'grt_ticket_support_phone', sanitize_text_field( $_POST['grt_ticket_support_phone'] ) );
+	update_option( 'grt_ticket_sms_body', sanitize_textarea_field( $_POST['grt_ticket_sms_body'] ) );
+	
 	echo '<div class="notice notice-success"><p>' . esc_html__( 'Settings saved successfully!', 'grt-ticket' ) . '</p></div>';
 }
 
@@ -61,6 +74,19 @@ $admin_name = get_option( 'grt_ticket_admin_name', 'Support Team' );
 $notification_emails = get_option( 'grt_ticket_notification_emails', get_option( 'admin_email' ) );
 $per_page = get_option( 'grt_ticket_per_page', 20 );
 $poll_interval = get_option( 'grt_ticket_poll_interval', 3000 );
+
+// WhatsApp Options
+$enable_whatsapp = get_option( 'grt_ticket_enable_whatsapp', 0 );
+$twilio_sid = get_option( 'grt_ticket_twilio_sid', '' );
+$twilio_token = get_option( 'grt_ticket_twilio_token', '' );
+$twilio_from = get_option( 'grt_ticket_twilio_from', '' );
+$whatsapp_admin_number = get_option( 'grt_ticket_whatsapp_admin_number', '' );
+
+// Direct Contact Options
+$enable_direct_call = get_option( 'grt_ticket_enable_direct_call', 0 );
+$enable_direct_sms = get_option( 'grt_ticket_enable_direct_sms', 0 );
+$support_phone = get_option( 'grt_ticket_support_phone', '' );
+$sms_body = get_option( 'grt_ticket_sms_body', 'Hello, I need help with my ticket.' );
 ?>
 
 <div class="wrap grt-ticket-wrap">
@@ -73,6 +99,7 @@ $poll_interval = get_option( 'grt_ticket_poll_interval', 3000 );
 		<a href="#grt-tab-general" class="nav-tab nav-tab-active"><?php esc_html_e( 'General Settings', 'grt-ticket' ); ?></a>
 		<a href="#grt-tab-email" class="nav-tab"><?php esc_html_e( 'Email Notifications', 'grt-ticket' ); ?></a>
 		<a href="#grt-tab-whatsapp" class="nav-tab"><?php esc_html_e( 'WhatsApp Integrations', 'grt-ticket' ); ?></a>
+		<a href="#grt-tab-contact" class="nav-tab"><?php esc_html_e( 'Direct Contact', 'grt-ticket' ); ?></a>
 	</h2>
 
 	<form method="post" action="" class="grt-settings-form">
@@ -229,6 +256,64 @@ $poll_interval = get_option( 'grt_ticket_poll_interval', 3000 );
 			</table>
 		</div>
 		
+		<!-- Direct Contact Tab -->
+		<div id="grt-tab-contact" class="grt-tab-content">
+			<div class="grt-settings-section-header">
+				<h2><?php esc_html_e( 'Direct Contact (Call & SMS)', 'grt-ticket' ); ?></h2>
+				<p><?php esc_html_e( 'Enable direct "Call Us" and "SMS Us" buttons for users to contact you directly via phone.', 'grt-ticket' ); ?></p>
+			</div>
+			
+			<table class="form-table">
+				<tbody>
+					<tr>
+						<th scope="row">
+							<label for="grt_ticket_support_phone"><?php esc_html_e( 'Support Phone Number', 'grt-ticket' ); ?></label>
+						</th>
+						<td>
+							<input type="text" name="grt_ticket_support_phone" id="grt_ticket_support_phone" value="<?php echo esc_attr( $support_phone ); ?>" class="regular-text" placeholder="+1234567890">
+							<p class="description"><?php esc_html_e( 'Enter your support phone number in international format (e.g., +1234567890).', 'grt-ticket' ); ?></p>
+						</td>
+					</tr>
+
+					<tr>
+						<th scope="row">
+							<label for="grt_ticket_enable_direct_call"><?php esc_html_e( 'Enable Direct Call', 'grt-ticket' ); ?></label>
+						</th>
+						<td>
+							<label class="grt-switch">
+								<input type="checkbox" name="grt_ticket_enable_direct_call" id="grt_ticket_enable_direct_call" value="1" <?php checked( $enable_direct_call, 1 ); ?>>
+								<span class="slider round"></span>
+							</label>
+							<p class="description"><?php esc_html_e( 'Show a "Call Us" button.', 'grt-ticket' ); ?></p>
+						</td>
+					</tr>
+
+					<tr>
+						<th scope="row">
+							<label for="grt_ticket_enable_direct_sms"><?php esc_html_e( 'Enable Direct SMS', 'grt-ticket' ); ?></label>
+						</th>
+						<td>
+							<label class="grt-switch">
+								<input type="checkbox" name="grt_ticket_enable_direct_sms" id="grt_ticket_enable_direct_sms" value="1" <?php checked( $enable_direct_sms, 1 ); ?>>
+								<span class="slider round"></span>
+							</label>
+							<p class="description"><?php esc_html_e( 'Show an "SMS Us" button.', 'grt-ticket' ); ?></p>
+						</td>
+					</tr>
+
+					<tr>
+						<th scope="row">
+							<label for="grt_ticket_sms_body"><?php esc_html_e( 'SMS Template', 'grt-ticket' ); ?></label>
+						</th>
+						<td>
+							<textarea name="grt_ticket_sms_body" id="grt_ticket_sms_body" rows="3" class="large-text"><?php echo esc_textarea( $sms_body ); ?></textarea>
+							<p class="description"><?php esc_html_e( 'Pre-filled message for the SMS.', 'grt-ticket' ); ?></p>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
 		<!-- Hidden fields for categories JS to work -->
 		<!-- JS Logic moved to admin/js/settings-page.js -->
 

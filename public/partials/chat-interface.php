@@ -13,6 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $is_solved = 'solved' === $ticket->status || 'closed' === $ticket->status;
 $admin_name = get_option( 'grt_ticket_admin_name', 'Support Team' );
+
+// Direct Contact Options
+$support_phone = get_option( 'grt_ticket_support_phone', '' );
+$enable_direct_call = get_option( 'grt_ticket_enable_direct_call', 0 );
+$enable_direct_sms = get_option( 'grt_ticket_enable_direct_sms', 0 );
+$sms_body = get_option( 'grt_ticket_sms_body', 'Hello, I need help with my ticket.' );
 ?>
 
 <div class="grt-chat-container">
@@ -23,6 +29,23 @@ $admin_name = get_option( 'grt_ticket_admin_name', 'Support Team' );
 				<span class="grt-plus-icon">+</span> <?php esc_html_e( 'New Ticket', 'grt-ticket' ); ?>
 			</a>
 		</div>
+
+		<?php if ( ( $enable_direct_call || $enable_direct_sms ) && ! empty( $support_phone ) ) : ?>
+		<div class="grt-direct-contact-actions">
+			<?php if ( $enable_direct_call ) : ?>
+				<a href="tel:<?php echo esc_attr( $support_phone ); ?>" class="grt-action-btn grt-call-btn">
+					<span class="grt-icon">📞</span> <?php esc_html_e( 'Call Us', 'grt-ticket' ); ?>
+				</a>
+			<?php endif; ?>
+			
+			<?php if ( $enable_direct_sms ) : ?>
+				<a href="sms:<?php echo esc_attr( $support_phone ); ?>?body=<?php echo rawurlencode( $sms_body ); ?>" class="grt-action-btn grt-sms-btn">
+					<span class="grt-icon">💬</span> <?php esc_html_e( 'SMS Us', 'grt-ticket' ); ?>
+				</a>
+			<?php endif; ?>
+		</div>
+		<?php endif; ?>
+
 		<div class="grt-chat-tickets-list">
 			<?php foreach ( $user_tickets as $user_ticket ) : ?>
 				<?php
@@ -58,15 +81,32 @@ $admin_name = get_option( 'grt_ticket_admin_name', 'Support Team' );
 					</span>
 				</p>
 			</div>
-			<?php if ( is_user_logged_in() ) : ?>
-				<?php $current_user = wp_get_current_user(); ?>
-				<div class="grt-chat-header-profile">
-					<a href="<?php echo esc_url( get_permalink() ); ?>" class="grt-profile-link" title="<?php esc_attr_e( 'Go to Profile', 'grt-ticket' ); ?>">
-						<span class="grt-profile-icon"><?php echo esc_html( strtoupper( substr( $current_user->display_name, 0, 1 ) ) ); ?></span>
-						<span class="grt-profile-name"><?php echo esc_html( $current_user->display_name ); ?></span>
-					</a>
-				</div>
-			<?php endif; ?>
+			<div class="grt-chat-header-right">
+				<?php if ( ( $enable_direct_call || $enable_direct_sms ) && ! empty( $support_phone ) ) : ?>
+					<div class="grt-direct-contact-header">
+						<?php if ( $enable_direct_call ) : ?>
+							<a href="tel:<?php echo esc_attr( $support_phone ); ?>" class="grt-action-btn grt-call-btn" title="<?php esc_attr_e( 'Call Us', 'grt-ticket' ); ?>">
+								<span class="grt-icon">📞</span> <span class="grt-btn-text"><?php esc_html_e( 'Call', 'grt-ticket' ); ?></span>
+							</a>
+						<?php endif; ?>
+						<?php if ( $enable_direct_sms ) : ?>
+							<a href="sms:<?php echo esc_attr( $support_phone ); ?>?body=<?php echo rawurlencode( $sms_body ); ?>" class="grt-action-btn grt-sms-btn" title="<?php esc_attr_e( 'SMS Us', 'grt-ticket' ); ?>">
+								<span class="grt-icon">💬</span> <span class="grt-btn-text"><?php esc_html_e( 'SMS', 'grt-ticket' ); ?></span>
+							</a>
+						<?php endif; ?>
+					</div>
+				<?php endif; ?>
+
+				<?php if ( is_user_logged_in() ) : ?>
+					<?php $current_user = wp_get_current_user(); ?>
+					<div class="grt-chat-header-profile">
+						<a href="<?php echo esc_url( get_permalink() ); ?>" class="grt-profile-link" title="<?php esc_attr_e( 'Go to Profile', 'grt-ticket' ); ?>">
+							<span class="grt-profile-icon"><?php echo esc_html( strtoupper( substr( $current_user->display_name, 0, 1 ) ) ); ?></span>
+							<span class="grt-profile-name"><?php echo esc_html( $current_user->display_name ); ?></span>
+						</a>
+					</div>
+				<?php endif; ?>
+			</div>
 		</div>
 
 		<div class="grt-chat-messages">

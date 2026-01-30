@@ -97,78 +97,111 @@
     background: #fff;
     border-bottom: 1px solid #ddd;
     flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.grt-chat-header h3 {
+.grt-chat-header-content h3 {
     margin: 0 0 5px 0;
-    font-size: 20px;
+    font-size: 18px;
+    color: #333;
 }
 
-.grt-chat-header p {
+.grt-chat-header-content p {
     margin: 0;
-    color: #666;
     font-size: 13px;
+    color: #666;
+}
+
+.grt-chat-header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.grt-profile-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #333;
+}
+
+.grt-profile-icon {
+    width: 32px;
+    height: 32px;
+    background: #667eea;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    font-weight: bold;
 }
 
 .grt-chat-messages {
     flex: 1;
     overflow-y: auto;
     padding: 20px;
-    background: #f9f9f9;
-    min-height: 0; /* Fix for nested flex scrolling */
+    background: #f5f7fb;
     display: flex;
     flex-direction: column;
 }
 
 .grt-chat-message {
     margin-bottom: 20px;
+    max-width: 80%;
     display: flex;
     flex-direction: column;
 }
 
-.grt-chat-message.admin {
-    align-items: flex-start;
+.grt-chat-message.user {
+    align-self: flex-end;
+    align-items: flex-end;
 }
 
-.grt-chat-message.user {
-    align-items: flex-end;
+.grt-chat-message.admin {
+    align-self: flex-start;
+    align-items: flex-start;
 }
 
 .grt-message-sender {
     font-size: 12px;
-    font-weight: 600;
-    margin-bottom: 5px;
-    color: #666;
+    color: #888;
+    margin-bottom: 4px;
 }
 
 .grt-message-bubble {
-    max-width: 70%;
     padding: 12px 16px;
     border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    position: relative;
     word-wrap: break-word;
 }
 
-.grt-chat-message.admin .grt-message-bubble {
+.grt-chat-message.user .grt-message-bubble {
     background: #667eea;
     color: #fff;
-    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 2px;
 }
 
-.grt-chat-message.user .grt-message-bubble {
+.grt-chat-message.admin .grt-message-bubble {
     background: #fff;
-    color: #23282d;
-    border: 1px solid #ddd;
-    border-bottom-right-radius: 4px;
+    color: #333;
+    border: 1px solid #e1e4e8;
+    border-bottom-left-radius: 2px;
 }
 
 .grt-message-time {
     font-size: 11px;
-    color: #999;
-    margin-top: 5px;
+    color: #aaa;
+    margin-top: 4px;
 }
 
 .grt-chat-input-container {
-    padding: 15px;
+    padding: 20px;
     background: #fff;
     border-top: 1px solid #ddd;
     flex-shrink: 0;
@@ -177,20 +210,16 @@
 .grt-chat-input-wrapper {
     display: flex;
     gap: 10px;
-    align-items: flex-end;
 }
 
 .grt-chat-input {
     flex: 1;
-    padding: 10px;
-    border: 2px solid #e0e0e0;
+    padding: 12px;
+    border: 1px solid #ddd;
     border-radius: 5px;
-    resize: vertical;
-    min-height: 40px;
-    max-height: 150px;
-    font-family: inherit;
     font-size: 14px;
-    line-height: 1.5;
+    resize: none;
+    height: 50px;
 }
 
 .grt-chat-input:focus {
@@ -257,6 +286,62 @@
     color: #721c24;
 }
 
+/* Direct Contact Actions (Sidebar) */
+.grt-direct-contact-actions-sidebar {
+    padding: 10px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    gap: 10px;
+}
+
+/* Direct Contact Header */
+.grt-direct-contact-header {
+    display: flex;
+    gap: 8px;
+}
+
+.grt-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.2s;
+    color: #fff !important; /* Force color */
+    text-align: center;
+}
+
+.grt-direct-contact-header .grt-action-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 20px; /* Rounded pill style */
+}
+
+.grt-call-btn {
+    background-color: #28a745;
+}
+
+.grt-call-btn:hover {
+    background-color: #218838;
+}
+
+.grt-sms-btn {
+    background-color: #17a2b8;
+}
+
+.grt-sms-btn:hover {
+    background-color: #138496;
+}
+
+.grt-action-btn .grt-icon {
+    margin-right: 5px;
+    font-size: 14px;
+}
+
 /* Responsive */
 @media screen and (max-width: 768px) {
     .grt-chat-sidebar {
@@ -283,5 +368,27 @@
 
     .grt-chat-send-btn {
         width: 100%;
+    }
+
+    /* Mobile Header Adjustments */
+    .grt-btn-text {
+        display: none;
+    }
+
+    .grt-direct-contact-header .grt-action-btn {
+        padding: 8px;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        justify-content: center;
+    }
+
+    .grt-action-btn .grt-icon {
+        margin-right: 0;
+        font-size: 16px;
+    }
+
+    .grt-profile-name {
+        display: none;
     }
 }
