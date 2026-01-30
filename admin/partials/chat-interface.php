@@ -74,7 +74,16 @@ $is_solved = 'solved' === $ticket->status || 'closed' === $ticket->status;
 					<?php if ( ! empty( $message->attachment_url ) ) : ?>
 						<div class="grt-message-attachment">
 							<a href="<?php echo esc_url( $message->attachment_url ); ?>" target="_blank">
-								<img src="<?php echo esc_url( $message->attachment_url ); ?>" alt="<?php esc_attr_e( 'Attachment', 'grt-ticket' ); ?>" style="max-width: 300px; border-radius: 8px;">
+								<?php 
+								$file_ext = pathinfo( $message->attachment_url, PATHINFO_EXTENSION );
+								if ( strtolower( $file_ext ) === 'pdf' ) : ?>
+									<div class="grt-pdf-attachment">
+										<span class="dashicons dashicons-pdf" style="font-size: 40px; width: 40px; height: 40px; color: #d00000;"></span>
+										<span><?php echo esc_html( basename( $message->attachment_url ) ); ?></span>
+									</div>
+								<?php else : ?>
+									<img src="<?php echo esc_url( $message->attachment_url ); ?>" alt="<?php esc_attr_e( 'Attachment', 'grt-ticket' ); ?>" style="max-width: 300px; border-radius: 8px;">
+								<?php endif; ?>
 							</a>
 						</div>
 					<?php endif; ?>
@@ -103,10 +112,10 @@ $is_solved = 'solved' === $ticket->status || 'closed' === $ticket->status;
 						</select>
 					<?php endif; ?>
 
-					<input type="file" id="grt-chat-attachment" accept="image/*" style="display: none;">
-					<button type="button" id="grt-chat-attach-btn" class="grt-chat-attach-btn" title="<?php esc_attr_e( 'Attach Image', 'grt-ticket' ); ?>">📎</button>
+					<input type="file" id="grt-chat-attachment" accept="image/*,application/pdf" style="display: none;">
+					<button type="button" id="grt-chat-attach-btn" class="grt-chat-attach-btn" title="<?php esc_attr_e( 'Attach File', 'grt-ticket' ); ?>">📎</button>
 					<div id="grt-attachment-preview" class="grt-attachment-preview" style="display: none;">
-						<img id="grt-preview-image" src="" alt="Preview">
+						<div id="grt-preview-content"></div>
 						<button type="button" id="grt-remove-attachment" class="grt-remove-attachment">×</button>
 					</div>
 					<textarea id="grt-chat-input" class="grt-chat-input" placeholder="<?php esc_attr_e( 'Type your message...', 'grt-ticket' ); ?>"></textarea>

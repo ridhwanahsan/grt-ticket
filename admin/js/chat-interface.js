@@ -59,29 +59,35 @@
             const file = e.target.files[0];
             if (file) {
                 // Validate file type
-                if (!file.type.match('image.*')) {
-                    alert('Please select an image file.');
+                if (!file.type.match('image.*') && file.type !== 'application/pdf') {
+                    alert('Please select an image or PDF file.');
                     return;
                 }
                 // Validate file size (5MB max)
                 if (file.size > 5 * 1024 * 1024) {
-                    alert('Image size must be less than 5MB.');
+                    alert('File size must be less than 5MB.');
                     return;
                 }
+                
                 // Show preview
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    $('#grt-preview-image').attr('src', e.target.result);
-                    $('#grt-attachment-preview').show();
-                };
-                reader.readAsDataURL(file);
+                $('#grt-attachment-preview').show();
+                
+                if (file.type === 'application/pdf') {
+                    $('#grt-preview-content').html('<div class="grt-pdf-preview"><span class="dashicons dashicons-pdf" style="font-size: 30px; width: 30px; height: 30px; color: #d00000; display:inline-block; vertical-align:middle;"></span> <span style="vertical-align:middle;">' + file.name + '</span></div>');
+                } else {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#grt-preview-content').html('<img src="' + e.target.result + '" alt="Preview" style="max-height: 100px; max-width: 100px; object-fit: cover;">');
+                    };
+                    reader.readAsDataURL(file);
+                }
             }
         });
 
         $('#grt-remove-attachment').on('click', function () {
             $('#grt-chat-attachment').val('');
             $('#grt-attachment-preview').hide();
-            $('#grt-preview-image').attr('src', '');
+            $('#grt-preview-content').empty();
         });
 
         // Canned response selection
@@ -143,7 +149,7 @@
                         $('#grt-chat-input').val('');
                         $('#grt-chat-attachment').val('');
                         $('#grt-attachment-preview').hide();
-                        $('#grt-preview-image').attr('src', '');
+                        $('#grt-preview-content').empty();
                         
                         // If we received the new message object, append it directly
                         if (response.data.chat_message) {

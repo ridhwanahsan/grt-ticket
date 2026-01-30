@@ -198,11 +198,11 @@ class GRT_Ticket_Ajax {
 		$attachment_url = '';
 		if ( ! empty( $_FILES['attachment'] ) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK ) {
 			// Validate file type
-			$allowed_types = array( 'image/jpeg', 'image/jpg', 'image/png', 'image/gif' );
+			$allowed_types = array( 'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'application/pdf' );
 			$file_type = $_FILES['attachment']['type'];
 
 			if ( ! in_array( $file_type, $allowed_types, true ) ) {
-				wp_send_json_error( array( 'message' => __( 'Only image files (JPEG, PNG, GIF) are allowed.', 'grt-ticket' ) ) );
+				wp_send_json_error( array( 'message' => __( 'Only image files (JPEG, PNG, GIF) and PDF files are allowed.', 'grt-ticket' ) ) );
 			}
 
 			// Validate file size (5MB max)

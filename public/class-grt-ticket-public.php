@@ -64,6 +64,9 @@ class GRT_Ticket_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_styles() {
+		// Enqueue Dashicons for frontend usage
+		wp_enqueue_style( 'dashicons' );
+
 		// Register styles
 		wp_register_style(
 			$this->plugin_name . '-ticket-form',
