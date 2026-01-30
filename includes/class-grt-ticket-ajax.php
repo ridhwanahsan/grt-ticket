@@ -134,6 +134,19 @@ class GRT_Ticket_Ajax {
 				}
 			}
 
+			// Email Confirmation to User
+			$site_name = get_bloginfo( 'name' );
+			$user_subject = sprintf( __( '[%s] Ticket #%d Created: %s', 'grt-ticket' ), $site_name, $ticket_id, $_POST['title'] );
+			$user_message = sprintf( __( 'Hello %s,', 'grt-ticket' ), $_POST['user_name'] ) . "\r\n\r\n";
+			$user_message .= sprintf( __( 'Thank you for contacting support. Your ticket #%d has been created successfully.', 'grt-ticket' ), $ticket_id ) . "\r\n\r\n";
+			$user_message .= sprintf( __( 'You can reply directly to this email to add more information to your ticket.', 'grt-ticket' ) ) . "\r\n\r\n";
+			$user_message .= sprintf( __( 'Ticket Details:', 'grt-ticket' ) ) . "\r\n";
+			$user_message .= sprintf( __( 'Subject: %s', 'grt-ticket' ), $_POST['title'] ) . "\r\n";
+			$user_message .= sprintf( __( 'Description:', 'grt-ticket' ) ) . "\r\n";
+			$user_message .= wp_strip_all_tags( $_POST['description'] ) . "\r\n\r\n";
+			
+			wp_mail( $user_email, $user_subject, $user_message );
+
 			// WhatsApp Notification to Admins
 			$whatsapp_admin_number = get_option( 'grt_ticket_whatsapp_admin_number', '' );
 			if ( ! empty( $whatsapp_admin_number ) ) {
