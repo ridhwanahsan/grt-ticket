@@ -214,8 +214,9 @@
 
 .grt-form-group input:focus,
 .grt-form-group textarea:focus {
-    outline: none;
-    border-color: #667eea;
+    outline: none !important;
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 1px #667eea !important;
 }
 
 .grt-form-group textarea {

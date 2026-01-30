@@ -292,8 +292,9 @@
 .grt-form-group input:focus,
 .grt-form-group textarea:focus,
 .grt-form-group select:focus {
-    outline: none;
-    border-color: #667eea;
+    outline: none !important;
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 1px #667eea !important;
 }
 
 .grt-form-group textarea {
@@ -326,11 +327,14 @@
     display: block;
 }
 
-.grt-ticket-container .grt-submit-btn:hover {
+.grt-ticket-container .grt-submit-btn:hover,
+.grt-ticket-container .grt-submit-btn:focus {
     transform: translateY(-2px);
     box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4) !important;
     background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
     color: #fff !important;
+    border: none !important;
+    text-decoration: none !important;
 }
 
 .grt-ticket-container .grt-submit-btn:disabled {
@@ -519,8 +523,9 @@
 
 .grt-login-form-wrapper input[type="text"]:focus,
 .grt-login-form-wrapper input[type="password"]:focus {
-    outline: none;
-    border-color: #667eea;
+    outline: none !important;
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 1px #667eea !important;
 }
 
 .grt-login-form-wrapper .login-remember {

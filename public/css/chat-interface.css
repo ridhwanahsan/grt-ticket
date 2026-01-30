@@ -334,8 +334,9 @@
 }
 
 .grt-chat-input:focus {
-    outline: none;
-    border-color: #667eea;
+    outline: none !important;
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 1px #667eea !important;
 }
 
 .grt-chat-input:disabled {
@@ -344,19 +345,24 @@
 }
 
 .grt-chat-send-btn {
-    padding: 12px 24px;
-    background: #667eea;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
+    padding: 12px 24px !important;
+    background: #667eea !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 5px !important;
     cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    transition: background 0.2s;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    transition: background 0.2s !important;
+    text-decoration: none !important;
+    line-height: normal !important;
 }
 
-.grt-chat-send-btn:hover {
-    background: #5568d3;
+.grt-chat-send-btn:hover,
+.grt-chat-send-btn:focus {
+    background: #5568d3 !important;
+    color: #fff !important;
+    text-decoration: none !important;
 }
 
 .grt-chat-send-btn:disabled {
@@ -436,16 +442,22 @@
     background-color: #28a745 !important;
 }
 
-.grt-call-btn:hover {
+.grt-call-btn:hover,
+.grt-call-btn:focus {
     background-color: #218838 !important;
+    color: #fff !important;
+    text-decoration: none !important;
 }
 
 .grt-sms-btn {
     background-color: #17a2b8 !important;
 }
 
-.grt-sms-btn:hover {
+.grt-sms-btn:hover,
+.grt-sms-btn:focus {
     background-color: #138496 !important;
+    color: #fff !important;
+    text-decoration: none !important;
 }
 
 .grt-action-btn .grt-icon {
