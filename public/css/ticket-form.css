@@ -432,3 +432,74 @@
         text-align: center;
     }
 }
+
+/* Login Form Styles */
+.grt-login-form-wrapper {
+    max-width: 450px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    border: 1px solid #f0f0f1;
+}
+
+.grt-login-form-wrapper .login-username,
+.grt-login-form-wrapper .login-password {
+    margin-bottom: 20px;
+}
+
+.grt-login-form-wrapper label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+.grt-login-form-wrapper input[type="text"],
+.grt-login-form-wrapper input[type="password"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #000;
+    background: #fff;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+}
+
+.grt-login-form-wrapper input[type="text"]:focus,
+.grt-login-form-wrapper input[type="password"]:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.grt-login-form-wrapper .login-remember {
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #666;
+}
+
+.grt-login-form-wrapper .login-submit {
+    margin-top: 10px;
+}
+
+.grt-login-form-wrapper input[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.grt-login-form-wrapper input[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
