@@ -51,6 +51,15 @@ class GRT_Ticket_Ajax {
 			}
 		} elseif ( email_exists( $user_email ) ) {
 			$user_id = email_exists( $user_email );
+
+			// Try to auto-login if password is provided
+			if ( ! empty( $_POST['user_password'] ) ) {
+				$user = get_user_by( 'email', $user_email );
+				if ( $user && wp_check_password( $_POST['user_password'], $user->data->user_pass, $user->ID ) ) {
+					wp_set_current_user( $user->ID );
+					wp_set_auth_cookie( $user->ID );
+				}
+			}
 		} else {
 			// Create new user
 			// Use custom password if provided, otherwise auto-generate
@@ -96,6 +105,10 @@ class GRT_Ticket_Ajax {
 
 				wp_mail( $user_email, sprintf( __( '[%s] New Support Account', 'grt-ticket' ), $site_name ), $message );
 				
+				// Auto-login newly created user
+				wp_set_current_user( $user_id );
+				wp_set_auth_cookie( $user_id );
+
 				$new_account_created = true;
 			}
 		}

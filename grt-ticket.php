@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name:       GRT Ticket
- * Plugin URI:        https://example.com/grt-ticket
+ * Plugin URI:        https://github.com/ridhwanahsan/grt-ticket
  * Description:       A complete support ticket system with real-time chat functionality for WordPress.
- * Version:           1.0.0
+ * Version:           1.0.2
  * Author:            GRT Team
- * Author URI:        https://example.com
- * License:           GPL-2.0+
- * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
+ * Author URI:        https://github.com/ridhwanahsan
+ * License:           GPL-2.0-or-later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       grt-ticket
  * Domain Path:       /languages
  */
@@ -20,7 +20,7 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Currently plugin version.
  */
-define( 'GRT_TICKET_VERSION', '1.0.0' );
+define( 'GRT_TICKET_VERSION', '1.0.3' );
 define( 'GRT_TICKET_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'GRT_TICKET_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'GRT_TICKET_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );

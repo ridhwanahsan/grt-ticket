@@ -12,11 +12,54 @@
 
 .grt-ticket-inner {
     width: 100%;
-    max-width: 600px;
+    max-width: 1200px;
     background: #fff;
     border-radius: 10px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     padding: 40px;
+}
+
+/* Tabs Navigation */
+.grt-tabs-nav {
+    display: flex;
+    border-bottom: 2px solid #f0f0f1;
+    margin-bottom: 30px;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 5px; /* Scrollbar spacing */
+}
+
+.grt-tab-link {
+    background: none;
+    border: none;
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px; /* Overlap border-bottom of container */
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+
+.grt-tab-link:hover {
+    color: #667eea;
+}
+
+.grt-tab-link.active {
+    color: #667eea;
+    border-bottom-color: #667eea;
+}
+
+/* Tabs Content */
+.grt-tab-content {
+    display: none;
+    animation: fadeIn 0.3s;
+}
+
+.grt-tab-content.active {
+    display: block;
 }
 
 .grt-ticket-header {
@@ -173,7 +216,9 @@
 }
 
 .grt-ticket-form.active {
-    display: block;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
     animation: fadeIn 0.3s;
 }
 
@@ -190,7 +235,18 @@
 }
 
 .grt-form-group {
+    width: 48%;
     margin-bottom: 20px;
+}
+
+.grt-form-group.grt-full-width {
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .grt-form-group {
+        width: 100%;
+    }
 }
 
 .grt-form-group label {
@@ -202,7 +258,8 @@
 }
 
 .grt-form-group input,
-.grt-form-group textarea {
+.grt-form-group textarea,
+.grt-form-group select {
     width: 100%;
     padding: 12px 15px;
     border: 2px solid #e0e0e0;
@@ -210,10 +267,13 @@
     font-size: 14px;
     font-family: inherit;
     transition: border-color 0.3s;
+    background: #fff;
+    color: #000;
 }
 
 .grt-form-group input:focus,
-.grt-form-group textarea:focus {
+.grt-form-group textarea:focus,
+.grt-form-group select:focus {
     outline: none;
     border-color: #667eea;
 }
@@ -284,9 +344,91 @@
     border: 1px solid #f5c6cb;
 }
 
+/* Recent Tickets Styles */
+.grt-recent-ticket-item {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: all 0.2s;
+}
+
+.grt-recent-ticket-item:hover {
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-color: #667eea;
+}
+
+.grt-recent-ticket-item a {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.grt-recent-ticket-item h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.grt-recent-ticket-item p {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    flex-wrap: wrap;
+}
+
+.grt-ticket-status {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.grt-ticket-status.status-new { background: #e3f2fd; color: #1565c0; }
+.grt-ticket-status.status-open { background: #fff3e0; color: #e65100; }
+.grt-ticket-status.status-pending { background: #fff8e1; color: #fbc02d; }
+.grt-ticket-status.status-solved { background: #e8f5e9; color: #2e7d32; }
+.grt-ticket-status.status-closed { background: #eceff1; color: #546e7a; }
+
+.grt-ticket-date {
+    color: #999;
+}
+
+/* Profile Section Styles */
+.grt-profile-info p {
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+.grt-logout-link {
+    display: inline-block;
+    margin-top: 15px;
+    color: #e74c3c;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.grt-logout-link:hover {
+    text-decoration: underline;
+}
+
 /* Responsive */
 @media screen and (max-width: 768px) {
     .grt-ticket-inner {
         padding: 30px 20px;
+    }
+    
+    .grt-tabs-nav {
+        flex-wrap: wrap;
+    }
+    
+    .grt-tab-link {
+        flex: 1 1 auto;
+        text-align: center;
     }
 }

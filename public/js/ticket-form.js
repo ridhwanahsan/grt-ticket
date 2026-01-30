@@ -15,6 +15,19 @@
      * Initialize ticket form
      */
     function initTicketForm() {
+        // Tab Switching Logic
+        $('.grt-tab-link').on('click', function() {
+            var tabId = $(this).data('tab');
+            
+            // Activate tab link
+            $('.grt-tab-link').removeClass('active');
+            $(this).addClass('active');
+            
+            // Activate tab content
+            $('.grt-tab-content').removeClass('active');
+            $('#' + tabId).addClass('active');
+        });
+
         // Custom Dropdown Logic
         var $dropdown = $('#grt-category-dropdown');
         var $selected = $dropdown.find('.grt-dropdown-selected');
