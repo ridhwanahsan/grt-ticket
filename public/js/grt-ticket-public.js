@@ -23,15 +23,47 @@
      * Initialize ticket form
      */
     function initTicketForm() {
-        // Show form when category is selected
-        $('#grt-category-select').on('change', function () {
-            const category = $(this).val();
-            if (category) {
-                $('#grt-selected-category').val(category);
-                $('.grt-ticket-form').addClass('active');
-            } else {
-                $('.grt-ticket-form').removeClass('active');
-            }
+        // Custom Dropdown Logic
+        var $dropdown = $('#grt-category-dropdown');
+        var $selected = $dropdown.find('.grt-dropdown-selected');
+        var $options = $dropdown.find('.grt-dropdown-options');
+        var $input = $('#grt-selected-category');
+
+        // Toggle dropdown
+        $selected.on('click', function(e) {
+            e.stopPropagation();
+            $dropdown.find('.grt-dropdown-selected').toggleClass('active');
+            $options.toggleClass('show');
+        });
+
+        // Close when clicking outside
+        $(document).on('click', function() {
+            $selected.removeClass('active');
+            $options.removeClass('show');
+        });
+
+        // Select item
+        $dropdown.on('click', '.grt-dropdown-item', function() {
+            var value = $(this).data('value');
+            var html = $(this).html();
+            
+            // Update selected view
+            $selected.find('.grt-selected-text').html('<div class="grt-selected-content">' + html + '</div>');
+            
+            // Update input value
+            $input.val(value);
+            
+            // Close dropdown
+            $selected.removeClass('active');
+            $options.removeClass('show');
+            
+            // Show form
+            $('.grt-ticket-form').addClass('active');
+            
+            // Smooth scroll to form
+            $('html, body').animate({
+                scrollTop: $('.grt-ticket-form').offset().top - 50
+            }, 500);
         });
 
         // Submit ticket form

@@ -71,6 +71,7 @@ class GRT_Ticket_Admin {
 		$screen = get_current_screen();
 		
 		if ( strpos( $screen->id, 'grt-ticket' ) !== false ) {
+			wp_enqueue_media();
 			wp_enqueue_script(
 				$this->plugin_name,
 				GRT_TICKET_PLUGIN_URL . 'admin/js/grt-ticket-admin.js',

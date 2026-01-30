@@ -11,8 +11,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$categories = get_option( 'grt_ticket_categories', 'Installation Issue,Customization Help,Bug Report,Feature Request,License Issue' );
-$categories_array = array_map( 'trim', explode( ',', $categories ) );
+$categories_option = get_option( 'grt_ticket_categories', 'Installation Issue,Customization Help,Bug Report,Feature Request,License Issue' );
+$categories = array();
+
+// Try to decode JSON
+$decoded = json_decode( $categories_option, true );
+if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
+	$categories = $decoded;
+} else {
+	// Fallback to comma-separated
+	$items = array_map( 'trim', explode( ',', $categories_option ) );
+	foreach ( $items as $item ) {
+		if ( ! empty( $item ) ) {
+			$categories[] = array( 'name' => $item, 'image' => '' );
+		}
+	}
+}
 ?>
 
 <div class="grt-ticket-container">
@@ -41,13 +55,28 @@ $categories_array = array_map( 'trim', explode( ',', $categories ) );
 		</div>
 
 		<div class="grt-category-selector">
-			<label for="grt-category-select"><?php esc_html_e( 'What can we help you with?', 'grt-ticket' ); ?></label>
-			<select id="grt-category-select" class="grt-category-select">
-				<option value=""><?php esc_html_e( '-- Select an issue category --', 'grt-ticket' ); ?></option>
-				<?php foreach ( $categories_array as $category ) : ?>
-					<option value="<?php echo esc_attr( $category ); ?>"><?php echo esc_html( $category ); ?></option>
-				<?php endforeach; ?>
-			</select>
+			<label><?php esc_html_e( 'What can we help you with?', 'grt-ticket' ); ?></label>
+			
+			<div class="grt-custom-dropdown" id="grt-category-dropdown">
+				<div class="grt-dropdown-selected">
+					<span class="grt-selected-text"><?php esc_html_e( 'Select an issue category', 'grt-ticket' ); ?></span>
+					<span class="grt-dropdown-arrow">▼</span>
+				</div>
+				<div class="grt-dropdown-options">
+					<?php foreach ( $categories as $cat ) : ?>
+						<div class="grt-dropdown-item" data-value="<?php echo esc_attr( $cat['name'] ); ?>">
+							<div class="grt-item-icon">
+								<?php if ( ! empty( $cat['image'] ) ) : ?>
+									<img src="<?php echo esc_url( $cat['image'] ); ?>" alt="<?php echo esc_attr( $cat['name'] ); ?>">
+								<?php else: ?>
+									<span class="grt-item-icon-placeholder">?</span>
+								<?php endif; ?>
+							</div>
+							<span class="grt-item-name"><?php echo esc_html( $cat['name'] ); ?></span>
+						</div>
+					<?php endforeach; ?>
+				</div>
+			</div>
 		</div>
 
 		<form id="grt-ticket-submit-form" class="grt-ticket-form">

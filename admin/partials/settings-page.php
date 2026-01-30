@@ -13,7 +13,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Save settings
 if ( isset( $_POST['grt_ticket_save_settings'] ) && check_admin_referer( 'grt_ticket_settings_nonce' ) ) {
-	update_option( 'grt_ticket_categories', sanitize_text_field( $_POST['grt_ticket_categories'] ) );
+	// Handle Categories
+	$categories_data = array();
+	if ( isset( $_POST['grt_categories'] ) && is_array( $_POST['grt_categories'] ) ) {
+		foreach ( $_POST['grt_categories'] as $cat ) {
+			if ( ! empty( $cat['name'] ) ) {
+				$categories_data[] = array(
+					'name'  => sanitize_text_field( $cat['name'] ),
+					'image' => esc_url_raw( $cat['image'] ),
+				);
+			}
+		}
+	}
+	update_option( 'grt_ticket_categories', json_encode( $categories_data ) );
+	
 	update_option( 'grt_ticket_admin_name', sanitize_text_field( $_POST['grt_ticket_admin_name'] ) );
 	update_option( 'grt_ticket_per_page', absint( $_POST['grt_ticket_per_page'] ) );
 	update_option( 'grt_ticket_poll_interval', absint( $_POST['grt_ticket_poll_interval'] ) );
@@ -21,7 +34,28 @@ if ( isset( $_POST['grt_ticket_save_settings'] ) && check_admin_referer( 'grt_ti
 	echo '<div class="notice notice-success"><p>' . esc_html__( 'Settings saved successfully!', 'grt-ticket' ) . '</p></div>';
 }
 
-$categories = get_option( 'grt_ticket_categories', 'Installation Issue,Customization Help,Bug Report,Feature Request,License Issue' );
+$categories_option = get_option( 'grt_ticket_categories', 'Installation Issue,Customization Help,Bug Report,Feature Request,License Issue' );
+$categories = array();
+
+// Try to decode JSON
+$decoded = json_decode( $categories_option, true );
+if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
+	$categories = $decoded;
+} else {
+	// Fallback to comma-separated
+	$items = array_map( 'trim', explode( ',', $categories_option ) );
+	foreach ( $items as $item ) {
+		if ( ! empty( $item ) ) {
+			$categories[] = array( 'name' => $item, 'image' => '' );
+		}
+	}
+}
+
+// Ensure at least one empty row if empty
+if ( empty( $categories ) ) {
+	$categories[] = array( 'name' => '', 'image' => '' );
+}
+
 $admin_name = get_option( 'grt_ticket_admin_name', 'Support Team' );
 $per_page = get_option( 'grt_ticket_per_page', 20 );
 $poll_interval = get_option( 'grt_ticket_poll_interval', 3000 );
@@ -40,11 +74,116 @@ $poll_interval = get_option( 'grt_ticket_poll_interval', 3000 );
 			<tbody>
 				<tr>
 					<th scope="row">
-						<label for="grt_ticket_categories"><?php esc_html_e( 'Issue Categories', 'grt-ticket' ); ?></label>
+						<label><?php esc_html_e( 'Issue Categories', 'grt-ticket' ); ?></label>
 					</th>
 					<td>
-						<textarea name="grt_ticket_categories" id="grt_ticket_categories" rows="5" class="large-text"><?php echo esc_textarea( $categories ); ?></textarea>
-						<p class="description"><?php esc_html_e( 'Enter issue categories separated by commas. These will appear in the dropdown on the ticket submission form.', 'grt-ticket' ); ?></p>
+						<div id="grt-categories-wrapper">
+							<?php foreach ( $categories as $index => $cat ) : ?>
+								<div class="grt-category-item">
+									<input type="text" name="grt_categories[<?php echo $index; ?>][name]" value="<?php echo esc_attr( $cat['name'] ); ?>" placeholder="<?php esc_attr_e( 'Category Name', 'grt-ticket' ); ?>" class="regular-text">
+									
+									<div class="grt-image-upload-wrapper">
+										<input type="hidden" name="grt_categories[<?php echo $index; ?>][image]" value="<?php echo esc_attr( $cat['image'] ); ?>" class="grt-cat-image-url">
+										<div class="grt-image-preview">
+											<?php if ( ! empty( $cat['image'] ) ) : ?>
+												<img src="<?php echo esc_url( $cat['image'] ); ?>" alt="Preview">
+											<?php endif; ?>
+										</div>
+										<button type="button" class="button grt-upload-image"><?php esc_html_e( 'Select Image', 'grt-ticket' ); ?></button>
+										<?php if ( ! empty( $cat['image'] ) ) : ?>
+											<button type="button" class="button grt-remove-image">×</button>
+										<?php else: ?>
+											<button type="button" class="button grt-remove-image" style="display:none;">×</button>
+										<?php endif; ?>
+									</div>
+
+									<button type="button" class="button grt-remove-category"><?php esc_html_e( 'Remove', 'grt-ticket' ); ?></button>
+								</div>
+							<?php endforeach; ?>
+						</div>
+						<button type="button" class="button" id="grt-add-category"><?php esc_html_e( 'Add Category', 'grt-ticket' ); ?></button>
+						<p class="description"><?php esc_html_e( 'Enter category name and select an image (icon/thumbnail).', 'grt-ticket' ); ?></p>
+						
+						<script>
+						jQuery(document).ready(function($) {
+							var wrapper = $('#grt-categories-wrapper');
+							var addBtn = $('#grt-add-category');
+							var count = <?php echo count( $categories ); ?>;
+							
+							// Add Category
+							addBtn.on('click', function() {
+								var item = `
+									<div class="grt-category-item">
+										<input type="text" name="grt_categories[${count}][name]" placeholder="<?php esc_attr_e( 'Category Name', 'grt-ticket' ); ?>" class="regular-text">
+										
+										<div class="grt-image-upload-wrapper">
+											<input type="hidden" name="grt_categories[${count}][image]" class="grt-cat-image-url">
+											<div class="grt-image-preview"></div>
+											<button type="button" class="button grt-upload-image"><?php esc_html_e( 'Select Image', 'grt-ticket' ); ?></button>
+											<button type="button" class="button grt-remove-image" style="display:none;">×</button>
+										</div>
+
+										<button type="button" class="button grt-remove-category"><?php esc_html_e( 'Remove', 'grt-ticket' ); ?></button>
+									</div>
+								`;
+								wrapper.append(item);
+								count++;
+							});
+							
+							// Remove Category
+							wrapper.on('click', '.grt-remove-category', function() {
+								if (confirm('<?php esc_attr_e( 'Are you sure?', 'grt-ticket' ); ?>')) {
+									$(this).closest('.grt-category-item').remove();
+								}
+							});
+
+							// Media Uploader
+							var frame;
+							var currentUploadWrapper;
+
+							wrapper.on('click', '.grt-upload-image', function(e) {
+								e.preventDefault();
+								currentUploadWrapper = $(this).closest('.grt-image-upload-wrapper');
+
+								if (frame) {
+									frame.open();
+									return;
+								}
+
+								frame = wp.media({
+									title: '<?php esc_attr_e( 'Select Category Image', 'grt-ticket' ); ?>',
+									button: {
+										text: '<?php esc_attr_e( 'Use this image', 'grt-ticket' ); ?>'
+									},
+									multiple: false
+								});
+
+								frame.on('select', function() {
+									var attachment = frame.state().get('selection').first().toJSON();
+									
+									// Update fields
+									currentUploadWrapper.find('.grt-cat-image-url').val(attachment.url);
+									
+									// Update preview
+									var previewHtml = '<img src="' + attachment.url + '" alt="Preview">';
+									currentUploadWrapper.find('.grt-image-preview').html(previewHtml);
+									
+									// Show remove button
+									currentUploadWrapper.find('.grt-remove-image').show();
+								});
+
+								frame.open();
+							});
+
+							// Remove Image
+							wrapper.on('click', '.grt-remove-image', function() {
+								var wrapper = $(this).closest('.grt-image-upload-wrapper');
+								wrapper.find('.grt-cat-image-url').val('');
+								wrapper.find('.grt-image-preview').empty();
+								$(this).hide();
+							});
+						});
+						</script>
 					</td>
 				</tr>
 
