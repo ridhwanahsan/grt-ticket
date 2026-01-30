@@ -16,7 +16,11 @@ It is built with performance and modularity in mind, ensuring that assets are on
 - **Smart Asset Loading**: Modular CSS and JS files are loaded only on relevant pages for optimal performance.
 - **Ticket Management**: Comprehensive admin panel to view, manage, and reply to support tickets.
 - **Status Tracking**: Clear status indicators (Open, Solved, Closed) for efficient workflow management.
-- **File Attachments**: Users and admins can share images within the chat.
+- **Priority System**: Prioritize tickets with Low, Medium, or High priority levels to handle urgent issues first.
+- **File Attachments**: Users and admins can share Images (JPG, PNG, GIF) and PDF files directly within the chat.
+- **Analytics Dashboard**: A dedicated admin dashboard to visualize ticket volume, resolution time, and user satisfaction ratings.
+- **User Ratings**: Users can rate the support experience and provide feedback after a ticket is solved.
+- **Canned Responses**: Admins can save and insert common replies to respond faster.
 - **Twilio Integration**: Send automated notifications via WhatsApp and SMS to admins when new tickets are created.
 - **Direct Contact Options**: Offer direct "Call Us" and "SMS Us" buttons within the chat interface for immediate support.
 - **Responsive Design**: Fully responsive interface that works perfectly on desktop, tablet, and mobile devices.
@@ -47,12 +51,14 @@ To display the ticket submission form and user dashboard, add the following shor
 
 Navigate to **GRT Ticket** in your WordPress admin menu.
 
-1. **Tickets List**: View all submitted tickets with their status, user details, and category.
-2. **Support Chat**: Select a ticket to enter the real-time chat interface.
-   - Reply to users instantly.
+1. **Dashboard**: Get an overview of your support performance with real-time statistics and rating breakdowns.
+2. **Tickets List**: View all submitted tickets with their status, priority, user details, and category.
+3. **Support Chat**: Select a ticket to enter the real-time chat interface.
+   - Reply to users instantly using text or attachments.
+   - Use **Canned Responses** for quick replies.
    - Mark tickets as **Solved** when the issue is resolved.
    - Delete spam or invalid tickets.
-3. **Settings**: Customize the plugin behavior.
+4. **Settings**: Customize the plugin behavior.
 
 ## Configuration
 
@@ -72,9 +78,12 @@ The plugin follows a modular architecture for better maintainability and perform
 ```text
 grt-ticket/
 ├── admin/                  # Admin-specific functionality
-│   ├── css/                # Modular CSS files (tickets-list, chat-interface, settings)
+│   ├── css/                # Modular CSS files (tickets-list, chat-interface, settings, dashboard)
 │   ├── js/                 # Modular JS files (tickets-list, chat-interface, settings)
 │   ├── partials/           # PHP views for admin screens
+│   │   ├── dashboard.php
+│   │   ├── canned-responses.php
+│   │   └── ...
 │   └── class-grt-ticket-admin.php
 ├── public/                 # Public-facing functionality
 │   ├── css/                # Modular CSS files (ticket-form, chat-interface)
