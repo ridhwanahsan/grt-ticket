@@ -133,17 +133,35 @@ class GRT_Ticket_Ajax {
 		$description = wp_kses_post( $_POST['description'] ); // Allow HTML in description (it becomes the first message)
 		$priority = sanitize_text_field( $_POST['priority'] );
 
+		// Auto-assign agent based on category
+		$assigned_agent_id = 0;
+		$categories_option = get_option( 'grt_ticket_categories' );
+		if ( $categories_option ) {
+			$categories_data = json_decode( $categories_option, true );
+			if ( is_array( $categories_data ) ) {
+				foreach ( $categories_data as $cat_data ) {
+					if ( isset( $cat_data['name'] ) && $cat_data['name'] === $category ) {
+						if ( ! empty( $cat_data['agent_id'] ) ) {
+							$assigned_agent_id = (int) $cat_data['agent_id'];
+						}
+						break;
+					}
+				}
+			}
+		}
+
 		// Create ticket
 		$ticket_id = GRT_Ticket_Database::create_ticket( array(
-			'user_id'      => $user_id,
-			'user_email'   => $user_email,
-			'user_name'    => $user_name,
-			'theme_name'   => $theme_name,
-			'license_code' => $license_code,
-			'category'     => $category,
-			'title'        => $title,
-			'description'  => $description,
-			'priority'     => $priority,
+			'user_id'           => $user_id,
+			'user_email'        => $user_email,
+			'user_name'         => $user_name,
+			'theme_name'        => $theme_name,
+			'license_code'      => $license_code,
+			'category'          => $category,
+			'title'             => $title,
+			'description'       => $description,
+			'priority'          => $priority,
+			'assigned_agent_id' => $assigned_agent_id,
 		) );
 
 		if ( $ticket_id ) {
@@ -170,6 +188,29 @@ class GRT_Ticket_Ajax {
 						} catch ( \Throwable $e ) {
 							error_log( 'GRT Ticket Email Error: ' . $e->getMessage() );
 						}
+					}
+				}
+			}
+
+			// Email Notification to Assigned Agent
+			if ( $assigned_agent_id > 0 && get_option( 'grt_ticket_enable_email_notifications', 1 ) ) {
+				$agent_user = get_userdata( $assigned_agent_id );
+				if ( $agent_user ) {
+					$site_name = get_bloginfo( 'name' );
+					$agent_subject = sprintf( __( '[%s] New Ticket Assigned: %s', 'grt-ticket' ), $site_name, $title );
+					$agent_message = sprintf( __( 'Hello %s,', 'grt-ticket' ), $agent_user->display_name ) . "\r\n\r\n";
+					$agent_message .= sprintf( __( 'A new ticket has been automatically assigned to you based on the category "%s".', 'grt-ticket' ), $category ) . "\r\n\r\n";
+					$agent_message .= sprintf( __( 'Ticket Details:', 'grt-ticket' ) ) . "\r\n";
+					$agent_message .= sprintf( __( 'From: %s', 'grt-ticket' ), $user_name ) . "\r\n";
+					$agent_message .= sprintf( __( 'Title: %s', 'grt-ticket' ), $title ) . "\r\n\r\n";
+					$agent_message .= sprintf( __( 'Description:', 'grt-ticket' ) ) . "\r\n";
+					$agent_message .= wp_strip_all_tags( $description ) . "\r\n\r\n";
+					$agent_message .= sprintf( __( 'View Ticket: %s', 'grt-ticket' ), admin_url( 'admin.php?page=grt-ticket-chat&ticket_id=' . $ticket_id ) );
+
+					try {
+						wp_mail( $agent_user->user_email, $agent_subject, $agent_message );
+					} catch ( \Throwable $e ) {
+						error_log( 'GRT Ticket Agent Email Error: ' . $e->getMessage() );
 					}
 				}
 			}
@@ -614,5 +655,50 @@ class GRT_Ticket_Ajax {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Assign ticket to agent.
+	 *
+	 * @since    1.0.5
+	 */
+	public function assign_ticket() {
+		// Verify nonce
+		check_ajax_referer( 'grt_ticket_nonce', 'nonce' );
+
+		// Check permissions
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'grt-ticket' ) ) );
+		}
+
+		$ticket_id = isset( $_POST['ticket_id'] ) ? (int) $_POST['ticket_id'] : 0;
+		$agent_id  = isset( $_POST['agent_id'] ) ? (int) $_POST['agent_id'] : 0;
+
+		if ( ! $ticket_id ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid ticket ID.', 'grt-ticket' ) ) );
+		}
+
+		$result = GRT_Ticket_Database::assign_ticket( $ticket_id, $agent_id );
+
+		if ( $result ) {
+			// Send email to agent
+			if ( $agent_id > 0 ) {
+				$agent = get_userdata( $agent_id );
+				if ( $agent ) {
+					$ticket = GRT_Ticket_Database::get_ticket( $ticket_id );
+					$subject = sprintf( __( '[%s] You have been assigned to Ticket #%d', 'grt-ticket' ), get_bloginfo( 'name' ), $ticket_id );
+					$message = sprintf( __( 'Hello %s,', 'grt-ticket' ), $agent->display_name ) . "\r\n\r\n";
+					$message .= sprintf( __( 'You have been assigned to the following ticket:', 'grt-ticket' ) ) . "\r\n\r\n";
+					$message .= sprintf( __( 'Ticket #%d: %s', 'grt-ticket' ), $ticket_id, $ticket->title ) . "\r\n";
+					$message .= sprintf( __( 'View Ticket: %s', 'grt-ticket' ), admin_url( 'admin.php?page=grt-ticket-chat&ticket_id=' . $ticket_id ) ) . "\r\n\r\n";
+					
+					wp_mail( $agent->user_email, $subject, $message );
+				}
+			}
+
+			wp_send_json_success( array( 'message' => __( 'Agent assigned successfully.', 'grt-ticket' ) ) );
+		} else {
+			wp_send_json_error( array( 'message' => __( 'Failed to assign agent.', 'grt-ticket' ) ) );
+		}
 	}
 }

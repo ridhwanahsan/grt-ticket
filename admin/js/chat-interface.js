@@ -50,6 +50,33 @@
             markAsSolved();
         });
 
+        // Assign Agent
+        $('#grt-assign-agent').on('change', function () {
+            const ticketId = $(this).data('ticket-id');
+            const agentId = $(this).val();
+            
+            $.ajax({
+            url: grtTicketAdmin.ajax_url,
+            type: 'POST',
+                data: {
+                    action: 'grt_ticket_assign_agent',
+                    ticket_id: ticketId,
+                    agent_id: agentId,
+                    nonce: grtTicketAdmin.nonce
+                },
+                success: function (response) {
+                    if (response.success) {
+                        alert(response.data.message);
+                    } else {
+                        alert(response.data.message);
+                    }
+                },
+                error: function () {
+                    alert('Error assigning agent.');
+                }
+            });
+        });
+
         // File attachment handling
         $('#grt-chat-attach-btn').on('click', function () {
             $('#grt-chat-attachment').click();

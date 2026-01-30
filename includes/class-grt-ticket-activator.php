@@ -30,6 +30,7 @@ class GRT_Ticket_Activator {
 		$sql_tickets = "CREATE TABLE $table_tickets (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) NOT NULL DEFAULT 0,
+			assigned_agent_id bigint(20) NOT NULL DEFAULT 0,
 			user_email varchar(100) NOT NULL,
 			user_name varchar(100) NOT NULL,
 			theme_name varchar(200) NOT NULL,

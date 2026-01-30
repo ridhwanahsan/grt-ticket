@@ -105,13 +105,25 @@ class GRT_Ticket_Admin {
 			wp_register_script( $this->plugin_name . '-chat-interface', GRT_TICKET_PLUGIN_URL . 'admin/js/chat-interface.js', array( 'jquery' ), $this->version, false );
 			wp_register_script( $this->plugin_name . '-settings-page', GRT_TICKET_PLUGIN_URL . 'admin/js/settings-page.js', array( 'jquery' ), $this->version, false );
 
+			// Fetch agents (admins and editors)
+			$agents = get_users( array( 'role__in' => array( 'administrator', 'editor' ), 'fields' => array( 'ID', 'display_name' ) ) );
+			$agents_data = array();
+			foreach ( $agents as $agent ) {
+				$agents_data[] = array(
+					'id'   => $agent->ID,
+					'name' => $agent->display_name,
+				);
+			}
+
 			$data = array(
 				'ajax_url'      => admin_url( 'admin-ajax.php' ),
 				'nonce'         => wp_create_nonce( 'grt_ticket_nonce' ),
 				'poll_interval' => get_option( 'grt_ticket_poll_interval', 3000 ),
+				'agents'        => $agents_data,
 				'i18n'          => array(
 					'category_name'         => __( 'Category Name', 'grt-ticket' ),
 					'select_image'          => __( 'Select Image', 'grt-ticket' ),
+					'select_agent'          => __( 'Select Agent', 'grt-ticket' ),
 					'remove'                => __( 'Remove', 'grt-ticket' ),
 					'are_you_sure'          => __( 'Are you sure?', 'grt-ticket' ),
 					'select_category_image' => __( 'Select Category Image', 'grt-ticket' ),
@@ -122,7 +134,7 @@ class GRT_Ticket_Admin {
 			// Enqueue based on screen
 			if ( $screen->id === 'toplevel_page_grt-ticket' ) {
 				// Dashboard scripts if needed
-			} elseif ( $screen->id === 'grt-ticket_page_grt-ticket-list' ) {
+			} elseif ( strpos( $screen->id, 'grt-ticket-list' ) !== false ) {
 				wp_enqueue_script( $this->plugin_name . '-tickets-list' );
 				wp_localize_script( $this->plugin_name . '-tickets-list', 'grtTicketAdmin', $data );
 			} elseif ( strpos( $screen->id, 'grt-ticket-chat' ) !== false ) {
@@ -215,7 +227,19 @@ class GRT_Ticket_Admin {
 	 * @since    1.0.0
 	 */
 	public function display_tickets_page() {
-		$tickets = GRT_Ticket_Database::get_tickets();
+		$args = array();
+		$current_user_id = get_current_user_id();
+
+		// Handle filters
+		if ( isset( $_GET['assigned_to_me'] ) && '1' === $_GET['assigned_to_me'] ) {
+			$args['assigned_agent_id'] = $current_user_id;
+		}
+
+		if ( isset( $_GET['status'] ) && ! empty( $_GET['status'] ) ) {
+			$args['status'] = sanitize_text_field( $_GET['status'] );
+		}
+
+		$tickets = GRT_Ticket_Database::get_tickets( $args );
 		include GRT_TICKET_PLUGIN_DIR . 'admin/partials/tickets-list.php';
 	}
 
@@ -271,6 +295,8 @@ class GRT_Ticket_Admin {
 	 * @since    1.0.0
 	 */
 	public function display_settings_page() {
+		// Fetch agents for the settings page dropdown
+		$agents = get_users( array( 'role__in' => array( 'administrator', 'editor' ), 'fields' => array( 'ID', 'display_name' ) ) );
 		include GRT_TICKET_PLUGIN_DIR . 'admin/partials/settings-page.php';
 	}
 

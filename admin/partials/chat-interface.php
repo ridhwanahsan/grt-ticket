@@ -51,6 +51,20 @@ $is_solved = 'solved' === $ticket->status || 'closed' === $ticket->status;
 					<span><strong><?php esc_html_e( 'Priority:', 'grt-ticket' ); ?></strong> <span class="grt-ticket-priority priority-<?php echo esc_attr( $ticket->priority ); ?>"><?php echo esc_html( ucfirst( $ticket->priority ) ); ?></span></span>
 				<?php endif; ?>
 				<span><strong><?php esc_html_e( 'Status:', 'grt-ticket' ); ?></strong> <span class="grt-ticket-status status-<?php echo esc_attr( $ticket->status ); ?>"><?php echo esc_html( ucfirst( $ticket->status ) ); ?></span></span>
+				<span>
+					<strong><?php esc_html_e( 'Assigned:', 'grt-ticket' ); ?></strong>
+					<select id="grt-assign-agent" data-ticket-id="<?php echo esc_attr( $ticket->id ); ?>" style="max-width: 150px; padding: 0; height: 24px; font-size: 12px; border: 1px solid #ddd; border-radius: 4px;">
+						<option value="0"><?php esc_html_e( 'Unassigned', 'grt-ticket' ); ?></option>
+						<?php
+						$agents = get_users( array( 'role__in' => array( 'administrator', 'editor' ) ) );
+						$current_assigned = isset( $ticket->assigned_agent_id ) ? $ticket->assigned_agent_id : 0;
+						foreach ( $agents as $agent ) {
+							$selected = ( $current_assigned == $agent->ID ) ? 'selected' : '';
+							echo '<option value="' . esc_attr( $agent->ID ) . '" ' . $selected . '>' . esc_html( $agent->display_name ) . '</option>';
+						}
+						?>
+					</select>
+				</span>
 				<?php if ( isset( $ticket->rating ) && $ticket->rating > 0 ) : ?>
 					<span class="grt-admin-rating" title="<?php echo esc_attr( $ticket->rating_feedback ); ?>">
 						<strong><?php esc_html_e( 'Rating:', 'grt-ticket' ); ?></strong>

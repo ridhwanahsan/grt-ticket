@@ -7,10 +7,73 @@
 
     $(document).ready(function () {
         // Delete ticket functionality
-        $('.grt-delete-ticket').on('click', function () {
+        $(document).on('click', '.grt-delete-ticket', function () {
             deleteTicket($(this));
         });
+
+        // Assign agent functionality
+        $(document).on('change', '.grt-assign-agent-list', function () {
+            assignAgent($(this));
+        });
     });
+
+    /**
+     * Assign agent
+     */
+    function assignAgent($select) {
+        // Ensure localization object exists
+        if (typeof grtTicketAdmin === 'undefined') {
+            console.error('GRT Ticket: grtTicketAdmin object is missing.');
+            alert('System Error: Configuration missing. Please reload the page.');
+            return;
+        }
+
+        const ticketId = $select.data('ticket-id');
+        const agentId = $select.val();
+
+        // Disable select temporarily and show saving state
+        $select.prop('disabled', true);
+        const originalColor = $select.css('background-color');
+        $select.css('background-color', '#fff3cd'); // Yellow for "saving"
+        
+        console.log('Assigning ticket ID:', ticketId, 'to Agent ID:', agentId);
+
+        $.ajax({
+            url: grtTicketAdmin.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'grt_ticket_assign_agent',
+                ticket_id: ticketId,
+                agent_id: agentId,
+                nonce: grtTicketAdmin.nonce
+            },
+            success: function (response) {
+                $select.prop('disabled', false);
+                if (response.success) {
+                    // Success visual indicator (Green flash)
+                    $select.css('background-color', '#d4edda');
+                    $select.css('border-color', '#28a745');
+                    
+                    setTimeout(function() {
+                        $select.css('background-color', originalColor);
+                        $select.css('border-color', '');
+                    }, 1000);
+                } else {
+                    $select.css('background-color', '#f8d7da'); // Red for error
+                    alert(response.data.message || 'Failed to assign agent.');
+                    setTimeout(function() {
+                        $select.css('background-color', originalColor);
+                    }, 2000);
+                }
+            },
+            error: function (xhr, status, error) {
+                $select.prop('disabled', false);
+                $select.css('background-color', '#f8d7da'); // Red for error
+                console.error('AJAX Error:', status, error);
+                alert('An error occurred. Please check console for details.');
+            }
+        });
+    }
 
     /**
      * Delete ticket

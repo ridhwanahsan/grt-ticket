@@ -56,10 +56,21 @@
 
         // Add Category
         $addBtn.on('click', function() {
+            var agentOptions = '<option value="0">' + grtTicketAdmin.i18n.select_agent + '</option>';
+            if (grtTicketAdmin.agents && grtTicketAdmin.agents.length > 0) {
+                $.each(grtTicketAdmin.agents, function(index, agent) {
+                    agentOptions += '<option value="' + agent.id + '">' + agent.name + '</option>';
+                });
+            }
+
             var item = `
                 <div class="grt-category-item">
                     <input type="text" name="grt_categories[${count}][name]" placeholder="${grtTicketAdmin.i18n.category_name}" class="regular-text">
                     
+                    <select name="grt_categories[${count}][agent_id]" class="grt-cat-agent-select">
+                        ${agentOptions}
+                    </select>
+
                     <div class="grt-image-upload-wrapper">
                         <input type="hidden" name="grt_categories[${count}][image]" class="grt-cat-image-url">
                         <div class="grt-image-preview"></div>

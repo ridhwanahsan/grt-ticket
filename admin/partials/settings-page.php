@@ -19,8 +19,9 @@ if ( isset( $_POST['grt_ticket_save_settings'] ) && check_admin_referer( 'grt_ti
 		foreach ( $_POST['grt_categories'] as $cat ) {
 			if ( ! empty( $cat['name'] ) ) {
 				$categories_data[] = array(
-					'name'  => sanitize_text_field( $cat['name'] ),
-					'image' => esc_url_raw( $cat['image'] ),
+					'name'     => sanitize_text_field( $cat['name'] ),
+					'image'    => esc_url_raw( $cat['image'] ),
+					'agent_id' => isset( $cat['agent_id'] ) ? absint( $cat['agent_id'] ) : 0,
 				);
 			}
 		}
@@ -141,6 +142,15 @@ $imap_ssl = get_option( 'grt_ticket_imap_ssl', 1 );
 									<div class="grt-category-item">
 										<input type="text" name="grt_categories[<?php echo $index; ?>][name]" value="<?php echo esc_attr( $cat['name'] ); ?>" placeholder="<?php esc_attr_e( 'Category Name', 'grt-ticket' ); ?>" class="regular-text">
 										
+										<select name="grt_categories[<?php echo $index; ?>][agent_id]" class="grt-cat-agent-select">
+											<option value="0"><?php esc_html_e( 'Select Agent', 'grt-ticket' ); ?></option>
+											<?php foreach ( $agents as $agent ) : ?>
+												<option value="<?php echo esc_attr( $agent->ID ); ?>" <?php selected( isset( $cat['agent_id'] ) ? $cat['agent_id'] : 0, $agent->ID ); ?>>
+													<?php echo esc_html( $agent->display_name ); ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+
 										<div class="grt-image-upload-wrapper">
 											<input type="hidden" name="grt_categories[<?php echo $index; ?>][image]" value="<?php echo esc_attr( $cat['image'] ); ?>" class="grt-cat-image-url">
 											<div class="grt-image-preview">

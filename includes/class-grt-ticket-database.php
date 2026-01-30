@@ -41,6 +41,46 @@ class GRT_Ticket_Database {
 	}
 
 	/**
+	 * Check if a column exists in a table.
+	 *
+	 * @since    1.0.5
+	 * @param    string $table_name    Table name.
+	 * @param    string $column_name   Column name.
+	 * @return   bool                  True if exists, false otherwise.
+	 */
+	private static function check_column_exists( $table_name, $column_name ) {
+		global $wpdb;
+		$row = $wpdb->get_results( "SHOW COLUMNS FROM $table_name LIKE '$column_name'" );
+		return ! empty( $row );
+	}
+
+	/**
+	 * Ensure the tickets table has the assigned_agent_id column.
+	 *
+	 * @since    1.0.5
+	 */
+	public static function ensure_assigned_agent_column() {
+		global $wpdb;
+		
+		// Only check once per request
+		static $checked = false;
+		if ( $checked ) {
+			return;
+		}
+
+		$table_name = self::get_tickets_table();
+		if ( ! $table_name ) {
+			return;
+		}
+
+		if ( ! self::check_column_exists( $table_name, 'assigned_agent_id' ) ) {
+			$wpdb->query( "ALTER TABLE $table_name ADD COLUMN assigned_agent_id bigint(20) NOT NULL DEFAULT 0 AFTER user_id" );
+		}
+		
+		$checked = true;
+	}
+
+	/**
 	 * Get the tickets table name.
 	 *
 	 * @since    1.0.0
@@ -285,8 +325,9 @@ class GRT_Ticket_Database {
 				'description' => wp_kses_post( $data['description'] ),
 				'priority'    => isset( $data['priority'] ) ? sanitize_text_field( $data['priority'] ) : 'medium',
 				'status'      => 'open',
+				'assigned_agent_id' => isset( $data['assigned_agent_id'] ) ? (int) $data['assigned_agent_id'] : 0,
 			),
-			array( '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
+			array( '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d' )
 		);
 
 		if ( $result ) {
@@ -305,6 +346,9 @@ class GRT_Ticket_Database {
 	 */
 	public static function get_ticket( $ticket_id ) {
 		global $wpdb;
+
+		// Ensure schema is up to date (Temporary check for 1.0.5)
+		self::ensure_assigned_agent_column();
 
 		$table = self::get_tickets_table();
 		if ( ! $table ) {
@@ -343,6 +387,9 @@ class GRT_Ticket_Database {
 	public static function get_tickets( $args = array() ) {
 		global $wpdb;
 
+		// Ensure schema is up to date (Temporary check for 1.0.5)
+		self::ensure_assigned_agent_column();
+
 		$table = self::get_tickets_table();
 		if ( ! $table ) {
 			return array();
@@ -376,6 +423,11 @@ class GRT_Ticket_Database {
 		if ( ! empty( $args['status'] ) ) {
 			$where[]        = 'status = %s';
 			$prepare_args[] = $args['status'];
+		}
+
+		if ( isset( $args['assigned_agent_id'] ) ) {
+			$where[]        = 'assigned_agent_id = %d';
+			$prepare_args[] = $args['assigned_agent_id'];
 		}
 
 		$where_clause = implode( ' AND ', $where );
@@ -421,6 +473,9 @@ class GRT_Ticket_Database {
 	public static function count_tickets( $args = array() ) {
 		global $wpdb;
 
+		// Ensure schema is up to date
+		self::ensure_assigned_agent_column();
+
 		$table = self::get_tickets_table();
 		if ( ! $table ) {
 			return 0;
@@ -444,6 +499,11 @@ class GRT_Ticket_Database {
 			$prepare_args[] = $args['status'];
 		}
 
+		if ( isset( $args['assigned_agent_id'] ) ) {
+			$where[]        = 'assigned_agent_id = %d';
+			$prepare_args[] = $args['assigned_agent_id'];
+		}
+
 		$where_clause = implode( ' AND ', $where );
 
 		$query = "SELECT COUNT(*) FROM " . $table . " WHERE {$where_clause}";
@@ -453,6 +513,36 @@ class GRT_Ticket_Database {
 		}
 
 		return (int) $wpdb->get_var( $query );
+	}
+
+	/**
+	 * Assign ticket to an agent.
+	 *
+	 * @since    1.0.5
+	 * @param    int $ticket_id    Ticket ID.
+	 * @param    int $agent_id     Agent ID.
+	 * @return   bool              True on success, false on failure.
+	 */
+	public static function assign_ticket( $ticket_id, $agent_id ) {
+		global $wpdb;
+
+		// Ensure schema is up to date
+		self::ensure_assigned_agent_column();
+
+		$table = self::get_tickets_table();
+		if ( ! $table ) {
+			return false;
+		}
+
+		$result = $wpdb->update(
+			$table,
+			array( 'assigned_agent_id' => $agent_id ),
+			array( 'id' => $ticket_id ),
+			array( '%d' ),
+			array( '%d' )
+		);
+
+		return false !== $result;
 	}
 
 	/**

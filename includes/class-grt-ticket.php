@@ -185,6 +185,7 @@ class GRT_Ticket {
 		// Admin only AJAX
 		$this->loader->add_action( 'wp_ajax_grt_ticket_mark_solved', $plugin_ajax, 'mark_solved' );
 		$this->loader->add_action( 'wp_ajax_grt_ticket_delete', $plugin_ajax, 'delete_ticket' );
+		$this->loader->add_action( 'wp_ajax_grt_ticket_assign_agent', $plugin_ajax, 'assign_ticket' );
 	}
 
 	/**
