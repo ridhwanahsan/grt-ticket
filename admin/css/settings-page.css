@@ -215,3 +215,50 @@ input:checked + .slider:before {
     opacity: 1;
     margin-bottom: -1px;
 }
+
+/* Scoped Button Styles */
+.grt-settings-form .button {
+    background: #f6f7f7;
+    border-color: #dcdcde;
+    color: #2271b1;
+    text-decoration: none;
+    text-shadow: none;
+    box-shadow: none;
+    transition: all 0.2s ease;
+}
+
+.grt-settings-form .button:hover {
+    background: #f0f0f1;
+    border-color: #0a4b78;
+    color: #0a4b78;
+}
+
+.grt-settings-form .button-primary {
+    background: #2271b1;
+    border-color: #2271b1;
+    color: #fff;
+    text-shadow: none;
+    box-shadow: none;
+}
+
+.grt-settings-form .button-primary:hover {
+    background: #135e96;
+    border-color: #135e96;
+    color: #fff;
+}
+
+/* Scoped Link Styles */
+.grt-settings-form a:not(.button) {
+    color: #2271b1;
+    text-decoration: none;
+    transition: color 0.1s ease-in-out;
+}
+
+.grt-settings-form a:not(.button):hover {
+    color: #135e96;
+}
+
+.grt-settings-form a:not(.button):focus {
+    box-shadow: 0 0 0 2px #2271b1;
+    outline: 2px solid transparent;
+}
