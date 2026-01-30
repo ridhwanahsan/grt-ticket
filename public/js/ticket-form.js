@@ -128,8 +128,19 @@
                         $submitBtn.prop('disabled', false).text('Submit Ticket');
                     }
                 },
-                error: function () {
-                    showMessage('An error occurred. Please try again.', 'error');
+                error: function (xhr, status, error) {
+                    let errorMessage = 'An error occurred. Please try again.';
+                    
+                    if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+                        errorMessage = xhr.responseJSON.data.message;
+                    } else if (status === 'parsererror') {
+                        errorMessage = 'Error: Invalid server response. Please refresh the page.';
+                    } else if (error) {
+                        errorMessage = 'Error: ' + error;
+                    }
+                    
+                    showMessage(errorMessage, 'error');
+                    console.error('Ticket Submission Error:', xhr, status, error);
                     $submitBtn.prop('disabled', false).text('Submit Ticket');
                 }
             });

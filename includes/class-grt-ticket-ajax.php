@@ -20,9 +20,13 @@ class GRT_Ticket_Ajax {
 	 */
 	public function submit_ticket() {
 		// Verify nonce
-		check_ajax_referer( 'grt_ticket_nonce', 'nonce' );
+		if ( ! check_ajax_referer( 'grt_ticket_nonce', 'nonce', false ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed. Please refresh the page and try again.', 'grt-ticket' ) ) );
+			return;
+		}
 
-		// Validate required fields
+		try {
+			// Validate required fields
 		$required_fields = array( 'user_name', 'user_email', 'theme_name', 'license_code', 'category', 'title', 'description' );
 		foreach ( $required_fields as $field ) {
 			if ( empty( $_POST[ $field ] ) ) {
@@ -104,7 +108,14 @@ class GRT_Ticket_Ajax {
 				
 				$message .= sprintf( __( 'Login here: %s', 'grt-ticket' ), wp_login_url() ) . "\r\n";
 
-				wp_mail( $user_email, sprintf( __( '[%s] New Support Account', 'grt-ticket' ), $site_name ), $message );
+				// Check if email notifications are enabled
+				if ( get_option( 'grt_ticket_enable_email_notifications', 1 ) ) {
+					try {
+						wp_mail( $user_email, sprintf( __( '[%s] New Support Account', 'grt-ticket' ), $site_name ), $message );
+					} catch ( \Throwable $e ) {
+						error_log( 'GRT Ticket Email Error: ' . $e->getMessage() );
+					}
+				}
 				
 				// Auto-login newly created user
 				wp_set_current_user( $user_id );
@@ -151,8 +162,15 @@ class GRT_Ticket_Ajax {
 				$message .= wp_strip_all_tags( $description ) . "\r\n\r\n";
 				$message .= sprintf( __( 'View Ticket: %s', 'grt-ticket' ), admin_url( 'admin.php?page=grt-ticket-chat&ticket_id=' . $ticket_id ) );
 
-				foreach ( $emails as $email ) {
-					wp_mail( $email, $subject, $message );
+				// Check if email notifications are enabled
+				if ( get_option( 'grt_ticket_enable_email_notifications', 1 ) ) {
+					foreach ( $emails as $email ) {
+						try {
+							wp_mail( $email, $subject, $message );
+						} catch ( \Throwable $e ) {
+							error_log( 'GRT Ticket Email Error: ' . $e->getMessage() );
+						}
+					}
 				}
 			}
 
@@ -167,7 +185,14 @@ class GRT_Ticket_Ajax {
 			$user_message .= sprintf( __( 'Description:', 'grt-ticket' ) ) . "\r\n";
 			$user_message .= wp_strip_all_tags( $description ) . "\r\n\r\n";
 			
-			wp_mail( $user_email, $user_subject, $user_message );
+			// Check if email notifications are enabled
+			if ( get_option( 'grt_ticket_enable_email_notifications', 1 ) ) {
+				try {
+					wp_mail( $user_email, $user_subject, $user_message );
+				} catch ( \Throwable $e ) {
+					error_log( 'GRT Ticket Email Error: ' . $e->getMessage() );
+				}
+			}
 
 			// WhatsApp Notification to Admins
 			$whatsapp_admin_number = get_option( 'grt_ticket_whatsapp_admin_number', '' );
@@ -196,6 +221,12 @@ class GRT_Ticket_Ajax {
 		} else {
 			wp_send_json_error( array( 'message' => __( 'Failed to create ticket. Please try again.', 'grt-ticket' ) ) );
 		}
+
+		} catch ( \Throwable $e ) {
+			error_log( 'GRT Ticket Submit Error: ' . $e->getMessage() );
+			// We show a generic error to the user, but include the message for debugging since this is a support system
+			wp_send_json_error( array( 'message' => __( 'Server error: ', 'grt-ticket' ) . $e->getMessage() ) );
+		}
 	}
 
 	/**
@@ -205,8 +236,12 @@ class GRT_Ticket_Ajax {
 	 */
 	public function send_message() {
 		// Verify nonce
-		check_ajax_referer( 'grt_ticket_nonce', 'nonce' );
+		if ( ! check_ajax_referer( 'grt_ticket_nonce', 'nonce', false ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed. Please refresh the page and try again.', 'grt-ticket' ) ) );
+			return;
+		}
 
+		try {
 		// Validate required fields (message is now optional if attachment is provided)
 		if ( empty( $_POST['ticket_id'] ) || ( empty( $_POST['message'] ) && empty( $_FILES['attachment'] ) ) ) {
 			wp_send_json_error( array( 'message' => __( 'Ticket ID and message or attachment are required.', 'grt-ticket' ) ) );
@@ -283,6 +318,9 @@ class GRT_Ticket_Ajax {
 		$message_id = GRT_Ticket_Database::add_message( $message_data );
 
 		if ( $message_id ) {
+			// Set rate limit transient
+			set_transient( $transient_key, true, 10 );
+
 			// Email Notification Logic
 			$site_name = get_bloginfo( 'name' );
 			
@@ -298,8 +336,15 @@ class GRT_Ticket_Ajax {
 					$body .= wp_strip_all_tags( $message_content ) . "\r\n\r\n";
 					$body .= sprintf( __( 'View Ticket: %s', 'grt-ticket' ), admin_url( 'admin.php?page=grt-ticket-chat&ticket_id=' . $ticket_id ) );
 					
-					foreach ( $emails as $email ) {
-						wp_mail( $email, $subject, $body );
+					// Check if email notifications are enabled
+					if ( get_option( 'grt_ticket_enable_email_notifications', 1 ) ) {
+						foreach ( $emails as $email ) {
+							try {
+								wp_mail( $email, $subject, $body );
+							} catch ( \Throwable $e ) {
+								error_log( 'GRT Ticket Email Error: ' . $e->getMessage() );
+							}
+						}
 					}
 				}
 
@@ -321,7 +366,14 @@ class GRT_Ticket_Ajax {
 					$body .= sprintf( __( 'You have received a new reply from support:', 'grt-ticket' ) ) . "\r\n\r\n";
 					$body .= wp_strip_all_tags( $message_content ) . "\r\n\r\n";
 					
-					wp_mail( $ticket->user_email, $subject, $body );
+					// Check if email notifications are enabled
+					if ( get_option( 'grt_ticket_enable_email_notifications', 1 ) ) {
+						try {
+							wp_mail( $ticket->user_email, $subject, $body );
+						} catch ( \Throwable $e ) {
+							error_log( 'GRT Ticket Email Error: ' . $e->getMessage() );
+						}
+					}
 				}
 			}
 
@@ -334,6 +386,11 @@ class GRT_Ticket_Ajax {
 			) );
 		} else {
 			wp_send_json_error( array( 'message' => __( 'Failed to send message. Please try again.', 'grt-ticket' ) ) );
+		}
+
+		} catch ( \Throwable $e ) {
+			error_log( 'GRT Ticket Send Message Error: ' . $e->getMessage() );
+			wp_send_json_error( array( 'message' => __( 'Server error: ', 'grt-ticket' ) . $e->getMessage() ) );
 		}
 	}
 

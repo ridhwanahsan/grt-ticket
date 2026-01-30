@@ -182,3 +182,36 @@ input:checked + .slider:before {
 .slider.round:before {
     border-radius: 50%;
 }
+
+/* Scoped Tab Styles */
+.grt-settings-tabs {
+    border-bottom: 1px solid #c3c4c7;
+    padding-top: 10px;
+}
+
+.grt-settings-tabs .nav-tab {
+    background: #e5e5e5;
+    color: #555;
+    border: 1px solid #c3c4c7;
+    border-bottom: none;
+    margin-right: 4px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.grt-settings-tabs .nav-tab:hover {
+    background: #f0f0f1;
+    color: #000;
+    opacity: 1;
+}
+
+.grt-settings-tabs .nav-tab-active,
+.grt-settings-tabs .nav-tab-active:hover {
+    background: #fff;
+    border-bottom: 1px solid #fff;
+    color: #000;
+    font-weight: 600;
+    opacity: 1;
+    margin-bottom: -1px;
+}

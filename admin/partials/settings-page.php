@@ -28,6 +28,7 @@ if ( isset( $_POST['grt_ticket_save_settings'] ) && check_admin_referer( 'grt_ti
 	update_option( 'grt_ticket_categories', json_encode( $categories_data ) );
 	
 	update_option( 'grt_ticket_admin_name', sanitize_text_field( $_POST['grt_ticket_admin_name'] ) );
+	update_option( 'grt_ticket_enable_email_notifications', isset( $_POST['grt_ticket_enable_email_notifications'] ) ? 1 : 0 );
 	update_option( 'grt_ticket_notification_emails', sanitize_textarea_field( $_POST['grt_ticket_notification_emails'] ) );
 	update_option( 'grt_ticket_per_page', absint( $_POST['grt_ticket_per_page'] ) );
 	update_option( 'grt_ticket_poll_interval', absint( $_POST['grt_ticket_poll_interval'] ) );
@@ -82,6 +83,7 @@ if ( empty( $categories ) ) {
 }
 
 $admin_name = get_option( 'grt_ticket_admin_name', 'Support Team' );
+$enable_email_notifications = get_option( 'grt_ticket_enable_email_notifications', 1 );
 $notification_emails = get_option( 'grt_ticket_notification_emails', get_option( 'admin_email' ) );
 $per_page = get_option( 'grt_ticket_per_page', 20 );
 $poll_interval = get_option( 'grt_ticket_poll_interval', 3000 );
@@ -200,6 +202,18 @@ $imap_ssl = get_option( 'grt_ticket_imap_ssl', 1 );
 		<div id="grt-tab-email" class="grt-tab-content">
 			<table class="form-table">
 				<tbody>
+					<tr>
+						<th scope="row">
+							<label for="grt_ticket_enable_email_notifications"><?php esc_html_e( 'Enable Email Notifications', 'grt-ticket' ); ?></label>
+						</th>
+						<td>
+							<label class="grt-switch">
+								<input type="checkbox" name="grt_ticket_enable_email_notifications" id="grt_ticket_enable_email_notifications" value="1" <?php checked( $enable_email_notifications, 1 ); ?>>
+								<span class="slider round"></span>
+							</label>
+							<p class="description"><?php esc_html_e( 'Toggle all email notifications on/off.', 'grt-ticket' ); ?></p>
+						</td>
+					</tr>
 					<tr>
 						<th scope="row">
 							<label for="grt_ticket_notification_emails"><?php esc_html_e( 'Notification Emails', 'grt-ticket' ); ?></label>

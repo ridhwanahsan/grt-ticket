@@ -86,22 +86,26 @@ class GRT_Ticket_Activator {
 		}
 
 		// Add default canned responses if table is empty
-		$count_canned = $wpdb->get_var( "SELECT COUNT(*) FROM $table_canned" );
-		if ( 0 == $count_canned ) {
-			$wpdb->insert(
-				$table_canned,
-				array(
-					'title'    => 'Hello',
-					'response' => "Hello,\n\nThank you for reaching out to us. We have received your ticket and are looking into it.\n\nBest regards,\nSupport Team",
-				)
-			);
-			$wpdb->insert(
-				$table_canned,
-				array(
-					'title'    => 'Closing Ticket',
-					'response' => "Hello,\n\nSince we haven't heard back from you in a while, we are marking this ticket as resolved. Feel free to open a new ticket if you need further assistance.\n\nBest regards,\nSupport Team",
-				)
-			);
+		$table_exists = $wpdb->get_var( "SHOW TABLES LIKE '$table_canned'" ) === $table_canned;
+		
+		if ( $table_exists ) {
+			$count_canned = $wpdb->get_var( "SELECT COUNT(*) FROM $table_canned" );
+			if ( 0 == $count_canned ) {
+				$wpdb->insert(
+					$table_canned,
+					array(
+						'title'    => sanitize_text_field( 'Hello' ),
+						'response' => wp_kses_post( "Hello,\n\nThank you for reaching out to us. We have received your ticket and are looking into it.\n\nBest regards,\nSupport Team" ),
+					)
+				);
+				$wpdb->insert(
+					$table_canned,
+					array(
+						'title'    => sanitize_text_field( 'Closing Ticket' ),
+						'response' => wp_kses_post( "Hello,\n\nSince we haven't heard back from you in a while, we are marking this ticket as resolved. Feel free to open a new ticket if you need further assistance.\n\nBest regards,\nSupport Team" ),
+					)
+				);
+			}
 		}
 
 		// Set default options
@@ -113,10 +117,10 @@ class GRT_Ticket_Activator {
 			'License Issue',
 		);
 
-		add_option( 'grt_ticket_categories', implode( ',', $default_categories ) );
-		add_option( 'grt_ticket_admin_name', 'Support Team' );
-		add_option( 'grt_ticket_per_page', 20 );
-		add_option( 'grt_ticket_poll_interval', 3000 ); // 3 seconds in milliseconds
-		add_option( 'grt_ticket_version', GRT_TICKET_VERSION );
+		update_option( 'grt_ticket_categories', implode( ',', $default_categories ) );
+		update_option( 'grt_ticket_admin_name', 'Support Team' );
+		update_option( 'grt_ticket_per_page', 20 );
+		update_option( 'grt_ticket_poll_interval', 3000 ); // 3 seconds in milliseconds
+		update_option( 'grt_ticket_version', GRT_TICKET_VERSION );
 	}
 }

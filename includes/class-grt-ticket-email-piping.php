@@ -35,10 +35,22 @@ class GRT_Ticket_Email_Piping {
 		$mailbox = "{{$host}:{$port}/imap{$ssl}}INBOX";
 		
 		// Suppress warnings to avoid filling error logs on connection failures
-		$inbox = @imap_open( $mailbox, $user, $pass );
+		$inbox = false;
+		$retry_count = 0;
+		$max_retries = 3;
+		
+		while ( ! $inbox && $retry_count < $max_retries ) {
+			$inbox = @imap_open( $mailbox, $user, $pass );
+			if ( ! $inbox ) {
+				$retry_count++;
+				if ( $retry_count < $max_retries ) {
+					sleep( 1 ); // Wait 1 second before retrying
+				}
+			}
+		}
 
 		if ( ! $inbox ) {
-			error_log( 'GRT Ticket: IMAP connection failed: ' . imap_last_error() );
+			error_log( 'GRT Ticket: IMAP connection failed after ' . $max_retries . ' attempts: ' . imap_last_error() );
 			return;
 		}
 
@@ -47,13 +59,30 @@ class GRT_Ticket_Email_Piping {
 
 		if ( $emails ) {
 			rsort( $emails ); // Newest first
+			
+			// Performance: Limit number of emails processed per run
+			$limit = 50;
+			$count = 0;
 
 			foreach ( $emails as $email_number ) {
+				if ( $count >= $limit ) {
+					break;
+				}
+				
 				$overview = imap_fetch_overview( $inbox, $email_number, 0 );
 				
 				if ( isset( $overview[0]->subject ) ) {
-					$subject = $overview[0]->subject;
-					$from = $overview[0]->from;
+					// Handle subject encoding if necessary (though imap_fetch_overview usually returns decoded if using correct flags, but explicit decoding is safer)
+					$subject = isset($overview[0]->subject) ? $overview[0]->subject : '';
+					if ( function_exists( 'imap_utf8' ) ) {
+						$subject = imap_utf8( $subject );
+					}
+					
+					$from = isset($overview[0]->from) ? $overview[0]->from : '';
+					if ( function_exists( 'imap_utf8' ) ) {
+						$from = imap_utf8( $from );
+					}
+					
 					$ticket_id = $this->parse_ticket_id( $subject );
 
 					if ( $ticket_id ) {
@@ -61,7 +90,8 @@ class GRT_Ticket_Email_Piping {
 						$message_body = $this->get_part( $inbox, $email_number, "TEXT/PLAIN" );
 						if ( ! $message_body ) {
 							$message_body = $this->get_part( $inbox, $email_number, "TEXT/HTML" );
-							$message_body = strip_tags( $message_body );
+							// Convert HTML to plain text better
+							$message_body = wp_strip_all_tags( $message_body ); 
 						}
 						
 						$message_body = $this->clean_reply_body( $message_body );
@@ -77,6 +107,8 @@ class GRT_Ticket_Email_Piping {
 						$this->add_reply( $ticket_id, $message_body, $sender_email );
 					}
 				}
+				
+				$count++;
 			}
 		}
 
@@ -84,7 +116,9 @@ class GRT_Ticket_Email_Piping {
 	}
 
 	private function parse_ticket_id( $subject ) {
-		if ( preg_match( '/#(\d+)/', $subject, $matches ) ) {
+		// Enhanced regex to handle various formats: #123, Ticket #123, [Ticket #123]
+		// Case insensitive
+		if ( preg_match( '/(?:Ticket\s*#|#|\[Ticket\s*#?)\s*(\d+)/i', $subject, $matches ) ) {
 			return intval( $matches[1] );
 		}
 		return 0;
@@ -134,12 +168,14 @@ class GRT_Ticket_Email_Piping {
 	}
 
 	private function clean_reply_body( $body ) {
-		// Basic cleanup to remove quoted replies
+		// Advanced cleanup
 		$delimiters = array(
-			'/^On.*wrote:$/m',
-			'/^From:.*$/m',
-			'/^-+Original Message-+$/m',
-			'/^>.*$/m' // Quoted lines
+			'/^On\s.*wrote:$/im',
+			'/^From:\s.*$/im',
+			'/^-+\s*Original Message\s*-+$/im',
+			'/^>.*$/m', // Quoted lines
+			'/^Sent from my.*$/im', // Mobile signatures
+			'/^_{3,}$/m', // Underscore separators
 		);
 
 		$lines = explode( "\n", $body );
@@ -147,6 +183,12 @@ class GRT_Ticket_Email_Piping {
 		
 		foreach ( $lines as $line ) {
 			$line = trim( $line );
+			
+			// Skip empty lines at the start (handled by implode later but good to check)
+			if ( empty( $line ) && empty( $new_lines ) ) {
+				continue;
+			}
+
 			$is_delimiter = false;
 			
 			// Check for quoted lines (>)
@@ -168,12 +210,18 @@ class GRT_Ticket_Email_Piping {
 			$new_lines[] = $line;
 		}
 		
-		return implode( "\n", $new_lines );
+		$body = implode( "\n", $new_lines );
+		
+		// Remove multiple newlines
+		$body = preg_replace( "/[\r\n]{2,}/", "\n\n", $body );
+		
+		return trim( $body );
 	}
 
 	private function add_reply( $ticket_id, $message, $sender_email ) {
 		$ticket = GRT_Ticket_Database::get_ticket( $ticket_id );
 		if ( ! $ticket ) {
+			error_log( "GRT Ticket: Ticket #$ticket_id not found for incoming email." );
 			return;
 		}
 
@@ -189,21 +237,27 @@ class GRT_Ticket_Email_Piping {
 			$sender_name = get_option( 'grt_ticket_admin_name', 'Support Team' );
 		} else {
 			if ( strcasecmp( $sender_email, $ticket->user_email ) !== 0 ) {
-				 // Optional: allow flexible matching or return
+				 // Unknown sender
+				 error_log( "GRT Ticket: Unknown sender $sender_email for ticket #$ticket_id. Reply rejected." );
 				 return;
 			}
 		}
 
 		if ( empty( trim( $message ) ) ) {
+			error_log( "GRT Ticket: Empty message body for ticket #$ticket_id from $sender_email." );
 			return;
 		}
 
-		GRT_Ticket_Database::add_message( array(
+		$result = GRT_Ticket_Database::add_message( array(
 			'ticket_id'   => $ticket_id,
 			'sender_type' => $sender_type,
 			'sender_name' => $sender_name,
 			'message'     => wp_kses_post( $message ),
 		) );
+		
+		if ( ! $result ) {
+			error_log( "GRT Ticket: Failed to add message to DB for ticket #$ticket_id." );
+		}
 	}
 
 }
