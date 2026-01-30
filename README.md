@@ -41,6 +41,8 @@ Unlike standard ticketing plugins, GRT Ticket offers a distraction-free experien
 
 ### 🛠️ Ticket Management (Admin)
 *   **Admin Dashboard**: Visual overview of support performance, including ticket volume, open/closed counts, and average user ratings.
+*   **Agent Performance**: Track individual agent performance with detailed stats on assigned and solved tickets.
+*   **Auto-Assignment**: Automatically assign tickets to specific agents based on the issue category.
 *   **Ticket List**: Filterable list of all tickets with status (Open, Solved, Closed), priority, and category.
 *   **Priority System**: Categorize issues by Low, Medium, or High priority.
 *   **Canned Responses**: Create and manage pre-saved replies to answer common questions instantly.
@@ -48,6 +50,7 @@ Unlike standard ticketing plugins, GRT Ticket offers a distraction-free experien
 *   **Status Management**: Easily mark tickets as Solved or Closed.
 
 ### ⚙️ Integrations & Settings
+*   **Agent Notifications**: Automatically notify agents via email when a new ticket is assigned to them.
 *   **Twilio Integration**: Get notified via SMS or WhatsApp when a new ticket is created (requires Twilio API credentials).
 *   **Email Piping**: (Beta) Reply to ticket notifications via email to update the chat.
 *   **Custom Categories**: Define your own support categories with custom icons.
@@ -83,6 +86,12 @@ Add the following shortcode to any page to display the ticket form and user dash
 4.  Update the ticket status to **Solved** when finished.
 
 ## 📋 Changelog
+
+### 1.0.5
+*   **Feature**: Added automatic ticket assignment to agents based on issue category.
+*   **Feature**: Added "Agent Performance" widget to the admin dashboard showing assigned and solved ticket counts.
+*   **Feature**: Implemented email notifications for agents when tickets are assigned to them.
+*   **Improvement**: Enhanced dashboard UI with better agent stats visualization.
 
 ### 1.0.4
 *   **New**: Added functionality to hide WordPress Admin Bar for non-admin users.
