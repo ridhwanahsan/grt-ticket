@@ -113,4 +113,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</ul>
 		</div>
 	</div>
+
+	<!-- Agent Performance -->
+	<?php if ( ! empty( $stats['agent_stats'] ) ) : ?>
+	<div class="grt-dashboard-row" style="margin-top: 20px; grid-template-columns: 1fr;">
+		<div class="grt-dashboard-widget agent-stats-widget">
+			<h2><?php esc_html_e( 'Agent Performance', 'grt-ticket' ); ?></h2>
+			<div class="agent-stats-list">
+				<?php foreach ( $stats['agent_stats'] as $agent ) : ?>
+					<div class="agent-stat-item">
+						<div class="agent-avatar">
+							<img src="<?php echo esc_url( $agent['avatar'] ); ?>" alt="<?php echo esc_attr( $agent['agent_name'] ); ?>" width="48" height="48">
+						</div>
+						<div class="agent-info">
+							<h4><?php echo esc_html( $agent['agent_name'] ); ?></h4>
+							<div class="agent-ticket-count">
+								<span class="dashicons dashicons-tickets-alt"></span>
+								<?php echo sprintf( _n( '%s Ticket Assigned', '%s Tickets Assigned', $agent['open_count'], 'grt-ticket' ), number_format_i18n( $agent['open_count'] ) ); ?>
+							</div>
+							<div class="agent-solved-count">
+								<span class="dashicons dashicons-yes-alt"></span>
+								<?php echo sprintf( _n( '%s Solved Ticket', '%s Solved Tickets', $agent['solved_count'], 'grt-ticket' ), number_format_i18n( $agent['solved_count'] ) ); ?>
+							</div>
+						</div>
+					</div>
+				<?php endforeach; ?>
+			</div>
+		</div>
+	</div>
+	<?php endif; ?>
 </div>

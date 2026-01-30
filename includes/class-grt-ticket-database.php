@@ -269,6 +269,33 @@ class GRT_Ticket_Database {
 			$ratings_dist[ (int) $row['rating'] ] = (int) $row['count'];
 		}
 
+		// Agent Ticket Counts
+		$agent_counts = $wpdb->get_results( "
+			SELECT 
+				assigned_agent_id, 
+				SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) as open_count,
+				SUM(CASE WHEN status IN ('solved', 'closed') THEN 1 ELSE 0 END) as solved_count
+			FROM $tickets_table 
+			WHERE assigned_agent_id > 0 
+			GROUP BY assigned_agent_id 
+			ORDER BY open_count DESC
+		", ARRAY_A );
+
+		$agent_stats = array();
+		foreach ( $agent_counts as $row ) {
+			$agent_id = (int) $row['assigned_agent_id'];
+			$user = get_userdata( $agent_id );
+			if ( $user ) {
+				$agent_stats[] = array(
+					'agent_id'     => $agent_id,
+					'agent_name'   => $user->display_name,
+					'open_count'   => (int) $row['open_count'],
+					'solved_count' => (int) $row['solved_count'],
+					'avatar'       => get_avatar_url( $agent_id, array( 'size' => 64 ) ),
+				);
+			}
+		}
+
 		return array(
 			'total_tickets'       => $total_tickets,
 			'open_tickets'        => $stats_by_status['open'],
@@ -278,6 +305,7 @@ class GRT_Ticket_Database {
 			'avg_resolution_time' => $avg_resolution_hours,
 			'avg_rating'          => $avg_rating,
 			'rating_distribution' => $ratings_dist,
+			'agent_stats'         => $agent_stats,
 		);
 	}
 
