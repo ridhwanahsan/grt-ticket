@@ -133,6 +133,18 @@ class GRT_Ticket_Ajax {
 				}
 			}
 
+			// WhatsApp Notification to Admins
+			$whatsapp_admin_number = get_option( 'grt_ticket_whatsapp_admin_number', '' );
+			if ( ! empty( $whatsapp_admin_number ) ) {
+				$wa_message = sprintf( "*New Ticket #%d*\n", $ticket_id );
+				$wa_message .= sprintf( "From: %s\n", $_POST['user_name'] );
+				$wa_message .= sprintf( "Title: %s\n", $_POST['title'] );
+				$wa_message .= sprintf( "Desc: %s\n", wp_strip_all_tags( $_POST['description'] ) );
+				$wa_message .= sprintf( "Link: %s", admin_url( 'admin.php?page=grt-ticket-chat&ticket_id=' . $ticket_id ) );
+
+				$this->send_twilio_whatsapp( $whatsapp_admin_number, $wa_message );
+			}
+
 			// Add initial message
 			GRT_Ticket_Database::add_message( array(
 				'ticket_id'   => $ticket_id,
@@ -253,6 +265,17 @@ class GRT_Ticket_Ajax {
 					foreach ( $emails as $email ) {
 						wp_mail( $email, $subject, $body );
 					}
+				}
+
+				// Notify Admins via WhatsApp
+				$whatsapp_admin_number = get_option( 'grt_ticket_whatsapp_admin_number', '' );
+				if ( ! empty( $whatsapp_admin_number ) ) {
+					$wa_message = sprintf( "*New Message on Ticket #%d*\n", $ticket_id );
+					$wa_message .= sprintf( "From: %s\n", $sender_name );
+					$wa_message .= sprintf( "Msg: %s\n", wp_strip_all_tags( $message_content ) );
+					$wa_message .= sprintf( "Link: %s", admin_url( 'admin.php?page=grt-ticket-chat&ticket_id=' . $ticket_id ) );
+
+					$this->send_twilio_whatsapp( $whatsapp_admin_number, $wa_message );
 				}
 			} else {
 				// Notify User (if admin replied)
@@ -390,5 +413,62 @@ class GRT_Ticket_Ajax {
 		} else {
 			wp_send_json_error( array( 'message' => __( 'Failed to delete ticket.', 'grt-ticket' ) ) );
 		}
+	}
+
+	/**
+	 * Send WhatsApp notification via Twilio.
+	 *
+	 * @since 1.0.0
+	 * @param string $to Recipient phone number.
+	 * @param string $message Message body.
+	 * @return bool|WP_Error True on success, false or WP_Error on failure.
+	 */
+	private function send_twilio_whatsapp( $to, $message ) {
+		$enable_whatsapp = get_option( 'grt_ticket_enable_whatsapp', 0 );
+		if ( ! $enable_whatsapp ) {
+			return false;
+		}
+
+		$sid = get_option( 'grt_ticket_twilio_sid', '' );
+		$token = get_option( 'grt_ticket_twilio_token', '' );
+		$from = get_option( 'grt_ticket_twilio_from', '' );
+
+		if ( empty( $sid ) || empty( $token ) || empty( $from ) || empty( $to ) ) {
+			return false;
+		}
+
+		// Ensure numbers have whatsapp: prefix
+		if ( strpos( $from, 'whatsapp:' ) === false ) {
+			$from = 'whatsapp:' . $from;
+		}
+		if ( strpos( $to, 'whatsapp:' ) === false ) {
+			$to = 'whatsapp:' . $to;
+		}
+
+		$url = "https://api.twilio.com/2010-04-01/Accounts/$sid/Messages.json";
+		
+		$args = array(
+			'headers' => array(
+				'Authorization' => 'Basic ' . base64_encode( "$sid:$token" ),
+			),
+			'body' => array(
+				'From' => $from,
+				'To'   => $to,
+				'Body' => $message,
+			),
+		);
+
+		$response = wp_remote_post( $url, $args );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$code = wp_remote_retrieve_response_code( $response );
+		if ( $code >= 200 && $code < 300 ) {
+			return true;
+		}
+
+		return false;
 	}
 }

@@ -93,6 +93,14 @@ class GRT_Ticket_Admin {
 				'ajax_url'      => admin_url( 'admin-ajax.php' ),
 				'nonce'         => wp_create_nonce( 'grt_ticket_nonce' ),
 				'poll_interval' => get_option( 'grt_ticket_poll_interval', 3000 ),
+				'i18n'          => array(
+					'category_name'         => __( 'Category Name', 'grt-ticket' ),
+					'select_image'          => __( 'Select Image', 'grt-ticket' ),
+					'remove'                => __( 'Remove', 'grt-ticket' ),
+					'are_you_sure'          => __( 'Are you sure?', 'grt-ticket' ),
+					'select_category_image' => __( 'Select Category Image', 'grt-ticket' ),
+					'use_this_image'        => __( 'Use this image', 'grt-ticket' ),
+				),
 			);
 
 			// Enqueue based on screen
