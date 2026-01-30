@@ -47,6 +47,9 @@ $is_solved = 'solved' === $ticket->status || 'closed' === $ticket->status;
 				<span><strong><?php esc_html_e( 'User:', 'grt-ticket' ); ?></strong> <?php echo esc_html( $ticket->user_name ); ?></span>
 				<span><strong><?php esc_html_e( 'Email:', 'grt-ticket' ); ?></strong> <?php echo esc_html( $ticket->user_email ); ?></span>
 				<span><strong><?php esc_html_e( 'Theme:', 'grt-ticket' ); ?></strong> <?php echo esc_html( $ticket->theme_name ); ?></span>
+				<?php if ( isset( $ticket->priority ) ) : ?>
+					<span><strong><?php esc_html_e( 'Priority:', 'grt-ticket' ); ?></strong> <span class="grt-ticket-priority priority-<?php echo esc_attr( $ticket->priority ); ?>"><?php echo esc_html( ucfirst( $ticket->priority ) ); ?></span></span>
+				<?php endif; ?>
 				<span><strong><?php esc_html_e( 'Status:', 'grt-ticket' ); ?></strong> <span class="grt-ticket-status status-<?php echo esc_attr( $ticket->status ); ?>"><?php echo esc_html( ucfirst( $ticket->status ) ); ?></span></span>
 			</div>
 		</div>

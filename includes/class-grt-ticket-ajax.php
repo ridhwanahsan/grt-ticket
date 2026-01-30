@@ -104,12 +104,13 @@ class GRT_Ticket_Ajax {
 		$ticket_id = GRT_Ticket_Database::create_ticket( array(
 			'user_id'      => $user_id,
 			'user_email'   => $user_email,
-			'user_name'    => $_POST['user_name'],
-			'theme_name'   => $_POST['theme_name'],
-			'license_code' => $_POST['license_code'],
-			'category'     => $_POST['category'],
-			'title'        => $_POST['title'],
-			'description'  => $_POST['description'],
+			'user_name'    => sanitize_text_field( $_POST['user_name'] ),
+			'theme_name'   => sanitize_text_field( $_POST['theme_name'] ),
+			'license_code' => sanitize_text_field( $_POST['license_code'] ),
+			'category'     => sanitize_text_field( $_POST['category'] ),
+			'title'        => sanitize_text_field( $_POST['title'] ),
+			'description'  => sanitize_text_field( $_POST['description'] ),
+			'priority'     => sanitize_text_field( $_POST['priority'] ),
 		) );
 
 		if ( $ticket_id ) {

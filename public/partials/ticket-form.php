@@ -117,6 +117,15 @@ if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
 			</div>
 
 			<div class="grt-form-group required">
+				<label for="grt-issue-priority"><?php esc_html_e( 'Priority', 'grt-ticket' ); ?></label>
+				<select id="grt-issue-priority" name="priority" required>
+					<option value="low"><?php esc_html_e( 'Low - General Question', 'grt-ticket' ); ?></option>
+					<option value="medium" selected><?php esc_html_e( 'Medium - Normal Issue', 'grt-ticket' ); ?></option>
+					<option value="high"><?php esc_html_e( 'High - Critical Issue', 'grt-ticket' ); ?></option>
+				</select>
+			</div>
+
+			<div class="grt-form-group required">
 				<label for="grt-issue-description"><?php esc_html_e( 'Describe Your Issue', 'grt-ticket' ); ?></label>
 				<textarea id="grt-issue-description" name="description" required></textarea>
 			</div>

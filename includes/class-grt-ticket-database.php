@@ -52,13 +52,13 @@ class GRT_Ticket_Database {
 				'user_email'   => sanitize_email( $data['user_email'] ),
 				'user_name'    => sanitize_text_field( $data['user_name'] ),
 				'theme_name'   => sanitize_text_field( $data['theme_name'] ),
-				'license_code' => sanitize_text_field( $data['license_code'] ),
 				'category'     => sanitize_text_field( $data['category'] ),
 				'title'        => sanitize_text_field( $data['title'] ),
 				'description'  => wp_kses_post( $data['description'] ),
+				'priority'     => isset( $data['priority'] ) ? sanitize_text_field( $data['priority'] ) : 'medium',
 				'status'       => 'open',
 			),
-			array( '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
+			array( '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
 		);
 
 		if ( $result ) {

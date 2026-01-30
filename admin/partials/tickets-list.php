@@ -26,10 +26,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<table class="grt-tickets-table">
 			<thead>
 				<tr>
-					<th><?php esc_html_e( 'ID', 'grt-ticket' ); ?></th>
 					<th><?php esc_html_e( 'Title', 'grt-ticket' ); ?></th>
 					<th><?php esc_html_e( 'User', 'grt-ticket' ); ?></th>
 					<th><?php esc_html_e( 'Category', 'grt-ticket' ); ?></th>
+					<th><?php esc_html_e( 'Priority', 'grt-ticket' ); ?></th>
 					<th><?php esc_html_e( 'Status', 'grt-ticket' ); ?></th>
 					<th><?php esc_html_e( 'Created', 'grt-ticket' ); ?></th>
 					<th><?php esc_html_e( 'Actions', 'grt-ticket' ); ?></th>
@@ -38,13 +38,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tbody>
 				<?php foreach ( $tickets as $ticket ) : ?>
 					<tr>
-						<td><?php echo esc_html( $ticket->id ); ?></td>
-						<td><strong><?php echo esc_html( $ticket->title ); ?></strong></td>
+						<td>
+							<a href="<?php echo esc_url( admin_url( 'admin.php?page=grt-ticket-chat&ticket_id=' . $ticket->id ) ); ?>">
+								<strong><?php echo esc_html( $ticket->title ); ?></strong>
+							</a>
+						</td>
 						<td>
 							<?php echo esc_html( $ticket->user_name ); ?><br>
 							<small><?php echo esc_html( $ticket->user_email ); ?></small>
 						</td>
 						<td><?php echo esc_html( $ticket->category ); ?></td>
+						<td>
+							<?php 
+							$priority_class = 'priority-medium';
+							if ( isset( $ticket->priority ) ) {
+								$priority_class = 'priority-' . $ticket->priority;
+								echo '<span class="grt-ticket-priority ' . esc_attr( $priority_class ) . '">' . esc_html( ucfirst( $ticket->priority ) ) . '</span>';
+							} else {
+								echo '<span class="grt-ticket-priority priority-medium">' . esc_html__( 'Medium', 'grt-ticket' ) . '</span>';
+							}
+							?>
+						</td>
 						<td>
 							<span class="grt-ticket-status status-<?php echo esc_attr( $ticket->status ); ?>">
 								<?php echo esc_html( ucfirst( $ticket->status ) ); ?>
