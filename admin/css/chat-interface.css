@@ -91,6 +91,20 @@
     color: #666;
 }
 
+/* Rating Styles */
+.grt-admin-rating {
+    margin-left: 10px;
+}
+
+.grt-stars-inline {
+    color: #ddd;
+    font-size: 16px;
+}
+
+.grt-stars-inline .grt-star.selected {
+    color: #ffc107;
+}
+
 /* Chat Main Area */
 .grt-chat-main {
     flex: 1;

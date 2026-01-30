@@ -150,6 +150,9 @@ class GRT_Ticket {
 		$this->loader->add_action( 'wp_ajax_grt_ticket_get_tickets', $plugin_ajax, 'get_tickets' );
 		$this->loader->add_action( 'wp_ajax_nopriv_grt_ticket_get_tickets', $plugin_ajax, 'get_tickets' );
 
+		$this->loader->add_action( 'wp_ajax_grt_ticket_submit_rating', $plugin_ajax, 'submit_rating' );
+		$this->loader->add_action( 'wp_ajax_nopriv_grt_ticket_submit_rating', $plugin_ajax, 'submit_rating' );
+
 		// Admin only AJAX
 		$this->loader->add_action( 'wp_ajax_grt_ticket_mark_solved', $plugin_ajax, 'mark_solved' );
 		$this->loader->add_action( 'wp_ajax_grt_ticket_delete', $plugin_ajax, 'delete_ticket' );

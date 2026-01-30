@@ -51,6 +51,16 @@ $is_solved = 'solved' === $ticket->status || 'closed' === $ticket->status;
 					<span><strong><?php esc_html_e( 'Priority:', 'grt-ticket' ); ?></strong> <span class="grt-ticket-priority priority-<?php echo esc_attr( $ticket->priority ); ?>"><?php echo esc_html( ucfirst( $ticket->priority ) ); ?></span></span>
 				<?php endif; ?>
 				<span><strong><?php esc_html_e( 'Status:', 'grt-ticket' ); ?></strong> <span class="grt-ticket-status status-<?php echo esc_attr( $ticket->status ); ?>"><?php echo esc_html( ucfirst( $ticket->status ) ); ?></span></span>
+				<?php if ( isset( $ticket->rating ) && $ticket->rating > 0 ) : ?>
+					<span class="grt-admin-rating" title="<?php echo esc_attr( $ticket->rating_feedback ); ?>">
+						<strong><?php esc_html_e( 'Rating:', 'grt-ticket' ); ?></strong>
+						<span class="grt-stars-inline">
+							<?php for ( $i = 1; $i <= 5; $i++ ) : ?>
+								<span class="grt-star <?php echo $i <= $ticket->rating ? 'selected' : ''; ?>">★</span>
+							<?php endfor; ?>
+						</span>
+					</span>
+				<?php endif; ?>
 			</div>
 		</div>
 

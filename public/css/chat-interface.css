@@ -1,5 +1,69 @@
 /* GRT Ticket Public - Chat Interface Styles */
 
+/* Rating System */
+.grt-rating-section {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.grt-rating-section h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.grt-rating-stars {
+    font-size: 24px;
+    color: #ddd;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.grt-star {
+    transition: color 0.2s;
+}
+
+.grt-star:hover,
+.grt-star.hover,
+.grt-star.selected {
+    color: #ffc107;
+}
+
+#grt-rating-feedback {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical;
+    min-height: 60px;
+}
+
+.grt-rating-display {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.grt-stars.readonly {
+    font-size: 24px;
+    color: #ddd;
+}
+
+.grt-stars.readonly .grt-star.selected {
+    color: #ffc107;
+}
+
+.grt-feedback-text {
+    font-style: italic;
+    color: #666;
+    margin-top: 10px;
+}
+
 /* Chat Interface */
 .grt-chat-container {
     position: fixed;

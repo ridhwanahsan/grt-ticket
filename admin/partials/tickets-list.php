@@ -31,6 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<th><?php esc_html_e( 'Category', 'grt-ticket' ); ?></th>
 					<th><?php esc_html_e( 'Priority', 'grt-ticket' ); ?></th>
 					<th><?php esc_html_e( 'Status', 'grt-ticket' ); ?></th>
+					<th><?php esc_html_e( 'Rating', 'grt-ticket' ); ?></th>
 					<th><?php esc_html_e( 'Created', 'grt-ticket' ); ?></th>
 					<th><?php esc_html_e( 'Actions', 'grt-ticket' ); ?></th>
 				</tr>
@@ -63,6 +64,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<span class="grt-ticket-status status-<?php echo esc_attr( $ticket->status ); ?>">
 								<?php echo esc_html( ucfirst( $ticket->status ) ); ?>
 							</span>
+						</td>
+						<td>
+							<?php if ( isset( $ticket->rating ) && $ticket->rating > 0 ) : ?>
+								<span title="<?php echo esc_attr( $ticket->rating_feedback ); ?>"><?php echo str_repeat( '★', $ticket->rating ); ?></span>
+							<?php else : ?>
+								<span style="color: #ddd;">-</span>
+							<?php endif; ?>
 						</td>
 						<td><?php echo esc_html( date_i18n( get_option( 'date_format' ), strtotime( $ticket->created_at ) ) ); ?></td>
 						<td class="grt-ticket-actions">

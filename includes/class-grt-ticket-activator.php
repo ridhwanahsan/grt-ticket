@@ -39,6 +39,8 @@ class GRT_Ticket_Activator {
 			description text NOT NULL,
 			priority enum('low','medium','high') DEFAULT 'medium',
 			status enum('open','solved','closed') DEFAULT 'open',
+			rating int(1) DEFAULT 0,
+			rating_feedback text,
 			created_at datetime DEFAULT CURRENT_TIMESTAMP,
 			updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id),

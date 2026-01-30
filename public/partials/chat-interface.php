@@ -130,7 +130,35 @@ $sms_body = get_option( 'grt_ticket_sms_body', 'Hello, I need help with my ticke
 
 		<?php if ( $is_solved ) : ?>
 			<div class="grt-chat-solved-notice">
-				<?php esc_html_e( '✓ This ticket has been marked as solved by our support team.', 'grt-ticket' ); ?>
+				<?php esc_html_e( '✓ This ticket has been marked as solved.', 'grt-ticket' ); ?>
+				
+				<?php if ( isset( $ticket->rating ) && $ticket->rating > 0 ) : ?>
+					<div class="grt-rating-display">
+						<p><strong><?php esc_html_e( 'Your Rating:', 'grt-ticket' ); ?></strong></p>
+						<div class="grt-stars readonly">
+							<?php for ( $i = 1; $i <= 5; $i++ ) : ?>
+								<span class="grt-star <?php echo $i <= $ticket->rating ? 'selected' : ''; ?>">★</span>
+							<?php endfor; ?>
+						</div>
+						<?php if ( ! empty( $ticket->rating_feedback ) ) : ?>
+							<p class="grt-feedback-text">"<?php echo esc_html( $ticket->rating_feedback ); ?>"</p>
+						<?php endif; ?>
+					</div>
+				<?php else : ?>
+					<div class="grt-rating-section">
+						<h4><?php esc_html_e( 'Rate our support', 'grt-ticket' ); ?></h4>
+						<div class="grt-rating-stars">
+							<span class="grt-star" data-value="1">★</span>
+							<span class="grt-star" data-value="2">★</span>
+							<span class="grt-star" data-value="3">★</span>
+							<span class="grt-star" data-value="4">★</span>
+							<span class="grt-star" data-value="5">★</span>
+						</div>
+						<input type="hidden" id="grt-rating-value" value="0">
+						<textarea id="grt-rating-feedback" placeholder="<?php esc_attr_e( 'Optional feedback...', 'grt-ticket' ); ?>"></textarea>
+						<button type="button" id="grt-submit-rating" class="grt-btn-primary" style="margin-top: 10px;"><?php esc_html_e( 'Submit Rating', 'grt-ticket' ); ?></button>
+					</div>
+				<?php endif; ?>
 			</div>
 		<?php else : ?>
 			<div class="grt-chat-input-container">

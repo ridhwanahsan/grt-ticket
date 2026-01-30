@@ -94,6 +94,62 @@ class GRT_Ticket_Database {
 	}
 
 	/**
+	 * Get ticket statistics for dashboard.
+	 *
+	 * @since    1.0.0
+	 * @return   array    Statistics data.
+	 */
+	public static function get_dashboard_stats() {
+		global $wpdb;
+		$tickets_table = self::get_tickets_table();
+
+		// Total Tickets
+		$total_tickets = (int) $wpdb->get_var( "SELECT COUNT(*) FROM $tickets_table" );
+
+		// Tickets by Status
+		$status_counts = $wpdb->get_results( "SELECT status, COUNT(*) as count FROM $tickets_table GROUP BY status", ARRAY_A );
+		$stats_by_status = array( 'open' => 0, 'solved' => 0, 'closed' => 0 );
+		foreach ( $status_counts as $row ) {
+			$stats_by_status[ $row['status'] ] = (int) $row['count'];
+		}
+
+		// Tickets Today
+		$tickets_today = (int) $wpdb->get_var( "SELECT COUNT(*) FROM $tickets_table WHERE DATE(created_at) = CURDATE()" );
+
+		// Average Resolution Time (in hours) for solved/closed tickets
+		// Calculation: Difference between created_at and updated_at for solved/closed tickets
+		// Note: This is an approximation as updated_at changes on every update, but it's a good proxy for 'last touch' which is usually closing.
+		$avg_resolution_seconds = $wpdb->get_var( 
+			"SELECT AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) 
+			 FROM $tickets_table 
+			 WHERE status IN ('solved', 'closed')" 
+		);
+		$avg_resolution_hours = $avg_resolution_seconds ? round( $avg_resolution_seconds / 3600, 1 ) : 0;
+
+		// Average Rating
+		$avg_rating = $wpdb->get_var( "SELECT AVG(rating) FROM $tickets_table WHERE rating > 0" );
+		$avg_rating = $avg_rating ? round( $avg_rating, 1 ) : 0;
+
+		// Rating Distribution
+		$rating_counts = $wpdb->get_results( "SELECT rating, COUNT(*) as count FROM $tickets_table WHERE rating > 0 GROUP BY rating ORDER BY rating DESC", ARRAY_A );
+		$ratings_dist = array( 5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0 );
+		foreach ( $rating_counts as $row ) {
+			$ratings_dist[ (int) $row['rating'] ] = (int) $row['count'];
+		}
+
+		return array(
+			'total_tickets' => $total_tickets,
+			'open_tickets' => $stats_by_status['open'],
+			'solved_tickets' => $stats_by_status['solved'],
+			'closed_tickets' => $stats_by_status['closed'],
+			'tickets_today' => $tickets_today,
+			'avg_resolution_time' => $avg_resolution_hours,
+			'avg_rating' => $avg_rating,
+			'rating_distribution' => $ratings_dist
+		);
+	}
+
+	/**
 	 * Get the messages table name.
 	 *
 	 * @since    1.0.0
@@ -276,6 +332,39 @@ class GRT_Ticket_Database {
 
 		return false !== $result;
 	}
+
+	/**
+	 * Update ticket rating.
+	 *
+	 * @since    1.0.0
+	 * @param    int    $ticket_id    Ticket ID.
+	 * @param    int    $rating       Rating (1-5).
+	 * @param    string $feedback     Optional feedback.
+	 * @return   bool                 True on success, false on failure.
+	 */
+	public static function update_ticket_rating( $ticket_id, $rating, $feedback = '' ) {
+		global $wpdb;
+
+		$rating = (int) $rating;
+		if ( $rating < 1 || $rating > 5 ) {
+			return false;
+		}
+
+		$result = $wpdb->update(
+			self::get_tickets_table(),
+			array( 
+				'rating' => $rating,
+				'rating_feedback' => sanitize_textarea_field( $feedback )
+			),
+			array( 'id' => $ticket_id ),
+			array( '%d', '%s' ),
+			array( '%d' )
+		);
+
+		return false !== $result;
+	}
+
+
 
 	/**
 	 * Add a message to a ticket.

@@ -23,6 +23,69 @@
         let lastMessageId = 0;
         let pollInterval;
 
+        // Star Rating System
+        $('.grt-rating-stars .grt-star').hover(
+            function() {
+                $(this).addClass('hover').prevAll().addClass('hover');
+            },
+            function() {
+                $('.grt-rating-stars .grt-star').removeClass('hover');
+            }
+        );
+
+        $('.grt-rating-stars .grt-star').on('click', function(e) {
+            e.preventDefault();
+            const rating = $(this).data('value');
+            $('#grt-rating-value').val(rating);
+            
+            $('.grt-rating-stars .grt-star').removeClass('selected');
+            $(this).addClass('selected').prevAll().addClass('selected');
+        });
+
+        $('#grt-submit-rating').on('click', function(e) {
+            e.preventDefault();
+            const rating = $('#grt-rating-value').val();
+            const feedback = $('#grt-rating-feedback').val();
+            const $btn = $(this);
+
+            if (rating == 0) {
+                alert('Please select a rating star.');
+                return;
+            }
+
+            $btn.prop('disabled', true).text('Submitting...');
+
+            $.ajax({
+                url: grtTicketPublic.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'grt_ticket_submit_rating',
+                    ticket_id: ticketId,
+                    rating: rating,
+                    feedback: feedback,
+                    nonce: grtTicketPublic.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert(response.data.message);
+                        location.reload();
+                    } else {
+                        alert(response.data.message);
+                        $btn.prop('disabled', false).text('Submit Rating');
+                    }
+                },
+                error: function() {
+                    alert('Error submitting rating. Please try again.');
+                    $btn.prop('disabled', false).text('Submit Rating');
+                }
+            });
+        });
+
+        // Prevent reload on textarea interaction
+        $('#grt-rating-feedback').on('click keydown', function(e) {
+            e.stopPropagation();
+        });
+
         // Get initial last message ID
         $('.grt-chat-message').each(function () {
             const msgId = parseInt($(this).data('message-id'));
@@ -163,8 +226,13 @@
                             scrollToBottom();
                         }
 
-                        // Check if ticket was solved
-                        if (response.data.status === 'solved' || response.data.status === 'closed') {
+                        // Check if ticket status changed (solved/closed vs open)
+                        const isSolvedServer = response.data.status === 'solved' || response.data.status === 'closed';
+                        const isSolvedUI = $('.grt-chat-solved-notice').length > 0;
+
+                        if (isSolvedServer && !isSolvedUI) {
+                            location.reload();
+                        } else if (!isSolvedServer && isSolvedUI) {
                             location.reload();
                         }
                     }
