@@ -98,6 +98,44 @@
     background: #667eea;
     color: #fff;
     flex-shrink: 0;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+.grt-chat-sidebar-header .grt-new-ticket-btn {
+    background-color: #fff !important;
+    color: #667eea !important;
+    padding: 6px 12px !important;
+    border-radius: 4px !important;
+    text-decoration: none !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border: none !important;
+    transition: all 0.2s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    line-height: 1.2 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    white-space: nowrap !important;
+}
+
+.grt-chat-sidebar-header .grt-new-ticket-btn:hover {
+    background-color: #f8f9fa !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15) !important;
+    color: #764ba2 !important;
+}
+
+.grt-chat-sidebar-header .grt-new-ticket-btn .grt-plus-icon {
+    font-weight: bold !important;
+    font-size: 16px !important;
+    line-height: 1 !important;
+    display: inline-block !important;
+    margin-top: -2px !important;
 }
 
 .grt-chat-sidebar-header h3 {
@@ -185,10 +223,19 @@
 }
 
 .grt-profile-link {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    color: #333;
+    display: flex !important;
+    align-items: center !important;
+    text-decoration: none !important;
+    color: #333 !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transition: color 0.2s ease !important;
+}
+
+.grt-profile-link:hover {
+    color: #667eea !important;
+    text-decoration: none !important;
 }
 
 .grt-profile-icon {
@@ -386,19 +433,19 @@
 }
 
 .grt-call-btn {
-    background-color: #28a745;
+    background-color: #28a745 !important;
 }
 
 .grt-call-btn:hover {
-    background-color: #218838;
+    background-color: #218838 !important;
 }
 
 .grt-sms-btn {
-    background-color: #17a2b8;
+    background-color: #17a2b8 !important;
 }
 
 .grt-sms-btn:hover {
-    background-color: #138496;
+    background-color: #138496 !important;
 }
 
 .grt-action-btn .grt-icon {

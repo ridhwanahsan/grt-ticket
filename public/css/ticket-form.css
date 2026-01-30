@@ -19,37 +19,55 @@
     padding: 40px;
 }
 
-/* Tabs Navigation */
-.grt-tabs-nav {
+/* Tabs Navigation - Scoped to prevent theme conflicts */
+.grt-ticket-container .grt-tabs-nav {
     display: flex;
     border-bottom: 2px solid #f0f0f1;
     margin-bottom: 30px;
     gap: 10px;
     overflow-x: auto;
     padding-bottom: 5px; /* Scrollbar spacing */
+    margin-top: 0;
+    margin-left: 0;
+    margin-right: 0;
 }
 
-.grt-tab-link {
-    background: none;
-    border: none;
-    padding: 10px 15px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #666;
+.grt-ticket-container .grt-tab-link {
+    background-color: transparent !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    padding: 10px 15px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #666 !important;
     cursor: pointer;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -2px; /* Overlap border-bottom of container */
-    transition: all 0.3s;
+    margin-bottom: -2px !important; /* Overlap border-bottom of container */
+    transition: all 0.3s ease !important;
     white-space: nowrap;
+    border-radius: 4px 4px 0 0 !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    line-height: 1.5 !important;
+    font-family: inherit;
+    outline: none !important;
 }
 
-.grt-tab-link:hover {
-    color: #667eea;
+.grt-ticket-container .grt-tab-link:hover {
+    color: #667eea !important;
+    background-color: rgba(102, 126, 234, 0.05) !important;
 }
 
-.grt-tab-link.active {
-    color: #667eea;
-    border-bottom-color: #667eea;
+.grt-ticket-container .grt-tab-link.active {
+    color: #667eea !important;
+    border-bottom-color: #667eea !important;
+    background-color: transparent !important;
+}
+
+.grt-ticket-container .grt-tab-link:focus {
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 /* Tabs Content */
@@ -288,28 +306,38 @@
     color: #e74c3c;
 }
 
-.grt-submit-btn {
+.grt-ticket-container .grt-submit-btn {
     width: 100%;
-    padding: 15px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    font-weight: 600;
+    padding: 15px !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 5px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    margin: 0 !important;
+    line-height: 1.5 !important;
+    display: block;
 }
 
-.grt-submit-btn:hover {
+.grt-ticket-container .grt-submit-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4) !important;
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
+    color: #fff !important;
 }
 
-.grt-submit-btn:disabled {
-    background: #ccc;
+.grt-ticket-container .grt-submit-btn:disabled {
+    background: #ccc !important;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none !important;
 }
 
 /* Messages */
@@ -347,38 +375,57 @@
 /* Recent Tickets Styles */
 .grt-recent-ticket-item {
     background: #f8f9fa;
-    border: 1px solid #e9ecef;
     border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-    transition: all 0.2s;
+    margin-bottom: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid #e9ecef;
 }
 
 .grt-recent-ticket-item:hover {
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
 
 .grt-recent-ticket-item a {
-    text-decoration: none;
-    color: inherit;
+    text-decoration: none !important;
+    color: inherit !important;
     display: block;
+    padding: 15px;
+    border-bottom: none !important;
 }
 
 .grt-recent-ticket-item h4 {
-    margin: 0 0 8px 0;
-    font-size: 16px;
-    color: #333;
+    margin: 0 0 8px 0 !important;
+    font-size: 16px !important;
+    color: #333 !important;
+    line-height: 1.4 !important;
 }
 
 .grt-recent-ticket-item p {
-    margin: 0;
+    margin: 0 !important;
+    font-size: 13px !important;
+    color: #666 !important;
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 12px;
     flex-wrap: wrap;
+}
+
+/* Logout Link */
+.grt-logout-link {
+    display: inline-block;
+    margin-top: 15px;
+    color: #e74c3c !important;
+    text-decoration: none !important;
+    font-weight: 600;
+    font-size: 14px;
+    border-bottom: 1px dashed #e74c3c;
+    transition: all 0.2s;
+}
+
+.grt-logout-link:hover {
+    color: #c0392b !important;
+    border-bottom-style: solid;
 }
 
 .grt-ticket-status {
