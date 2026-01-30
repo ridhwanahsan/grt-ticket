@@ -3,7 +3,7 @@
  * Plugin Name:       GRT Ticket
  * Plugin URI:        https://github.com/ridhwanahsan/grt-ticket
  * Description:       A complete support ticket system with real-time chat functionality for WordPress.
- * Version:           1.0.2
+ * Version:           1.0.3
  * Author:            GRT Team
  * Author URI:        https://github.com/ridhwanahsan
  * License:           GPL-2.0-or-later
