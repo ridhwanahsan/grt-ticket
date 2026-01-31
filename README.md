@@ -1,6 +1,6 @@
 # GRT Ticket - Professional WordPress Support Ticket System
 
-**Version:** 1.0.4  
+**Version:** 1.0.7  
 **Requires at least:** 5.0  
 **Tested up to:** 6.4  
 **Requires PHP:** 7.4  
@@ -33,12 +33,13 @@ Unlike standard ticketing plugins, GRT Ticket offers a distraction-free experien
 *   **Modern Ticket Form**: Beautifully designed submission form with custom category icons and validation.
 *   **Guest Ticket Submission**: Users don't need an account to submit tickets. The system automatically creates an account and handles secure password generation.
 *   **User Dashboard**: Logged-in users can view their profile, track recent tickets, and see status updates.
+*   **User Profile & Avatars**: Users can update their profile information and upload custom avatars with a modern camera overlay.
 *   **File Attachments**: Support for image (JPG, PNG, GIF) and PDF uploads directly within the chat.
 *   **Responsive Design**: Fully optimized for mobile, tablet, and desktop devices.
 *   **Direct Contact Buttons**: Integrated "Call Us" and "SMS Us" buttons within the chat for immediate escalation.
 *   **User Ratings**: Built-in feedback system allowing users to rate their support experience (1-5 stars).
 *   **Clean Interface**: Automatically hides the WordPress Admin Bar for non-admin users to maintain a professional app-like feel.
-
+  
 ### 🛠️ Ticket Management (Admin)
 *   **Admin Dashboard**: Visual overview of support performance, including ticket volume, open/closed counts, and average user ratings.
 *   **Agent Performance**: Track individual agent performance with detailed stats on assigned and solved tickets.
@@ -51,10 +52,17 @@ Unlike standard ticketing plugins, GRT Ticket offers a distraction-free experien
 
 ### ⚙️ Integrations & Settings
 *   **Agent Notifications**: Automatically notify agents via email when a new ticket is assigned to them.
-*   **Twilio Integration**: Get notified via SMS or WhatsApp when a new ticket is created (requires Twilio API credentials).
-*   **Email Piping**: (Beta) Reply to ticket notifications via email to update the chat.
 *   **Custom Categories**: Define your own support categories with custom icons.
 *   **Smart Asset Loading**: CSS and JS only load on plugin pages, ensuring no impact on your site's speed.
+
+### 💎 Advanced & Premium Capabilities (Included)
+Unlike other plugins that charge for essential features, GRT Ticket includes these powerful capabilities out of the box:
+*   **Email Piping (Beta)**: Two-way sync between email and chat. Reply to ticket notifications via email to automatically update the chat.
+*   **Twilio Integration**: Get notified via SMS or WhatsApp when a new ticket is created (requires Twilio API credentials).
+*   **Auto-Assignment**: Smart routing of tickets to specific agents based on the issue category.
+*   **Agent Performance Analytics**: Detailed insights into agent productivity with visual stats on assigned and solved tickets.
+*   **Real-time Chat**: Full-screen, real-time communication interface for users and admins without relying on external services.
+*   **Guest Ticket Submission**: Seamless support for non-logged-in users with automatic secure account creation.
 
 ## 📦 Installation
 
@@ -86,6 +94,15 @@ Add the following shortcode to any page to display the ticket form and user dash
 4.  Update the ticket status to **Solved** when finished.
 
 ## 📋 Changelog
+
+### 1.0.7
+*   **Fix**: Browser notifications now trigger even when the tab/window is active/focused.
+
+### 1.0.6
+*   **Feature**: Added Profile Tab in the chat sidebar for easy access to user information.
+*   **Feature**: Implemented Profile Image Upload functionality allowing users to set their own avatars.
+*   **UI**: Improved sidebar navigation with tabs for "Tickets" and "Profile".
+*   **UI**: Added camera overlay effect for profile image upload interaction.
 
 ### 1.0.5
 *   **Feature**: Added automatic ticket assignment to agents based on issue category.

@@ -18,10 +18,109 @@
      * Initialize chat interface
      */
     function initChatInterface() {
+        // Ensure localization object exists
+        if (typeof grtTicketPublic === 'undefined') {
+            console.error('GRT Ticket: grtTicketPublic object is missing.');
+            return;
+        }
+
         const ticketId = $('#grt-ticket-id').val();
         const userEmail = $('#grt-user-email').val();
         let lastMessageId = 0;
         let pollInterval;
+
+        // Request notification permission if enabled
+        if (grtTicketPublic.enable_notification == 1) {
+            if ('Notification' in window && Notification.permission !== 'granted') {
+                Notification.requestPermission();
+            }
+        }
+
+        // Load user notification preferences
+        loadUserNotificationPreferences();
+
+        function loadUserNotificationPreferences() {
+            const soundPref = localStorage.getItem('grt_user_notification_sound');
+            const $soundToggle = $('#grt-user-notification-sound');
+            
+            if (soundPref === 'true') {
+                $soundToggle.prop('checked', true);
+            } else if (soundPref === 'false') {
+                $soundToggle.prop('checked', false);
+            } else {
+                // Default to admin setting if not set by user
+                $soundToggle.prop('checked', grtTicketPublic.enable_sound == 1);
+            }
+        }
+
+        // Handle user notification preference change
+        $('#grt-user-notification-sound').on('change', function() {
+            const isChecked = $(this).is(':checked');
+            localStorage.setItem('grt_user_notification_sound', isChecked);
+        });
+
+        /**
+         * Trigger Browser Notification
+         */
+        function triggerNotification(title, body) {
+            if (grtTicketPublic.enable_notification != 1) return;
+            
+            if (!('Notification' in window)) return;
+
+            if (Notification.permission === 'granted') {
+                const notification = new Notification(title, {
+                    body: body,
+                    icon: grtTicketPublic.notification_icon || ''
+                });
+
+                notification.onclick = function() {
+                    window.focus();
+                    notification.close();
+                };
+            }
+        }
+
+        /**
+         * Play Notification Sound
+         */
+        function playNotificationSound() {
+            // Check user preference
+            const userPref = localStorage.getItem('grt_user_notification_sound');
+            
+            // If user explicitly disabled it, don't play
+            if (userPref === 'false') return;
+            
+            // If user hasn't set preference, use global setting
+            if (userPref === null && grtTicketPublic.enable_sound != 1) return;
+            
+            // Simple beep or use a custom audio file if provided
+            // For now, we can use a small base64 encoded audio or just rely on OS notification sound (which happens with browser notification)
+            // But user asked for explicit sound setting.
+            
+            // Let's use a simple beep
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    const ctx = new AudioContext();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    
+                    osc.type = 'sine';
+                    osc.frequency.value = 800; // Hz
+                    gain.gain.value = 0.1; // Volume
+                    
+                    osc.start();
+                    setTimeout(function() {
+                        osc.stop();
+                    }, 200);
+                }
+            } catch (e) {
+                console.error('Audio error', e);
+            }
+        }
 
         // Star Rating System
         $('.grt-rating-stars .grt-star').hover(
@@ -74,8 +173,9 @@
                         $btn.prop('disabled', false).text('Submit Rating');
                     }
                 },
-                error: function() {
-                    alert('Error submitting rating. Please try again.');
+                error: function(xhr, status, error) {
+                    console.error('GRT Ticket AJAX Error:', status, error);
+                    alert('Error submitting rating: ' + (error || status));
                     $btn.prop('disabled', false).text('Submit Rating');
                 }
             });
@@ -96,6 +196,17 @@
 
         // Scroll to bottom initially
         scrollToBottom();
+
+        // Sidebar Toggle
+        $('#grt-sidebar-toggle').on('click', function() {
+            $('.grt-chat-container').toggleClass('sidebar-collapsed');
+        });
+
+        // Auto-resize textarea
+        $('#grt-chat-input').on('input', function () {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
 
         // Send message
         $('#grt-chat-send-btn').on('click', function () {
@@ -148,6 +259,137 @@
             $('#grt-chat-attachment').val('');
             $('#grt-attachment-preview').hide();
             $('#grt-preview-content').empty();
+        });
+
+        // Profile Image Upload
+        $('.grt-profile-wrapper').on('click', function() {
+            $('#grt-profile-upload').click();
+        });
+
+        $('#grt-profile-upload').on('click', function(e) {
+            e.stopPropagation();
+        });
+
+        $('#grt-profile-upload').on('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (!file.type.match('image.*')) {
+                alert('Please select an image file.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('action', 'grt_upload_profile_image');
+            formData.append('nonce', grtTicketPublic.nonce);
+            formData.append('profile_image', file);
+
+            const $icon = $('.grt-profile-icon');
+            $icon.css('opacity', '0.5');
+
+            $.ajax({
+                url: grtTicketPublic.ajax_url,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        if ($icon.find('img').length) {
+                            $icon.find('img').attr('src', response.data.image_url);
+                        } else {
+                            // Replace text with image and re-add overlay
+                            $icon.html('<img src="' + response.data.image_url + '" alt="Profile"><div class="grt-profile-overlay"><span class="dashicons dashicons-camera"></span></div>');
+                        }
+                    } else {
+                        alert(response.data.message || 'Upload failed');
+                    }
+                },
+                error: function() {
+                    alert('Upload failed');
+                },
+                complete: function() {
+                    $icon.css('opacity', '1');
+                    // Reset input
+                    $('#grt-profile-upload').val('');
+                }
+            });
+        });
+
+        // Tab Switching
+        $('.grt-tab-btn').on('click', function() {
+            const tabId = $(this).data('tab');
+            
+            $('.grt-tab-btn').removeClass('active');
+            $(this).addClass('active');
+            
+            $('.grt-tab-content').removeClass('active');
+            $('#grt-tab-' + tabId).addClass('active');
+        });
+
+        // Profile Image Upload (Tab)
+        $('.grt-profile-wrapper.big').on('click', function() {
+            $('#grt-profile-upload-tab').click();
+        });
+
+        $('#grt-profile-upload-tab').on('click', function(e) {
+            e.stopPropagation();
+        });
+
+        $('#grt-profile-upload-tab').on('change', function(e) {
+            // Re-use the same upload logic but update the big icon and the header icon
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (!file.type.match('image.*')) {
+                alert('Please select an image file.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('action', 'grt_upload_profile_image');
+            formData.append('nonce', grtTicketPublic.nonce);
+            formData.append('profile_image', file);
+
+            const $icon = $('.grt-profile-icon.big');
+            $icon.css('opacity', '0.5');
+
+            $.ajax({
+                url: grtTicketPublic.ajax_url,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        const newImageHtml = '<img src="' + response.data.image_url + '" alt="Profile"><div class="grt-profile-overlay"><span class="dashicons dashicons-camera"></span></div>';
+                        
+                        // Update big profile icon
+                        if ($icon.find('img').length) {
+                            $icon.find('img').attr('src', response.data.image_url);
+                        } else {
+                            $icon.html(newImageHtml);
+                        }
+
+                        // Update header profile icon
+                        const $headerIcon = $('.grt-chat-header-profile .grt-profile-icon');
+                        if ($headerIcon.find('img').length) {
+                            $headerIcon.find('img').attr('src', response.data.image_url);
+                        } else {
+                            $headerIcon.html(newImageHtml);
+                        }
+                    } else {
+                        alert(response.data.message || 'Upload failed');
+                    }
+                },
+                error: function() {
+                    alert('Upload failed');
+                },
+                complete: function() {
+                    $icon.css('opacity', '1');
+                    $('#grt-profile-upload-tab').val('');
+                }
+            });
         });
 
         // Start polling for new messages
@@ -203,8 +445,9 @@
                         alert(response.data.message || 'Failed to send message.');
                     }
                 },
-                error: function () {
-                    alert('An error occurred. Please try again.');
+                error: function (xhr, status, error) {
+                    console.error('GRT Ticket AJAX Error:', status, error);
+                    alert('An error occurred: ' + (error || status));
                 },
                 complete: function () {
                     $sendBtn.prop('disabled', false).text('Send');
@@ -242,6 +485,9 @@
                             location.reload();
                         }
                     }
+                },
+                error: function (xhr, status, error) {
+                    console.error('GRT Ticket Polling Error:', status, error);
                 }
             });
         }
@@ -251,14 +497,27 @@
          */
         function appendMessages(messages) {
             const $messagesContainer = $('.grt-chat-messages');
+            let hasNewMessages = false;
+            let lastMsg = null;
 
             messages.forEach(function (msg) {
                 if (msg.id > lastMessageId) {
                     const messageHtml = createMessageHtml(msg);
                     $messagesContainer.append(messageHtml);
                     lastMessageId = msg.id;
+                    
+                    // Only notify for messages from others (admin)
+                    if (msg.sender_type !== 'user') {
+                        hasNewMessages = true;
+                        lastMsg = msg;
+                    }
                 }
             });
+
+            if (hasNewMessages && lastMsg) {
+                playNotificationSound();
+                triggerNotification('New Support Message', lastMsg.sender_name + ': ' + (lastMsg.message ? lastMsg.message.substring(0, 50) : 'Sent an attachment'));
+            }
         }
 
         /**
@@ -284,12 +543,24 @@
                 messageBubble = `<div class="grt-message-bubble">${escapeHtml(msg.message)}</div>`;
             }
 
+            // Avatar Logic
+            let avatarHtml = '';
+            if (msg.avatar_url) {
+                avatarHtml = `<div class="grt-message-avatar"><img src="${escapeHtml(msg.avatar_url)}" alt="${escapeHtml(msg.sender_name)}"></div>`;
+            } else {
+                const initial = msg.sender_name.charAt(0).toUpperCase();
+                avatarHtml = `<div class="grt-message-avatar"><div class="grt-avatar-placeholder">${initial}</div></div>`;
+            }
+
             return `
                 <div class="grt-chat-message ${senderClass}" data-message-id="${msg.id}">
-                    <div class="grt-message-sender">${escapeHtml(msg.sender_name)}</div>
-                    ${messageBubble}
-                    ${attachmentHtml}
-                    <div class="grt-message-time">${time}</div>
+                    ${avatarHtml}
+                    <div class="grt-message-content-wrapper">
+                        <div class="grt-message-sender">${escapeHtml(msg.sender_name)}</div>
+                        ${messageBubble}
+                        ${attachmentHtml}
+                        <div class="grt-message-time">${time}</div>
+                    </div>
                 </div>
             `;
         }

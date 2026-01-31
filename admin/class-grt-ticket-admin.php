@@ -63,28 +63,33 @@ class GRT_Ticket_Admin {
 	 */
 	public function enqueue_styles() {
 		$screen = get_current_screen();
+		$screen_id = $screen ? $screen->id : '';
 		
-		if ( strpos( $screen->id, 'grt-ticket' ) !== false ) {
-			// Register styles
-			wp_register_style( $this->plugin_name . '-tickets-list', GRT_TICKET_PLUGIN_URL . 'admin/css/tickets-list.css', array(), $this->version, 'all' );
-			wp_register_style( $this->plugin_name . '-chat-interface', GRT_TICKET_PLUGIN_URL . 'admin/css/chat-interface.css', array(), $this->version, 'all' );
-			wp_register_style( $this->plugin_name . '-settings-page', GRT_TICKET_PLUGIN_URL . 'admin/css/settings-page.css', array(), $this->version, 'all' );
-			wp_register_style( $this->plugin_name . '-dashboard', GRT_TICKET_PLUGIN_URL . 'admin/css/dashboard.css', array(), $this->version, 'all' );
+		// Check if we are on a plugin page (either via screen ID or GET parameter)
+		$is_plugin_page = ( strpos( $screen_id, 'grt-ticket' ) !== false ) || 
+						  ( isset( $_GET['page'] ) && strpos( $_GET['page'], 'grt-ticket' ) !== false );
 
-			// Enqueue based on screen
-			if ( $screen->id === 'toplevel_page_grt-ticket' ) {
+		if ( $is_plugin_page ) {
+			// Register styles
+			wp_register_style( $this->plugin_name . '-tickets-list', GRT_TICKET_PLUGIN_URL . 'admin/css/tickets-list.css', array(), time(), 'all' );
+			wp_register_style( $this->plugin_name . '-chat-interface', GRT_TICKET_PLUGIN_URL . 'admin/css/chat-interface.css', array(), time(), 'all' );
+			wp_register_style( $this->plugin_name . '-settings-page', GRT_TICKET_PLUGIN_URL . 'admin/css/settings-page.css', array(), time(), 'all' );
+			wp_register_style( $this->plugin_name . '-dashboard', GRT_TICKET_PLUGIN_URL . 'admin/css/dashboard.css', array(), time(), 'all' );
+
+			// Determine which style to enqueue
+			if ( $screen_id === 'toplevel_page_grt-ticket' || ( isset( $_GET['page'] ) && $_GET['page'] === 'grt-ticket' ) ) {
 				wp_enqueue_style( $this->plugin_name . '-dashboard' );
-			} elseif ( $screen->id === 'grt-ticket_page_grt-ticket-list' ) {
+			} elseif ( $screen_id === 'grt-ticket_page_grt-ticket-list' || ( isset( $_GET['page'] ) && $_GET['page'] === 'grt-ticket-list' ) ) {
 				wp_enqueue_style( $this->plugin_name . '-tickets-list' );
-			} elseif ( strpos( $screen->id, 'grt-ticket-chat' ) !== false ) {
-				if ( isset( $_GET['ticket_id'] ) && intval( $_GET['ticket_id'] ) > 0 ) {
-					wp_enqueue_style( $this->plugin_name . '-chat-interface' );
-				} else {
-					// Chat selection page uses tickets list styles (table, status, buttons)
-					wp_enqueue_style( $this->plugin_name . '-tickets-list' );
-				}
-			} elseif ( strpos( $screen->id, 'grt-ticket-settings' ) !== false ) {
+			} elseif ( strpos( $screen_id, 'grt-ticket-chat' ) !== false || ( isset( $_GET['page'] ) && $_GET['page'] === 'grt-ticket-chat' ) ) {
+				// Always enqueue chat styles on the chat page
+				wp_enqueue_style( $this->plugin_name . '-chat-interface' );
+				// Also enqueue list styles for the select screen
+				wp_enqueue_style( $this->plugin_name . '-tickets-list' );
+			} elseif ( strpos( $screen_id, 'grt-ticket-settings' ) !== false || ( isset( $_GET['page'] ) && $_GET['page'] === 'grt-ticket-settings' ) ) {
 				wp_enqueue_style( $this->plugin_name . '-settings-page' );
+			} elseif ( strpos( $screen_id, 'grt-ticket-notifications' ) !== false || ( isset( $_GET['page'] ) && $_GET['page'] === 'grt-ticket-notifications' ) ) {
+				wp_enqueue_style( $this->plugin_name . '-settings-page' ); // Reuse settings styles
 			}
 		}
 	}
@@ -120,6 +125,9 @@ class GRT_Ticket_Admin {
 				'nonce'         => wp_create_nonce( 'grt_ticket_nonce' ),
 				'poll_interval' => get_option( 'grt_ticket_poll_interval', 3000 ),
 				'agents'        => $agents_data,
+				'enable_notification' => get_option( 'grt_ticket_enable_browser_notification', 0 ),
+				'enable_sound' => get_option( 'grt_ticket_notification_sound', 0 ),
+				'notification_icon' => GRT_TICKET_PLUGIN_URL . 'assets/icon.png',
 				'i18n'          => array(
 					'category_name'         => __( 'Category Name', 'grt-ticket' ),
 					'select_image'          => __( 'Select Image', 'grt-ticket' ),
@@ -208,6 +216,16 @@ class GRT_Ticket_Admin {
 			'manage_options',
 			'grt-ticket-settings',
 			array( $this, 'display_settings_page' )
+		);
+
+		// Notification Settings submenu
+		add_submenu_page(
+			'grt-ticket',
+			__( 'Notification Settings', 'grt-ticket' ),
+			__( 'Notification Settings', 'grt-ticket' ),
+			'manage_options',
+			'grt-ticket-notifications',
+			array( $this, 'display_notification_settings_page' )
 		);
 	}
 
@@ -301,6 +319,15 @@ class GRT_Ticket_Admin {
 	}
 
 	/**
+	 * Display notification settings page.
+	 *
+	 * @since    1.0.6
+	 */
+	public function display_notification_settings_page() {
+		include GRT_TICKET_PLUGIN_DIR . 'admin/partials/notification-settings.php';
+	}
+
+	/**
 	 * Register settings.
 	 *
 	 * @since    1.0.0
@@ -310,5 +337,7 @@ class GRT_Ticket_Admin {
 		register_setting( 'grt_ticket_settings', 'grt_ticket_admin_name', array( 'sanitize_callback' => 'sanitize_text_field' ) );
 		register_setting( 'grt_ticket_settings', 'grt_ticket_per_page', array( 'sanitize_callback' => 'absint' ) );
 		register_setting( 'grt_ticket_settings', 'grt_ticket_poll_interval', array( 'sanitize_callback' => 'absint' ) );
+		register_setting( 'grt_ticket_settings', 'grt_ticket_enable_browser_notification', array( 'sanitize_callback' => 'absint' ) );
+		register_setting( 'grt_ticket_settings', 'grt_ticket_notification_sound', array( 'sanitize_callback' => 'absint' ) );
 	}
 }

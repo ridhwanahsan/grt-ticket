@@ -40,68 +40,89 @@ $is_solved = 'solved' === $ticket->status || 'closed' === $ticket->status;
 
 	<div class="grt-chat-main">
 		<div class="grt-chat-header">
-			<div>
-				<h2><?php echo esc_html( $ticket->title ); ?></h2>
-			</div>
-			<div class="grt-chat-info">
-				<span><strong><?php esc_html_e( 'User:', 'grt-ticket' ); ?></strong> <?php echo esc_html( $ticket->user_name ); ?></span>
-				<span><strong><?php esc_html_e( 'Email:', 'grt-ticket' ); ?></strong> <?php echo esc_html( $ticket->user_email ); ?></span>
-				<span><strong><?php esc_html_e( 'Theme:', 'grt-ticket' ); ?></strong> <?php echo esc_html( $ticket->theme_name ); ?></span>
-				<?php if ( isset( $ticket->priority ) ) : ?>
-					<span><strong><?php esc_html_e( 'Priority:', 'grt-ticket' ); ?></strong> <span class="grt-ticket-priority priority-<?php echo esc_attr( $ticket->priority ); ?>"><?php echo esc_html( ucfirst( $ticket->priority ) ); ?></span></span>
-				<?php endif; ?>
-				<span><strong><?php esc_html_e( 'Status:', 'grt-ticket' ); ?></strong> <span class="grt-ticket-status status-<?php echo esc_attr( $ticket->status ); ?>"><?php echo esc_html( ucfirst( $ticket->status ) ); ?></span></span>
-				<span>
-					<strong><?php esc_html_e( 'Assigned:', 'grt-ticket' ); ?></strong>
-					<select id="grt-assign-agent" data-ticket-id="<?php echo esc_attr( $ticket->id ); ?>" style="max-width: 150px; padding: 0; height: 24px; font-size: 12px; border: 1px solid #ddd; border-radius: 4px;">
-						<option value="0"><?php esc_html_e( 'Unassigned', 'grt-ticket' ); ?></option>
-						<?php
-						$agents = get_users( array( 'role__in' => array( 'administrator', 'editor' ) ) );
-						$current_assigned = isset( $ticket->assigned_agent_id ) ? $ticket->assigned_agent_id : 0;
-						foreach ( $agents as $agent ) {
-							$selected = ( $current_assigned == $agent->ID ) ? 'selected' : '';
-							echo '<option value="' . esc_attr( $agent->ID ) . '" ' . $selected . '>' . esc_html( $agent->display_name ) . '</option>';
-						}
-						?>
-					</select>
-				</span>
-				<?php if ( isset( $ticket->rating ) && $ticket->rating > 0 ) : ?>
-					<span class="grt-admin-rating" title="<?php echo esc_attr( $ticket->rating_feedback ); ?>">
-						<strong><?php esc_html_e( 'Rating:', 'grt-ticket' ); ?></strong>
-						<span class="grt-stars-inline">
-							<?php for ( $i = 1; $i <= 5; $i++ ) : ?>
-								<span class="grt-star <?php echo $i <= $ticket->rating ? 'selected' : ''; ?>">★</span>
-							<?php endfor; ?>
-						</span>
-					</span>
-				<?php endif; ?>
+			<button type="button" id="grt-sidebar-toggle" class="grt-sidebar-toggle" title="<?php esc_attr_e( 'Toggle Sidebar', 'grt-ticket' ); ?>">
+				<span class="dashicons dashicons-menu"></span>
+			</button>
+			<div class="grt-chat-header-content">
+				<div class="grt-chat-header-top">
+					<h2><?php echo esc_html( $ticket->title ); ?></h2>
+					<div class="grt-chat-status-badges">
+						<?php if ( isset( $ticket->priority ) ) : ?>
+							<span class="grt-ticket-priority priority-<?php echo esc_attr( $ticket->priority ); ?>"><?php echo esc_html( ucfirst( $ticket->priority ) ); ?></span>
+						<?php endif; ?>
+						<span class="grt-ticket-status status-<?php echo esc_attr( $ticket->status ); ?>"><?php echo esc_html( ucfirst( $ticket->status ) ); ?></span>
+					</div>
+				</div>
+				<div class="grt-chat-info-bar">
+					<div class="grt-info-item" title="<?php esc_attr_e( 'User', 'grt-ticket' ); ?>">
+						<span class="dashicons dashicons-admin-users"></span>
+						<span><?php echo esc_html( $ticket->user_name ); ?></span>
+					</div>
+					<div class="grt-info-item" title="<?php esc_attr_e( 'Email', 'grt-ticket' ); ?>">
+						<span class="dashicons dashicons-email"></span>
+						<span><?php echo esc_html( $ticket->user_email ); ?></span>
+					</div>
+					<div class="grt-info-item" title="<?php esc_attr_e( 'Theme', 'grt-ticket' ); ?>">
+						<span class="dashicons dashicons-desktop"></span>
+						<span><?php echo esc_html( $ticket->theme_name ); ?></span>
+					</div>
+					<div class="grt-info-item grt-assign-wrapper">
+						<span class="dashicons dashicons-businessperson"></span>
+						<select id="grt-assign-agent" data-ticket-id="<?php echo esc_attr( $ticket->id ); ?>" class="grt-assign-select">
+							<option value="0"><?php esc_html_e( 'Unassigned', 'grt-ticket' ); ?></option>
+							<?php
+							$agents = get_users( array( 'role__in' => array( 'administrator', 'editor' ) ) );
+							$current_assigned = isset( $ticket->assigned_agent_id ) ? $ticket->assigned_agent_id : 0;
+							foreach ( $agents as $agent ) {
+								$selected = ( $current_assigned == $agent->ID ) ? 'selected' : '';
+								echo '<option value="' . esc_attr( $agent->ID ) . '" ' . $selected . '>' . esc_html( $agent->display_name ) . '</option>';
+							}
+							?>
+						</select>
+					</div>
+					<?php if ( isset( $ticket->rating ) && $ticket->rating > 0 ) : ?>
+						<div class="grt-info-item grt-rating-item" title="<?php echo esc_attr( $ticket->rating_feedback ); ?>">
+							<span class="dashicons dashicons-star-filled" style="color: #ffc107;"></span>
+							<span><?php echo esc_html( $ticket->rating ); ?>/5</span>
+						</div>
+					<?php endif; ?>
+				</div>
 			</div>
 		</div>
 
 		<div class="grt-chat-messages">
 			<?php foreach ( $messages as $message ) : ?>
 				<div class="grt-chat-message <?php echo esc_attr( $message->sender_type ); ?>" data-message-id="<?php echo esc_attr( $message->id ); ?>">
-					<div class="grt-message-sender"><?php echo esc_html( $message->sender_name ); ?></div>
-					<?php if ( ! empty( $message->message ) ) : ?>
-						<div class="grt-message-bubble"><?php echo wp_kses_post( nl2br( $message->message ) ); ?></div>
+					
+					<?php if ( ! empty( $message->avatar_url ) ) : ?>
+						<div class="grt-message-avatar"><img src="<?php echo esc_url( $message->avatar_url ); ?>" alt="<?php echo esc_attr( $message->sender_name ); ?>"></div>
+					<?php else : ?>
+						<div class="grt-message-avatar"><div class="grt-avatar-placeholder"><?php echo esc_html( strtoupper( substr( $message->sender_name, 0, 1 ) ) ); ?></div></div>
 					<?php endif; ?>
-					<?php if ( ! empty( $message->attachment_url ) ) : ?>
-						<div class="grt-message-attachment">
-							<a href="<?php echo esc_url( $message->attachment_url ); ?>" target="_blank">
-								<?php 
-								$file_ext = pathinfo( $message->attachment_url, PATHINFO_EXTENSION );
-								if ( strtolower( $file_ext ) === 'pdf' ) : ?>
-									<div class="grt-pdf-attachment">
-										<span class="dashicons dashicons-pdf" style="font-size: 40px; width: 40px; height: 40px; color: #d00000;"></span>
-										<span><?php echo esc_html( basename( $message->attachment_url ) ); ?></span>
-									</div>
-								<?php else : ?>
-									<img src="<?php echo esc_url( $message->attachment_url ); ?>" alt="<?php esc_attr_e( 'Attachment', 'grt-ticket' ); ?>" style="max-width: 300px; border-radius: 8px;">
-								<?php endif; ?>
-							</a>
-						</div>
-					<?php endif; ?>
-					<div class="grt-message-time"><?php echo esc_html( human_time_diff( strtotime( $message->created_at ), current_time( 'timestamp' ) ) . ' ago' ); ?></div>
+
+					<div class="grt-message-content-wrapper">
+						<div class="grt-message-sender"><?php echo esc_html( $message->sender_name ); ?></div>
+						<?php if ( ! empty( $message->message ) ) : ?>
+							<div class="grt-message-bubble"><?php echo wp_kses_post( nl2br( $message->message ) ); ?></div>
+						<?php endif; ?>
+						<?php if ( ! empty( $message->attachment_url ) ) : ?>
+							<div class="grt-message-attachment">
+								<a href="<?php echo esc_url( $message->attachment_url ); ?>" target="_blank">
+									<?php 
+									$file_ext = pathinfo( $message->attachment_url, PATHINFO_EXTENSION );
+									if ( strtolower( $file_ext ) === 'pdf' ) : ?>
+										<div class="grt-pdf-attachment">
+											<span class="dashicons dashicons-pdf" style="font-size: 40px; width: 40px; height: 40px; color: #d00000;"></span>
+											<span><?php echo esc_html( basename( $message->attachment_url ) ); ?></span>
+										</div>
+									<?php else : ?>
+										<img src="<?php echo esc_url( $message->attachment_url ); ?>" alt="<?php esc_attr_e( 'Attachment', 'grt-ticket' ); ?>" style="max-width: 300px; border-radius: 8px;">
+									<?php endif; ?>
+								</a>
+							</div>
+						<?php endif; ?>
+						<div class="grt-message-time"><?php echo esc_html( human_time_diff( strtotime( $message->created_at ), current_time( 'timestamp' ) ) . ' ago' ); ?></div>
+					</div>
 				</div>
 			<?php endforeach; ?>
 		</div>
@@ -112,29 +133,36 @@ $is_solved = 'solved' === $ticket->status || 'closed' === $ticket->status;
 			</div>
 		<?php else : ?>
 			<div class="grt-chat-input-container">
-				<div class="grt-chat-input-wrapper">
-					<?php
-					// Get canned responses
-					$canned_responses = GRT_Ticket_Database::get_canned_responses();
-					if ( ! empty( $canned_responses ) ) :
-					?>
-						<select id="grt-canned-response-select" class="grt-canned-response-select" style="margin-bottom: 10px; width: 100%; max-width: 300px;">
+				<?php
+				// Get canned responses
+				$canned_responses = GRT_Ticket_Database::get_canned_responses();
+				?>
+				<div class="grt-chat-toolbar">
+					<?php if ( ! empty( $canned_responses ) ) : ?>
+						<select id="grt-canned-response-select" class="grt-canned-response-select">
 							<option value=""><?php esc_html_e( 'Insert Saved Reply...', 'grt-ticket' ); ?></option>
 							<?php foreach ( $canned_responses as $response ) : ?>
 								<option value="<?php echo esc_attr( $response->response ); ?>"><?php echo esc_html( $response->title ); ?></option>
 							<?php endforeach; ?>
 						</select>
 					<?php endif; ?>
-
-					<input type="file" id="grt-chat-attachment" accept="image/*,application/pdf" style="display: none;">
-					<button type="button" id="grt-chat-attach-btn" class="grt-chat-attach-btn" title="<?php esc_attr_e( 'Attach File', 'grt-ticket' ); ?>">📎</button>
-					<div id="grt-attachment-preview" class="grt-attachment-preview" style="display: none;">
-						<div id="grt-preview-content"></div>
-						<button type="button" id="grt-remove-attachment" class="grt-remove-attachment">×</button>
-					</div>
-					<textarea id="grt-chat-input" class="grt-chat-input" placeholder="<?php esc_attr_e( 'Type your message...', 'grt-ticket' ); ?>"></textarea>
-					<button type="button" id="grt-chat-send-btn" class="grt-chat-send-btn"><?php esc_html_e( 'Send', 'grt-ticket' ); ?></button>
 					<button type="button" id="grt-chat-solve-btn" class="grt-chat-solve-btn"><?php esc_html_e( 'Mark as Solved', 'grt-ticket' ); ?></button>
+				</div>
+
+				<div id="grt-attachment-preview" class="grt-attachment-preview" style="display: none;">
+					<div id="grt-preview-content"></div>
+					<button type="button" id="grt-remove-attachment" class="grt-remove-attachment">×</button>
+				</div>
+
+				<div class="grt-chat-input-bar">
+					<input type="file" id="grt-chat-attachment" accept="image/*,application/pdf" style="display: none;">
+					<button type="button" id="grt-chat-attach-btn" class="grt-chat-attach-btn" title="<?php esc_attr_e( 'Attach File', 'grt-ticket' ); ?>">
+						<span class="dashicons dashicons-paperclip"></span>
+					</button>
+					<textarea id="grt-chat-input" class="grt-chat-input" placeholder="<?php esc_attr_e( 'Type your message...', 'grt-ticket' ); ?>"></textarea>
+					<button type="button" id="grt-chat-send-btn" class="grt-chat-send-btn" title="<?php esc_attr_e( 'Send', 'grt-ticket' ); ?>">
+						<?php esc_html_e( 'Send', 'grt-ticket' ); ?>
+					</button>
 				</div>
 			</div>
 		<?php endif; ?>

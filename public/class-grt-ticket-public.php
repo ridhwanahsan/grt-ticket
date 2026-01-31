@@ -83,16 +83,41 @@ class GRT_Ticket_Public {
 			$this->plugin_name . '-ticket-form',
 			GRT_TICKET_PLUGIN_URL . 'public/css/ticket-form.css',
 			array(),
-			$this->version,
+			time(),
 			'all'
 		);
 		wp_register_style(
 			$this->plugin_name . '-chat-interface',
 			GRT_TICKET_PLUGIN_URL . 'public/css/chat-interface.css',
 			array(),
-			$this->version,
+			time(),
 			'all'
 		);
+
+		// Check if we are on a page with the shortcode and enqueue styles early
+		global $post;
+		$should_enqueue = false;
+
+		// Check 1: Shortcode in post content
+		if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'grt_ticket' ) ) {
+			$should_enqueue = true;
+		}
+
+		// Check 2: Query Vars or GET param (stronger signal)
+		if ( get_query_var( 'grt_ticket_id' ) || get_query_var( 'ticket' ) || isset( $_GET['ticket_id'] ) ) {
+			$should_enqueue = true;
+		}
+
+		// Check 3: Fallback - if we are on a singular post/page, just enqueue it to be safe
+		// This ensures it loads even if shortcode detection fails (e.g. inside a block or widget)
+		if ( is_singular() ) {
+			$should_enqueue = true;
+		}
+
+		if ( $should_enqueue ) {
+			wp_enqueue_style( $this->plugin_name . '-chat-interface' );
+			wp_enqueue_style( $this->plugin_name . '-ticket-form' );
+		}
 	}
 
 	/**
@@ -121,6 +146,9 @@ class GRT_Ticket_Public {
 			'ajax_url'      => admin_url( 'admin-ajax.php' ),
 			'nonce'         => wp_create_nonce( 'grt_ticket_nonce' ),
 			'poll_interval' => get_option( 'grt_ticket_poll_interval', 3000 ),
+			'enable_notification' => get_option( 'grt_ticket_enable_browser_notification', 0 ),
+			'enable_sound' => get_option( 'grt_ticket_notification_sound', 0 ),
+			'notification_icon' => GRT_TICKET_PLUGIN_URL . 'assets/icon.png', // Fallback or add asset later
 		);
 
 		wp_localize_script( $this->plugin_name . '-ticket-form', 'grtTicketPublic', $data );

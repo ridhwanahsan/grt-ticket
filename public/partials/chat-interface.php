@@ -30,47 +30,111 @@ $sms_body = get_option( 'grt_ticket_sms_body', 'Hello, I need help with my ticke
 			</a>
 		</div>
 
-		<?php if ( ( $enable_direct_call || $enable_direct_sms ) && ! empty( $support_phone ) ) : ?>
-		<div class="grt-direct-contact-actions">
-			<?php if ( $enable_direct_call ) : ?>
-				<a href="tel:<?php echo esc_attr( $support_phone ); ?>" class="grt-action-btn grt-call-btn">
-					<span class="grt-icon">📞</span> <?php esc_html_e( 'Call Us', 'grt-ticket' ); ?>
-				</a>
-			<?php endif; ?>
-			
-			<?php if ( $enable_direct_sms ) : ?>
-				<a href="sms:<?php echo esc_attr( $support_phone ); ?>?body=<?php echo rawurlencode( $sms_body ); ?>" class="grt-action-btn grt-sms-btn">
-					<span class="grt-icon">💬</span> <?php esc_html_e( 'SMS Us', 'grt-ticket' ); ?>
-				</a>
-			<?php endif; ?>
+		<!-- Tabs -->
+		<div class="grt-sidebar-tabs">
+			<button class="grt-tab-btn active" data-tab="tickets"><?php esc_html_e( 'Tickets', 'grt-ticket' ); ?></button>
+			<button class="grt-tab-btn" data-tab="profile"><?php esc_html_e( 'Profile', 'grt-ticket' ); ?></button>
 		</div>
-		<?php endif; ?>
 
-		<div class="grt-chat-tickets-list">
-			<?php foreach ( $user_tickets as $user_ticket ) : ?>
-				<?php
-				$active_class = $user_ticket->id === $ticket->id ? 'active' : '';
-				// Professional URL structure
-				// Check if permalinks are enabled (implied by requirement, but good to be safe using get_permalink)
-				// We append /ticket/ID/ to the base page URL
-				$base_url = get_permalink();
-				$base_url = rtrim( $base_url, '/' );
-				$ticket_url = $base_url . '/ticket/' . $user_ticket->id . '/';
-				?>
-				<a href="<?php echo esc_url( $ticket_url ); ?>" class="grt-chat-ticket-item <?php echo esc_attr( $active_class ); ?>">
-					<h4><?php echo esc_html( $user_ticket->title ); ?></h4>
-					<p>
-						<span class="grt-ticket-status status-<?php echo esc_attr( $user_ticket->status ); ?>">
-							<?php echo esc_html( ucfirst( $user_ticket->status ) ); ?>
-						</span>
-					</p>
-				</a>
-			<?php endforeach; ?>
+		<!-- Tickets Tab Content -->
+		<div id="grt-tab-tickets" class="grt-tab-content active">
+			<?php if ( ( $enable_direct_call || $enable_direct_sms ) && ! empty( $support_phone ) ) : ?>
+			<div class="grt-direct-contact-actions">
+				<?php if ( $enable_direct_call ) : ?>
+					<a href="tel:<?php echo esc_attr( $support_phone ); ?>" class="grt-action-btn grt-call-btn">
+						<span class="grt-icon">📞</span> <?php esc_html_e( 'Call Us', 'grt-ticket' ); ?>
+					</a>
+				<?php endif; ?>
+				
+				<?php if ( $enable_direct_sms ) : ?>
+					<a href="sms:<?php echo esc_attr( $support_phone ); ?>?body=<?php echo rawurlencode( $sms_body ); ?>" class="grt-action-btn grt-sms-btn">
+						<span class="grt-icon">💬</span> <?php esc_html_e( 'SMS Us', 'grt-ticket' ); ?>
+					</a>
+				<?php endif; ?>
+			</div>
+			<?php endif; ?>
+
+			<div class="grt-chat-tickets-list">
+				<?php foreach ( $user_tickets as $user_ticket ) : ?>
+					<?php
+					$active_class = $user_ticket->id === $ticket->id ? 'active' : '';
+					// Professional URL structure
+					// Check if permalinks are enabled (implied by requirement, but good to be safe using get_permalink)
+					// We append /ticket/ID/ to the base page URL
+					$base_url = get_permalink();
+					$base_url = rtrim( $base_url, '/' );
+					$ticket_url = $base_url . '/ticket/' . $user_ticket->id . '/';
+					?>
+					<a href="<?php echo esc_url( $ticket_url ); ?>" class="grt-chat-ticket-item <?php echo esc_attr( $active_class ); ?>">
+						<h4><?php echo esc_html( $user_ticket->title ); ?></h4>
+						<p>
+							<span class="grt-ticket-status status-<?php echo esc_attr( $user_ticket->status ); ?>">
+								<?php echo esc_html( ucfirst( $user_ticket->status ) ); ?>
+							</span>
+						</p>
+					</a>
+				<?php endforeach; ?>
+			</div>
+		</div>
+
+		<!-- Profile Tab Content -->
+		<div id="grt-tab-profile" class="grt-tab-content">
+			<?php if ( is_user_logged_in() ) : ?>
+				<?php $current_user = wp_get_current_user(); ?>
+				<div class="grt-profile-section">
+					<h3><?php esc_html_e( 'Your Profile', 'grt-ticket' ); ?></h3>
+					
+					<?php 
+					$profile_image_id = get_user_meta( $current_user->ID, 'grt_profile_image', true );
+					$profile_image_url = $profile_image_id ? wp_get_attachment_url( $profile_image_id ) : '';
+					?>
+					<div class="grt-profile-image-container">
+						<div class="grt-profile-wrapper big" title="<?php esc_attr_e( 'Change Profile Picture', 'grt-ticket' ); ?>">
+							<div class="grt-profile-icon big">
+								<?php if ( $profile_image_url ) : ?>
+									<img src="<?php echo esc_url( $profile_image_url ); ?>" alt="<?php echo esc_attr( $current_user->display_name ); ?>">
+								<?php else : ?>
+									<?php echo esc_html( strtoupper( substr( $current_user->display_name, 0, 1 ) ) ); ?>
+								<?php endif; ?>
+								<div class="grt-profile-overlay">
+									<span class="dashicons dashicons-camera"></span>
+								</div>
+							</div>
+							<input type="file" id="grt-profile-upload-tab" accept="image/*" style="display: none;">
+						</div>
+						<p class="grt-profile-upload-text"><?php esc_html_e( 'Click image to upload', 'grt-ticket' ); ?></p>
+					</div>
+
+					<div class="grt-profile-info">
+						<p><strong><?php esc_html_e( 'Name:', 'grt-ticket' ); ?></strong> <?php echo esc_html( $current_user->display_name ); ?></p>
+						<p><strong><?php esc_html_e( 'Username:', 'grt-ticket' ); ?></strong> <?php echo esc_html( $current_user->user_login ); ?></p>
+						<p><strong><?php esc_html_e( 'Email:', 'grt-ticket' ); ?></strong> <?php echo esc_html( $current_user->user_email ); ?></p>
+					</div>
+
+					<div class="grt-profile-notifications">
+						<h4><?php esc_html_e( 'Notifications', 'grt-ticket' ); ?></h4>
+						<div class="grt-notification-toggle">
+							<label><?php esc_html_e( 'Enable Notification Sound', 'grt-ticket' ); ?></label>
+							<label class="grt-switch">
+								<input type="checkbox" id="grt-user-notification-sound" value="1">
+								<span class="slider round"></span>
+							</label>
+						</div>
+					</div>
+				</div>
+			<?php else : ?>
+				<div class="grt-profile-section">
+					<p><?php esc_html_e( 'Please login to view your profile.', 'grt-ticket' ); ?></p>
+				</div>
+			<?php endif; ?>
 		</div>
 	</div>
 
 	<div class="grt-chat-main">
 		<div class="grt-chat-header">
+			<button type="button" id="grt-sidebar-toggle" class="grt-sidebar-toggle" title="<?php esc_attr_e( 'Toggle Sidebar', 'grt-ticket' ); ?>">
+				<span class="grt-icon-menu">☰</span>
+			</button>
 			<div class="grt-chat-header-content">
 				<h3><?php echo esc_html( $ticket->title ); ?></h3>
 				<p>
@@ -100,10 +164,24 @@ $sms_body = get_option( 'grt_ticket_sms_body', 'Hello, I need help with my ticke
 				<?php if ( is_user_logged_in() ) : ?>
 					<?php $current_user = wp_get_current_user(); ?>
 					<div class="grt-chat-header-profile">
-						<a href="<?php echo esc_url( get_permalink() ); ?>" class="grt-profile-link" title="<?php esc_attr_e( 'Go to Profile', 'grt-ticket' ); ?>">
-							<span class="grt-profile-icon"><?php echo esc_html( strtoupper( substr( $current_user->display_name, 0, 1 ) ) ); ?></span>
+						<?php 
+						$profile_image_id = get_user_meta( $current_user->ID, 'grt_profile_image', true );
+						$profile_image_url = $profile_image_id ? wp_get_attachment_url( $profile_image_id ) : '';
+						?>
+						<div class="grt-profile-wrapper" title="<?php esc_attr_e( 'Change Profile Picture', 'grt-ticket' ); ?>">
+							<div class="grt-profile-icon">
+								<?php if ( $profile_image_url ) : ?>
+									<img src="<?php echo esc_url( $profile_image_url ); ?>" alt="<?php echo esc_attr( $current_user->display_name ); ?>">
+								<?php else : ?>
+									<?php echo esc_html( strtoupper( substr( $current_user->display_name, 0, 1 ) ) ); ?>
+								<?php endif; ?>
+								<div class="grt-profile-overlay">
+									<span class="dashicons dashicons-camera"></span>
+								</div>
+							</div>
+							<input type="file" id="grt-profile-upload" accept="image/*" style="display: none;">
 							<span class="grt-profile-name"><?php echo esc_html( $current_user->display_name ); ?></span>
-						</a>
+						</div>
 					</div>
 				<?php endif; ?>
 			</div>
@@ -112,27 +190,36 @@ $sms_body = get_option( 'grt_ticket_sms_body', 'Hello, I need help with my ticke
 		<div class="grt-chat-messages">
 			<?php foreach ( $messages as $message ) : ?>
 			<div class="grt-chat-message <?php echo esc_attr( $message->sender_type ); ?>" data-message-id="<?php echo esc_attr( $message->id ); ?>">
-					<div class="grt-message-sender"><?php echo esc_html( $message->sender_name ); ?></div>
-					<?php if ( ! empty( $message->message ) ) : ?>
-						<div class="grt-message-bubble"><?php echo wp_kses_post( nl2br( $message->message ) ); ?></div>
+					
+					<?php if ( ! empty( $message->avatar_url ) ) : ?>
+						<div class="grt-message-avatar"><img src="<?php echo esc_url( $message->avatar_url ); ?>" alt="<?php echo esc_attr( $message->sender_name ); ?>"></div>
+					<?php else : ?>
+						<div class="grt-message-avatar"><div class="grt-avatar-placeholder"><?php echo esc_html( strtoupper( substr( $message->sender_name, 0, 1 ) ) ); ?></div></div>
 					<?php endif; ?>
-					<?php if ( ! empty( $message->attachment_url ) ) : ?>
-						<div class="grt-message-attachment">
-							<a href="<?php echo esc_url( $message->attachment_url ); ?>" target="_blank">
-								<?php 
-								$file_ext = pathinfo( $message->attachment_url, PATHINFO_EXTENSION );
-								if ( strtolower( $file_ext ) === 'pdf' ) : ?>
-									<div class="grt-pdf-attachment">
-										<span class="dashicons dashicons-pdf" style="font-size: 40px; width: 40px; height: 40px; color: #d00000;"></span>
-										<span><?php echo esc_html( basename( $message->attachment_url ) ); ?></span>
-									</div>
-								<?php else : ?>
-									<img src="<?php echo esc_url( $message->attachment_url ); ?>" alt="<?php esc_attr_e( 'Attachment', 'grt-ticket' ); ?>" style="max-width: 300px; border-radius: 8px;">
-								<?php endif; ?>
-							</a>
-						</div>
-					<?php endif; ?>
-					<div class="grt-message-time"><?php echo esc_html( human_time_diff( strtotime( $message->created_at ), current_time( 'timestamp' ) ) . ' ago' ); ?></div>
+
+					<div class="grt-message-content-wrapper">
+						<div class="grt-message-sender"><?php echo esc_html( $message->sender_name ); ?></div>
+						<?php if ( ! empty( $message->message ) ) : ?>
+							<div class="grt-message-bubble"><?php echo wp_kses_post( nl2br( $message->message ) ); ?></div>
+						<?php endif; ?>
+						<?php if ( ! empty( $message->attachment_url ) ) : ?>
+							<div class="grt-message-attachment">
+								<a href="<?php echo esc_url( $message->attachment_url ); ?>" target="_blank">
+									<?php 
+									$file_ext = pathinfo( $message->attachment_url, PATHINFO_EXTENSION );
+									if ( strtolower( $file_ext ) === 'pdf' ) : ?>
+										<div class="grt-pdf-attachment">
+											<span class="dashicons dashicons-pdf" style="font-size: 40px; width: 40px; height: 40px; color: #d00000;"></span>
+											<span><?php echo esc_html( basename( $message->attachment_url ) ); ?></span>
+										</div>
+									<?php else : ?>
+										<img src="<?php echo esc_url( $message->attachment_url ); ?>" alt="<?php esc_attr_e( 'Attachment', 'grt-ticket' ); ?>" style="max-width: 300px; border-radius: 8px;">
+									<?php endif; ?>
+								</a>
+							</div>
+						<?php endif; ?>
+						<div class="grt-message-time"><?php echo esc_html( human_time_diff( strtotime( $message->created_at ), current_time( 'timestamp' ) ) . ' ago' ); ?></div>
+					</div>
 				</div>
 			<?php endforeach; ?>
 		</div>
@@ -171,15 +258,20 @@ $sms_body = get_option( 'grt_ticket_sms_body', 'Hello, I need help with my ticke
 			</div>
 		<?php else : ?>
 			<div class="grt-chat-input-container">
-				<div class="grt-chat-input-wrapper">
+				<div id="grt-attachment-preview" class="grt-attachment-preview" style="display: none;">
+					<div id="grt-preview-content"></div>
+					<button type="button" id="grt-remove-attachment" class="grt-remove-attachment">×</button>
+				</div>
+
+				<div class="grt-chat-input-bar">
 					<input type="file" id="grt-chat-attachment" accept="image/*,application/pdf" style="display: none;">
-					<button type="button" id="grt-chat-attach-btn" class="grt-chat-attach-btn" title="<?php esc_attr_e( 'Attach File', 'grt-ticket' ); ?>">📎</button>
-					<div id="grt-attachment-preview" class="grt-attachment-preview" style="display: none;">
-						<div id="grt-preview-content"></div>
-						<button type="button" id="grt-remove-attachment" class="grt-remove-attachment">×</button>
-					</div>
+					<button type="button" id="grt-chat-attach-btn" class="grt-chat-attach-btn" title="<?php esc_attr_e( 'Attach File', 'grt-ticket' ); ?>">
+						<span class="dashicons dashicons-paperclip"></span>
+					</button>
 					<textarea id="grt-chat-input" class="grt-chat-input" placeholder="<?php esc_attr_e( 'Type your message...', 'grt-ticket' ); ?>"></textarea>
-					<button type="button" id="grt-chat-send-btn" class="grt-chat-send-btn"><?php esc_html_e( 'Send', 'grt-ticket' ); ?></button>
+					<button type="button" id="grt-chat-send-btn" class="grt-chat-send-btn" title="<?php esc_attr_e( 'Send', 'grt-ticket' ); ?>">
+						<?php esc_html_e( 'Send', 'grt-ticket' ); ?>
+					</button>
 				</div>
 			</div>
 		<?php endif; ?>

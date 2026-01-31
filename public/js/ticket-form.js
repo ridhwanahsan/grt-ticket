@@ -15,6 +15,12 @@
      * Initialize ticket form
      */
     function initTicketForm() {
+        // Ensure localization object exists
+        if (typeof grtTicketPublic === 'undefined') {
+            console.error('GRT Ticket: grtTicketPublic object is missing.');
+            return;
+        }
+
         // Tab Switching Logic
         $('.grt-tab-link').on('click', function() {
             var tabId = $(this).data('tab');
@@ -131,7 +137,9 @@
                 error: function (xhr, status, error) {
                     let errorMessage = 'An error occurred. Please try again.';
                     
-                    if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+                    if (xhr.status === 404) {
+                        errorMessage = 'Error: API endpoint not found (404). Please contact support.';
+                    } else if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
                         errorMessage = xhr.responseJSON.data.message;
                     } else if (status === 'parsererror') {
                         errorMessage = 'Error: Invalid server response. Please refresh the page.';

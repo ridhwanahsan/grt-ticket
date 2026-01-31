@@ -6,6 +6,11 @@
     'use strict';
 
     $(document).ready(function () {
+        // Ensure localization object exists
+        if (typeof grtTicketAdmin === 'undefined') {
+            console.error('GRT Ticket: grtTicketAdmin object is missing.');
+            return;
+        }
         
         // Tab Switching Logic
         var $tabs = $('.grt-settings-tabs .nav-tab');

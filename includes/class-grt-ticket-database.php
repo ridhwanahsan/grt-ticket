@@ -81,6 +81,32 @@ class GRT_Ticket_Database {
 	}
 
 	/**
+	 * Ensure the messages table has the sender_id column.
+	 *
+	 * @since    1.0.6
+	 */
+	public static function ensure_sender_id_column() {
+		global $wpdb;
+		
+		// Only check once per request
+		static $checked = false;
+		if ( $checked ) {
+			return;
+		}
+
+		$table_name = self::get_messages_table();
+		if ( ! $table_name ) {
+			return;
+		}
+
+		if ( ! self::check_column_exists( $table_name, 'sender_id' ) ) {
+			$wpdb->query( "ALTER TABLE $table_name ADD COLUMN sender_id bigint(20) NOT NULL DEFAULT 0 AFTER ticket_id" );
+		}
+		
+		$checked = true;
+	}
+
+	/**
 	 * Get the tickets table name.
 	 *
 	 * @since    1.0.0
@@ -652,6 +678,9 @@ class GRT_Ticket_Database {
 	public static function add_message( $data ) {
 		global $wpdb;
 
+		// Ensure schema is up to date
+		self::ensure_sender_id_column();
+
 		$table = self::get_messages_table();
 		if ( ! $table ) {
 			return false;
@@ -660,11 +689,12 @@ class GRT_Ticket_Database {
 		$insert_data = array(
 			'ticket_id'   => (int) $data['ticket_id'],
 			'sender_type' => in_array( $data['sender_type'], array( 'admin', 'user' ), true ) ? $data['sender_type'] : 'user',
+			'sender_id'   => isset( $data['sender_id'] ) ? (int) $data['sender_id'] : 0,
 			'sender_name' => sanitize_text_field( $data['sender_name'] ),
 			'message'     => wp_kses_post( $data['message'] ),
 		);
 
-		$formats = array( '%d', '%s', '%s', '%s' );
+		$formats = array( '%d', '%s', '%d', '%s', '%s' );
 
 		// Add attachment URL if provided
 		if ( ! empty( $data['attachment_url'] ) ) {
@@ -727,6 +757,9 @@ class GRT_Ticket_Database {
 	public static function get_messages( $ticket_id, $since_id = 0 ) {
 		global $wpdb;
 
+		// Ensure schema is up to date
+		self::ensure_sender_id_column();
+
 		$table = self::get_messages_table();
 		if ( ! $table ) {
 			return array();
@@ -750,10 +783,44 @@ class GRT_Ticket_Database {
 		}
 
 		if ( ! empty( $results ) ) {
+			// Get ticket info for fallbacks (avatars for old messages)
+			$ticket = self::get_ticket( $ticket_id );
+			$user_id = $ticket ? $ticket->user_id : 0;
+			$user_email = $ticket ? $ticket->user_email : '';
+			$agent_id = $ticket ? $ticket->assigned_agent_id : 0;
+
 			foreach ( $results as $key => $message ) {
 				$results[ $key ]->sender_name    = esc_html( $message->sender_name );
 				$results[ $key ]->message        = wp_kses_post( $message->message );
 				$results[ $key ]->attachment_url = ! empty( $message->attachment_url ) ? esc_url( $message->attachment_url ) : '';
+				
+				// Calculate avatar URL
+				$avatar_id_or_email = 0;
+				if ( ! empty( $message->sender_id ) && $message->sender_id > 0 ) {
+					$avatar_id_or_email = $message->sender_id;
+				} else {
+					// Fallback for old messages
+					if ( $message->sender_type === 'user' ) {
+						$avatar_id_or_email = $user_id ? $user_id : $user_email;
+					} else { // admin
+						$avatar_id_or_email = $agent_id;
+					}
+				}
+				
+				// Check for custom profile image first
+				$custom_avatar_url = '';
+				if ( is_numeric( $avatar_id_or_email ) && $avatar_id_or_email > 0 ) {
+					$profile_image_id = get_user_meta( $avatar_id_or_email, 'grt_profile_image', true );
+					if ( $profile_image_id ) {
+						$custom_avatar_url = wp_get_attachment_url( $profile_image_id );
+					}
+				}
+
+				if ( $custom_avatar_url ) {
+					$results[ $key ]->avatar_url = $custom_avatar_url;
+				} else {
+					$results[ $key ]->avatar_url = get_avatar_url( $avatar_id_or_email, array( 'size' => 64 ) );
+				}
 			}
 		}
 
