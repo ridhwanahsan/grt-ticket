@@ -3,7 +3,7 @@ Contributors: ridhwanahsan
 Tags: support, ticket, chat, email piping, helpdesk
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 1.0.6
+Stable tag: 1.0.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -27,6 +27,21 @@ GRT Ticket is a complete support ticket system for WordPress, providing real-tim
 4. Add the shortcode `[grt_ticket_form]` to any page to display the ticket submission form.
 
 == Changelog ==
+
+= 1.0.7 =
+* Fix: Browser notifications now trigger even when the tab is active.
+
+= 1.0.6 =
+* Feature: Added Profile Tab in the chat sidebar.
+* Feature: Implemented Profile Image Upload functionality.
+* UI: Improved sidebar navigation.
+* UI: Added camera overlay effect for profile image upload.
+
+= 1.0.5 =
+* Feature: Added automatic ticket assignment to agents based on issue category.
+* Feature: Added "Agent Performance" widget to the admin dashboard.
+* Feature: Implemented email notifications for agents.
+* Improvement: Enhanced dashboard UI.
 
 = 1.0.4 =
 * UI Improvements: Enhanced login form styling.

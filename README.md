@@ -1,6 +1,6 @@
 # GRT Ticket - Professional WordPress Support Ticket System
 
-**Version:** 1.0.4  
+**Version:** 1.0.7  
 **Requires at least:** 5.0  
 **Tested up to:** 6.4  
 **Requires PHP:** 7.4  
@@ -86,6 +86,9 @@ Add the following shortcode to any page to display the ticket form and user dash
 4.  Update the ticket status to **Solved** when finished.
 
 ## 📋 Changelog
+
+### 1.0.7
+*   **Fix**: Browser notifications now trigger even when the tab/window is active/focused.
 
 ### 1.0.6
 *   **Feature**: Added Profile Tab in the chat sidebar for easy access to user information.
