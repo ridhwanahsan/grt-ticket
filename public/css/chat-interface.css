@@ -91,6 +91,7 @@
     flex-direction: column;
     overflow: hidden;
     height: 100%;
+    transition: width 0.3s ease;
 }
 
 .grt-chat-sidebar-header {
@@ -98,44 +99,6 @@
     background: #667eea;
     color: #fff;
     flex-shrink: 0;
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-}
-
-.grt-chat-sidebar-header .grt-new-ticket-btn {
-    background-color: #fff !important;
-    color: #667eea !important;
-    padding: 6px 12px !important;
-    border-radius: 4px !important;
-    text-decoration: none !important;
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    border: none !important;
-    transition: all 0.2s ease !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 4px !important;
-    line-height: 1.2 !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-    text-transform: none !important;
-    letter-spacing: normal !important;
-    white-space: nowrap !important;
-}
-
-.grt-chat-sidebar-header .grt-new-ticket-btn:hover {
-    background-color: #f8f9fa !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.15) !important;
-    color: #764ba2 !important;
-}
-
-.grt-chat-sidebar-header .grt-new-ticket-btn .grt-plus-icon {
-    font-weight: bold !important;
-    font-size: 16px !important;
-    line-height: 1 !important;
-    display: inline-block !important;
-    margin-top: -2px !important;
 }
 
 .grt-chat-sidebar-header h3 {
@@ -144,24 +107,82 @@
     color: #fff;
 }
 
+.grt-new-ticket-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 13px;
+    transition: background 0.2s;
+}
+
+.grt-new-ticket-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    color: #fff;
+}
+
+.grt-direct-contact-actions {
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f1;
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.grt-action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.grt-call-btn {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.grt-call-btn:hover {
+    background: #c8e6c9;
+}
+
+.grt-sms-btn {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.grt-sms-btn:hover {
+    background: #bbdefb;
+}
+
+.grt-icon {
+    margin-right: 5px;
+}
+
 .grt-chat-tickets-list {
     flex: 1;
     overflow-y: auto;
     padding: 10px;
-    min-height: 0; /* Fix for nested flex scrolling */
 }
 
 .grt-chat-ticket-item {
+    display: block;
     padding: 15px;
     margin-bottom: 10px;
     background: #f9f9f9;
     border-radius: 5px;
-    cursor: pointer;
+    text-decoration: none;
+    color: #333;
     transition: background 0.2s;
     border-left: 3px solid transparent;
-    text-decoration: none;
-    display: block;
-    color: inherit;
 }
 
 .grt-chat-ticket-item:hover {
@@ -177,6 +198,7 @@
     margin: 0 0 5px 0;
     font-size: 14px;
     font-weight: 600;
+    color: #333;
 }
 
 .grt-chat-ticket-item p {
@@ -190,24 +212,25 @@
     display: flex;
     flex-direction: column;
     background: #fff;
-    height: 100%;
     overflow: hidden;
+    height: 100%;
 }
 
 .grt-chat-header {
-    padding: 20px;
+    padding: 15px 20px;
     background: #fff;
     border-bottom: 1px solid #ddd;
-    flex-shrink: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    z-index: 10;
+    flex-shrink: 0;
 }
 
 .grt-chat-header-content h3 {
     margin: 0 0 5px 0;
     font-size: 18px;
-    color: #333;
 }
 
 .grt-chat-header-content p {
@@ -222,47 +245,58 @@
     gap: 15px;
 }
 
-.grt-profile-link {
-    display: flex !important;
-    align-items: center !important;
-    text-decoration: none !important;
-    color: #333 !important;
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    transition: color 0.2s ease !important;
-}
-
-.grt-profile-link:hover {
-    color: #667eea !important;
-    text-decoration: none !important;
-}
-
-.grt-profile-icon {
-    width: 32px;
-    height: 32px;
-    background: #667eea;
-    color: #fff;
-    border-radius: 50%;
+.grt-direct-contact-header {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 8px;
-    font-weight: bold;
+    gap: 10px;
+}
+
+.grt-direct-contact-header .grt-action-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.grt-logout-btn {
+    color: #d63638;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.grt-logout-btn:hover {
+    text-decoration: underline;
+}
+
+.grt-ticket-status {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.grt-ticket-status.status-open {
+    background: #e5f5fa;
+    color: #008a20;
+}
+
+.grt-ticket-status.status-closed,
+.grt-ticket-status.status-solved {
+    background: #f0f0f1;
+    color: #646970;
 }
 
 .grt-chat-messages {
     flex: 1;
-    overflow-y: auto;
     padding: 20px;
-    background: #f5f7fb;
+    overflow-y: auto;
+    background: #f0f0f1;
     display: flex;
     flex-direction: column;
 }
 
 .grt-chat-message {
+    max-width: 70%;
     margin-bottom: 20px;
-    max-width: 80%;
     display: flex;
     flex-direction: column;
 }
@@ -272,15 +306,22 @@
     align-items: flex-end;
 }
 
+.grt-chat-message.agent,
 .grt-chat-message.admin {
     align-self: flex-start;
-    align-items: flex-start;
 }
 
 .grt-message-sender {
-    font-size: 12px;
-    color: #888;
-    margin-bottom: 4px;
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 5px;
+    margin-right: 5px;
+}
+
+.grt-chat-message.agent .grt-message-sender,
+.grt-chat-message.admin .grt-message-sender {
+    margin-left: 5px;
+    margin-right: 0;
 }
 
 .grt-message-bubble {
@@ -289,255 +330,183 @@
     font-size: 14px;
     line-height: 1.5;
     position: relative;
-    word-wrap: break-word;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
 .grt-chat-message.user .grt-message-bubble {
     background: #667eea;
     color: #fff;
-    border-bottom-right-radius: 2px;
+    border-top-right-radius: 2px;
 }
 
+.grt-chat-message.agent .grt-message-bubble,
 .grt-chat-message.admin .grt-message-bubble {
     background: #fff;
     color: #333;
-    border: 1px solid #e1e4e8;
-    border-bottom-left-radius: 2px;
+    border-top-left-radius: 2px;
 }
 
-.grt-message-time {
-    font-size: 11px;
-    color: #aaa;
-    margin-top: 4px;
-}
-
-.grt-chat-input-container {
+.grt-chat-input-area {
     padding: 20px;
     background: #fff;
     border-top: 1px solid #ddd;
     flex-shrink: 0;
 }
 
-.grt-chat-input-wrapper {
-    display: flex;
-    gap: 10px;
-}
-
-.grt-chat-input {
-    flex: 1;
-    padding: 12px;
+.grt-chat-input-area textarea {
+    width: 100%;
+    height: 80px;
+    padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
-    font-size: 14px;
     resize: none;
-    height: 50px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-family: inherit;
 }
 
-.grt-chat-input:focus {
-    outline: none !important;
-    border-color: #667eea !important;
-    box-shadow: 0 0 0 1px #667eea !important;
+.grt-chat-input-area textarea:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 1px #667eea;
+    outline: none;
 }
 
-.grt-chat-input:disabled {
-    background: #f0f0f1;
-    cursor: not-allowed;
+.grt-chat-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.grt-chat-send-btn {
-    padding: 12px 24px !important;
-    background: #667eea !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 5px !important;
-    cursor: pointer;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    transition: background 0.2s !important;
-    text-decoration: none !important;
-    line-height: normal !important;
-}
-
-.grt-chat-send-btn:hover,
-.grt-chat-send-btn:focus {
-    background: #5568d3 !important;
-    color: #fff !important;
-    text-decoration: none !important;
-}
-
-.grt-chat-send-btn:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-}
-
-.grt-chat-solved-notice {
-    padding: 15px;
-    background: #d4edda;
-    color: #155724;
-    text-align: center;
-    font-weight: 600;
-    border-top: 1px solid #c3e6cb;
-}
-
-.grt-ticket-status {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 3px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.grt-ticket-status.status-open {
-    background: #d4edda;
-    color: #155724;
-}
-
-.grt-ticket-status.status-solved {
-    background: #cce5ff;
-    color: #004085;
-}
-
-.grt-ticket-status.status-closed {
-    background: #f8d7da;
-    color: #721c24;
-}
-
-/* Direct Contact Actions (Sidebar) */
-.grt-direct-contact-actions-sidebar {
-    padding: 10px 20px;
-    background: #f8f9fa;
-    border-bottom: 1px solid #ddd;
+.grt-left-actions {
     display: flex;
     gap: 10px;
 }
 
-/* Direct Contact Header */
-.grt-direct-contact-header {
-    display: flex;
-    gap: 8px;
+.grt-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
 }
 
-.grt-action-btn {
+.grt-btn-primary {
+    background: #667eea;
+    color: #fff;
+}
+
+.grt-btn-primary:hover {
+    background: #5a67d8;
+}
+
+.grt-btn-secondary {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.grt-btn-secondary:hover {
+    background: #cbd5e0;
+}
+
+.grt-attach-btn {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.grt-attach-btn:hover {
+    color: #333;
+}
+
+.grt-attachment-preview {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: #f0f0f1;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.grt-remove-attachment {
+    color: #d63638;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 20px;
+    line-height: 1;
+}
+
+.grt-message-attachment img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-top: 5px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.grt-message-attachment img:hover {
+    opacity: 0.9;
+}
+
+/* Sidebar Toggle Button */
+.grt-sidebar-toggle {
+    background: none;
+    border: none;
+    color: #333;
+    cursor: pointer;
+    margin-right: 15px;
+    padding: 5px;
+    font-size: 24px;
+    line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 8px 12px;
     border-radius: 4px;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 500;
     transition: background 0.2s;
-    color: #fff !important; /* Force color */
-    text-align: center;
 }
 
-.grt-direct-contact-header .grt-action-btn {
-    padding: 6px 12px;
-    font-size: 12px;
-    border-radius: 20px; /* Rounded pill style */
+.grt-sidebar-toggle:hover {
+    background: rgba(0, 0, 0, 0.05);
 }
 
-.grt-call-btn {
-    background-color: #28a745 !important;
+/* Sidebar Collapsed State */
+.grt-chat-container.sidebar-collapsed .grt-chat-sidebar {
+    width: 0;
+    border-right: none;
 }
 
-.grt-call-btn:hover,
-.grt-call-btn:focus {
-    background-color: #218838 !important;
-    color: #fff !important;
-    text-decoration: none !important;
+.grt-chat-container.sidebar-collapsed .grt-chat-main {
+    width: 100%;
 }
 
-.grt-sms-btn {
-    background-color: #17a2b8 !important;
+/* Smooth transition */
+.grt-chat-sidebar {
+    transition: width 0.3s ease;
 }
 
-.grt-sms-btn:hover,
-.grt-sms-btn:focus {
-    background-color: #138496 !important;
-    color: #fff !important;
-    text-decoration: none !important;
-}
-
-.grt-action-btn .grt-icon {
-    margin-right: 5px;
-    font-size: 14px;
-}
-
-/* Responsive */
+/* Responsive adjustment */
 @media screen and (max-width: 768px) {
-    .grt-chat-sidebar {
-        width: 250px;
+    .grt-chat-container .grt-chat-sidebar {
+        position: absolute;
+        z-index: 1000;
+        height: 100%;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        transform: translateX(0);
+        width: 300px;
+    }
+    
+    .grt-chat-container.sidebar-collapsed .grt-chat-sidebar {
+        transform: translateX(-100%);
+        width: 300px;
     }
 
-    .grt-message-bubble {
-        max-width: 85%;
-    }
-}
-
-@media screen and (max-width: 600px) {
-    .grt-chat-sidebar {
-        display: none;
-    }
-
-    .grt-message-bubble {
-        max-width: 95%;
-    }
-
-    .grt-chat-input-wrapper {
-        flex-direction: column;
-    }
-
-    .grt-chat-send-btn {
-        width: 100%;
-    }
-
-    /* Mobile Header Adjustments */
-    .grt-btn-text {
-        display: none;
-    }
-
-    .grt-direct-contact-header .grt-action-btn {
-        padding: 8px;
-        border-radius: 50%;
-        width: 32px;
-        height: 32px;
-        justify-content: center;
-    }
-
-    .grt-action-btn .grt-icon {
-        margin-right: 0;
-        font-size: 16px;
-    }
-
-    .grt-profile-name {
-        display: none;
-    }
-}
-
-/* PDF Attachment Styling */
-.grt-pdf-attachment {
-    display: flex;
-    align-items: center;
-    background: #f1f1f1;
-    padding: 10px;
-    border-radius: 8px;
-    max-width: 300px;
-}
-
-.grt-pdf-attachment span {
-    margin-left: 10px;
-    font-weight: 500;
-    color: #333;
-    word-break: break-all;
-}
-
-.grt-pdf-preview {
-    display: flex;
-    align-items: center;
-    background: #f9f9f9;
-    padding: 5px;
-    border-radius: 4px;
-    border: 1px solid #eee;
+    /* On mobile, maybe default to collapsed? */
+    /* Let JS handle default state based on screen size if needed */
 }

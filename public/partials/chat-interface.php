@@ -71,6 +71,9 @@ $sms_body = get_option( 'grt_ticket_sms_body', 'Hello, I need help with my ticke
 
 	<div class="grt-chat-main">
 		<div class="grt-chat-header">
+			<button type="button" id="grt-sidebar-toggle" class="grt-sidebar-toggle" title="<?php esc_attr_e( 'Toggle Sidebar', 'grt-ticket' ); ?>">
+				<span class="grt-icon-menu">☰</span>
+			</button>
 			<div class="grt-chat-header-content">
 				<h3><?php echo esc_html( $ticket->title ); ?></h3>
 				<p>

@@ -40,6 +40,9 @@ $is_solved = 'solved' === $ticket->status || 'closed' === $ticket->status;
 
 	<div class="grt-chat-main">
 		<div class="grt-chat-header">
+			<button type="button" id="grt-sidebar-toggle" class="grt-sidebar-toggle" title="<?php esc_attr_e( 'Toggle Sidebar', 'grt-ticket' ); ?>">
+				<span class="dashicons dashicons-menu"></span>
+			</button>
 			<div>
 				<h2><?php echo esc_html( $ticket->title ); ?></h2>
 			</div>

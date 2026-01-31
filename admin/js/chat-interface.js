@@ -32,6 +32,11 @@
         // Scroll to bottom initially
         scrollToBottom();
 
+        // Sidebar Toggle
+        $('#grt-sidebar-toggle').on('click', function() {
+            $('.grt-chat-container').toggleClass('sidebar-collapsed');
+        });
+
         // Send message
         $('#grt-chat-send-btn').on('click', function () {
             sendMessage();
