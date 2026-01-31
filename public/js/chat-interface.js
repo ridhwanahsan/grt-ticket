@@ -499,10 +499,14 @@
                         const isSolvedServer = response.data.status === 'solved' || response.data.status === 'closed';
                         const isSolvedUI = $('.grt-chat-solved-notice').length > 0;
 
-                        if (isSolvedServer && !isSolvedUI) {
-                            location.reload();
-                        } else if (!isSolvedServer && isSolvedUI) {
-                            location.reload();
+                        if ((isSolvedServer && !isSolvedUI) || (!isSolvedServer && isSolvedUI)) {
+                            const statusKey = isSolvedServer ? 'solved' : 'open';
+                            const reloadKey = 'grt_ticket_status_reload_' + ticketId;
+                            const lastReloadedStatus = sessionStorage.getItem(reloadKey);
+                            if (lastReloadedStatus !== statusKey) {
+                                sessionStorage.setItem(reloadKey, statusKey);
+                                location.reload();
+                            }
                         }
                     }
                 },
