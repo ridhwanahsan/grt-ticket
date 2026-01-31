@@ -140,6 +140,87 @@
     line-height: 1;
 }
 
+/* Sidebar Tabs */
+.grt-sidebar-tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+}
+
+.grt-tab-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: #f9f9f9;
+    cursor: pointer;
+    font-weight: 600;
+    color: #666;
+    border-bottom: 2px solid transparent;
+}
+
+.grt-tab-btn.active {
+    background: #fff;
+    color: #0073aa;
+    border-bottom: 2px solid #0073aa;
+}
+
+.grt-tab-content {
+    display: none;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.grt-tab-content.active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Profile Tab Styles */
+.grt-profile-section {
+    padding: 20px;
+    text-align: center;
+}
+
+.grt-profile-image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.grt-profile-icon.big {
+    width: 100px;
+    height: 100px;
+    font-size: 40px;
+    margin: 0 auto;
+}
+
+.grt-profile-upload-text {
+    font-size: 12px;
+    color: #888;
+    margin-top: 5px;
+}
+
+.grt-profile-info {
+    text-align: left;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #eee;
+}
+
+.grt-profile-info p {
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+.grt-profile-info strong {
+    display: inline-block;
+    width: 80px;
+    color: #555;
+}
+
+/* ... existing code ... */
 .grt-chat-tickets-list {
     flex: 1;
     overflow-y: auto;
@@ -319,6 +400,12 @@
     border-color: #ddd;
 }
 
+.grt-profile-wrapper {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
 .grt-profile-icon {
     width: 32px;
     height: 32px;
@@ -331,7 +418,41 @@
     font-weight: 600;
     font-size: 16px;
     margin-right: 8px;
+    position: relative;
+    overflow: hidden;
 }
+
+.grt-profile-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.grt-profile-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.grt-profile-icon:hover .grt-profile-overlay {
+    opacity: 1;
+}
+
+.grt-profile-overlay .dashicons {
+    color: #fff;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
 
 .grt-profile-name {
     font-size: 16px;

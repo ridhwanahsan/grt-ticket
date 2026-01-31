@@ -168,6 +168,137 @@
             $('#grt-preview-content').empty();
         });
 
+        // Profile Image Upload
+        $('.grt-profile-wrapper').on('click', function() {
+            $('#grt-profile-upload').click();
+        });
+
+        $('#grt-profile-upload').on('click', function(e) {
+            e.stopPropagation();
+        });
+
+        $('#grt-profile-upload').on('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (!file.type.match('image.*')) {
+                alert('Please select an image file.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('action', 'grt_upload_profile_image');
+            formData.append('nonce', grtTicketPublic.nonce);
+            formData.append('profile_image', file);
+
+            const $icon = $('.grt-profile-icon');
+            $icon.css('opacity', '0.5');
+
+            $.ajax({
+                url: grtTicketPublic.ajax_url,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        if ($icon.find('img').length) {
+                            $icon.find('img').attr('src', response.data.image_url);
+                        } else {
+                            // Replace text with image and re-add overlay
+                            $icon.html('<img src="' + response.data.image_url + '" alt="Profile"><div class="grt-profile-overlay"><span class="dashicons dashicons-camera"></span></div>');
+                        }
+                    } else {
+                        alert(response.data.message || 'Upload failed');
+                    }
+                },
+                error: function() {
+                    alert('Upload failed');
+                },
+                complete: function() {
+                    $icon.css('opacity', '1');
+                    // Reset input
+                    $('#grt-profile-upload').val('');
+                }
+            });
+        });
+
+        // Tab Switching
+        $('.grt-tab-btn').on('click', function() {
+            const tabId = $(this).data('tab');
+            
+            $('.grt-tab-btn').removeClass('active');
+            $(this).addClass('active');
+            
+            $('.grt-tab-content').removeClass('active');
+            $('#grt-tab-' + tabId).addClass('active');
+        });
+
+        // Profile Image Upload (Tab)
+        $('.grt-profile-wrapper.big').on('click', function() {
+            $('#grt-profile-upload-tab').click();
+        });
+
+        $('#grt-profile-upload-tab').on('click', function(e) {
+            e.stopPropagation();
+        });
+
+        $('#grt-profile-upload-tab').on('change', function(e) {
+            // Re-use the same upload logic but update the big icon and the header icon
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (!file.type.match('image.*')) {
+                alert('Please select an image file.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('action', 'grt_upload_profile_image');
+            formData.append('nonce', grtTicketPublic.nonce);
+            formData.append('profile_image', file);
+
+            const $icon = $('.grt-profile-icon.big');
+            $icon.css('opacity', '0.5');
+
+            $.ajax({
+                url: grtTicketPublic.ajax_url,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        const newImageHtml = '<img src="' + response.data.image_url + '" alt="Profile"><div class="grt-profile-overlay"><span class="dashicons dashicons-camera"></span></div>';
+                        
+                        // Update big profile icon
+                        if ($icon.find('img').length) {
+                            $icon.find('img').attr('src', response.data.image_url);
+                        } else {
+                            $icon.html(newImageHtml);
+                        }
+
+                        // Update header profile icon
+                        const $headerIcon = $('.grt-chat-header-profile .grt-profile-icon');
+                        if ($headerIcon.find('img').length) {
+                            $headerIcon.find('img').attr('src', response.data.image_url);
+                        } else {
+                            $headerIcon.html(newImageHtml);
+                        }
+                    } else {
+                        alert(response.data.message || 'Upload failed');
+                    }
+                },
+                error: function() {
+                    alert('Upload failed');
+                },
+                complete: function() {
+                    $icon.css('opacity', '1');
+                    $('#grt-profile-upload-tab').val('');
+                }
+            });
+        });
+
         // Start polling for new messages
         startPolling();
 

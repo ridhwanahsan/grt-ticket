@@ -658,6 +658,78 @@ class GRT_Ticket_Ajax {
 	}
 
 	/**
+	 * Upload profile image.
+	 *
+	 * @since    1.0.0
+	 */
+	public function upload_profile_image() {
+		// Verify nonce
+		if ( ! check_ajax_referer( 'grt_ticket_nonce', 'nonce', false ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'grt-ticket' ) ) );
+			return;
+		}
+
+		if ( ! is_user_logged_in() ) {
+			wp_send_json_error( array( 'message' => __( 'You must be logged in to upload a profile image.', 'grt-ticket' ) ) );
+			return;
+		}
+
+		if ( empty( $_FILES['profile_image'] ) ) {
+			wp_send_json_error( array( 'message' => __( 'No file uploaded.', 'grt-ticket' ) ) );
+			return;
+		}
+
+		$file = $_FILES['profile_image'];
+
+		// Check file type
+		$file_type = wp_check_filetype( $file['name'] );
+		if ( ! in_array( $file_type['type'], array( 'image/jpeg', 'image/png', 'image/gif', 'image/webp' ) ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid file type. Please upload an image.', 'grt-ticket' ) ) );
+			return;
+		}
+
+		// Handle upload
+		if ( ! function_exists( 'wp_handle_upload' ) ) {
+			require_once( ABSPATH . 'wp-admin/includes/file.php' );
+		}
+
+		$upload_overrides = array( 'test_form' => false );
+		$movefile = wp_handle_upload( $file, $upload_overrides );
+
+		if ( $movefile && ! isset( $movefile['error'] ) ) {
+			// Insert attachment
+			$attachment = array(
+				'guid'           => $movefile['url'], 
+				'post_mime_type' => $movefile['type'],
+				'post_title'     => preg_replace( '/\.[^.]+$/', '', basename( $file['name'] ) ),
+				'post_content'   => '',
+				'post_status'    => 'inherit'
+			);
+
+			$attach_id = wp_insert_attachment( $attachment, $movefile['file'] );
+
+			if ( ! is_wp_error( $attach_id ) ) {
+				require_once( ABSPATH . 'wp-admin/includes/image.php' );
+				$attach_data = wp_generate_attachment_metadata( $attach_id, $movefile['file'] );
+				wp_update_attachment_metadata( $attach_id, $attach_data );
+
+				// Save to user meta
+				$user_id = get_current_user_id();
+				update_user_meta( $user_id, 'grt_profile_image', $attach_id );
+
+				wp_send_json_success( array(
+					'message' => __( 'Profile image updated successfully.', 'grt-ticket' ),
+					'image_url' => $movefile['url']
+				) );
+			} else {
+				wp_send_json_error( array( 'message' => __( 'Failed to save image.', 'grt-ticket' ) ) );
+			}
+		} else {
+			wp_send_json_error( array( 'message' => $movefile['error'] ) );
+		}
+	}
+
+	/**
 	 * Assign ticket to agent.
 	 *
 	 * @since    1.0.5

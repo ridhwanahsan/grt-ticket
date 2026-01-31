@@ -87,6 +87,12 @@ Add the following shortcode to any page to display the ticket form and user dash
 
 ## 📋 Changelog
 
+### 1.0.6
+*   **Feature**: Added Profile Tab in the chat sidebar for easy access to user information.
+*   **Feature**: Implemented Profile Image Upload functionality allowing users to set their own avatars.
+*   **UI**: Improved sidebar navigation with tabs for "Tickets" and "Profile".
+*   **UI**: Added camera overlay effect for profile image upload interaction.
+
 ### 1.0.5
 *   **Feature**: Added automatic ticket assignment to agents based on issue category.
 *   **Feature**: Added "Agent Performance" widget to the admin dashboard showing assigned and solved ticket counts.
