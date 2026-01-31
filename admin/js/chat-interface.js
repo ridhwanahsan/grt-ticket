@@ -38,20 +38,31 @@
          * Trigger Browser Notification
          */
         function triggerNotification(title, body) {
-            if (grtTicketAdmin.enable_notification != 1) return;
+            // Check global setting
+            if (typeof grtTicketAdmin.enable_notification !== 'undefined' && grtTicketAdmin.enable_notification != 1) return;
             
             if (!('Notification' in window)) return;
 
             if (Notification.permission === 'granted') {
-                const notification = new Notification(title, {
-                    body: body,
-                    icon: grtTicketAdmin.notification_icon || ''
-                });
+                try {
+                    const notification = new Notification(title, {
+                        body: body,
+                        icon: grtTicketAdmin.notification_icon || ''
+                    });
 
-                notification.onclick = function() {
-                    window.focus();
-                    notification.close();
-                };
+                    notification.onclick = function() {
+                        window.focus();
+                        notification.close();
+                    };
+                } catch (e) {
+                    console.error('Notification error:', e);
+                }
+            } else if (Notification.permission !== 'denied') {
+                Notification.requestPermission().then(function (permission) {
+                    if (permission === 'granted') {
+                        triggerNotification(title, body);
+                    }
+                });
             }
         }
 
@@ -59,7 +70,8 @@
          * Play Notification Sound
          */
         function playNotificationSound() {
-            if (grtTicketAdmin.enable_sound != 1) return;
+            // Check global setting
+            if (typeof grtTicketAdmin.enable_sound !== 'undefined' && grtTicketAdmin.enable_sound != 1) return;
             
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -79,6 +91,9 @@
                     setTimeout(function() {
                         osc.stop();
                     }, 200);
+                } else {
+                    // Fallback for very old browsers or where AudioContext is blocked
+                    console.warn('AudioContext not supported');
                 }
             } catch (e) {
                 console.error('Audio error', e);
@@ -224,25 +239,44 @@
         function sendMessage() {
             const message = $('#grt-chat-input').val().trim();
             const attachment = $('#grt-chat-attachment')[0].files[0];
+            const isInternal = $('#grt-internal-note-toggle').is(':checked');
 
             if (!message && !attachment) {
                 return;
             }
 
             const $sendBtn = $('#grt-chat-send-btn');
-            $sendBtn.prop('disabled', true).text('Sending...');
+            $sendBtn.prop('disabled', true).text('Send');
 
             // Use FormData to handle file upload
             const formData = new FormData();
             formData.append('action', 'grt_ticket_send_message');
             formData.append('nonce', grtTicketAdmin.nonce);
             formData.append('ticket_id', ticketId);
+            formData.append('is_internal', isInternal ? '1' : '0');
             if (message) {
                 formData.append('message', message);
             }
             if (attachment) {
                 formData.append('attachment', attachment);
             }
+
+            const tempId = 'temp-' + Date.now();
+            const tempText = message ? message : (attachment ? 'Attachment' : '');
+            const tempMessage = {
+                id: tempId,
+                sender_type: 'admin',
+                sender_name: 'You',
+                message: tempText,
+                attachment_url: '',
+                created_at: new Date().toISOString(),
+                is_internal: isInternal ? 1 : 0,
+                avatar_url: ''
+            };
+            const $tempMessage = $(createMessageHtml(tempMessage));
+            $('.grt-chat-messages').append($tempMessage);
+            scrollToBottom();
+            $sendBtn.prop('disabled', false).text('Send');
 
             $.ajax({
                 url: grtTicketAdmin.ajax_url,
@@ -252,23 +286,41 @@
                 contentType: false,
                 success: function (response) {
                     if (response.success) {
+                        $('.grt-chat-message[data-message-id="' + tempId + '"]').remove();
                         $('#grt-chat-input').val('');
                         $('#grt-chat-attachment').val('');
                         $('#grt-attachment-preview').hide();
                         $('#grt-preview-content').empty();
                         
+                        // Reset internal toggle if desired, or keep it checked? 
+                        // Usually better to reset to avoid accidental internal messages next time
+                        $('#grt-internal-note-toggle').prop('checked', false);
+
                         // If we received the new message object, append it directly
                         if (response.data.chat_message) {
+                            // Add the message immediately without waiting for polling
                             appendMessages([response.data.chat_message]);
                             scrollToBottom();
+                            
+                            // Don't trigger notification for our own messages
+                            // Only trigger if it's from another user and not internal
+                            if (response.data.chat_message.sender_type === 'user' && !response.data.chat_message.is_internal) {
+                                playNotificationSound();
+                                triggerNotification('New Ticket Message', response.data.chat_message.sender_name + ': ' + (response.data.chat_message.message ? response.data.chat_message.message.substring(0, 50) : 'Sent an attachment'));
+                            }
                         } else {
-                            loadNewMessages();
+                            // Fallback to polling if message object not available
+                            setTimeout(function() {
+                                loadNewMessages();
+                            }, 100);
                         }
                     } else {
+                        $('.grt-chat-message[data-message-id="' + tempId + '"]').remove();
                         alert(response.data.message || 'Failed to send message.');
                     }
                 },
                 error: function (xhr, status, error) {
+                    $('.grt-chat-message[data-message-id="' + tempId + '"]').remove();
                     console.error('GRT Ticket AJAX Error:', status, error);
                     alert('An error occurred: ' + (error || status));
                 },
@@ -347,16 +399,16 @@
             let lastMsg = null;
 
             messages.forEach(function (msg) {
-                if (msg.id > lastMessageId) {
+                const msgId = parseInt(msg.id);
+                    if (msgId > lastMessageId) {
                     const messageHtml = createMessageHtml(msg);
                     $messagesContainer.append(messageHtml);
-                    lastMessageId = msg.id;
+                    lastMessageId = msgId;
                     
-                    // Only notify for messages from user (not admin self)
-                    if (msg.sender_type === 'user') {
-                        hasNewMessages = true;
-                        lastMsg = msg;
-                    }
+                        if (msg.is_internal != 1) {
+                            hasNewMessages = true;
+                            lastMsg = msg;
+                        }
                 }
             });
 
@@ -371,6 +423,7 @@
          */
         function createMessageHtml(msg) {
             const senderClass = msg.sender_type === 'admin' ? 'admin' : 'user';
+            const internalClass = msg.is_internal == 1 ? 'internal-note' : '';
             const time = formatTime(msg.created_at);
             let attachmentHtml = '';
 
@@ -393,16 +446,26 @@
             let avatarHtml = '';
             if (msg.avatar_url) {
                 avatarHtml = `<div class="grt-message-avatar"><img src="${escapeHtml(msg.avatar_url)}" alt="${escapeHtml(msg.sender_name)}"></div>`;
+            } else if (grtTicketAdmin.default_avatar_url) {
+                avatarHtml = `<div class="grt-message-avatar"><img src="${escapeHtml(grtTicketAdmin.default_avatar_url)}" alt="${escapeHtml(msg.sender_name)}"></div>`;
             } else {
                 const initial = msg.sender_name.charAt(0).toUpperCase();
                 avatarHtml = `<div class="grt-message-avatar"><div class="grt-avatar-placeholder">${initial}</div></div>`;
             }
 
+            let internalBadge = '';
+            if (msg.is_internal == 1) {
+                internalBadge = '<span class="grt-internal-badge"><span class="dashicons dashicons-lock"></span> Internal Note</span>';
+            }
+
             return `
-                <div class="grt-chat-message ${senderClass}" data-message-id="${msg.id}">
+                <div class="grt-chat-message ${senderClass} ${internalClass}" data-message-id="${msg.id}">
                     ${avatarHtml}
                     <div class="grt-message-content-wrapper">
-                        <div class="grt-message-sender">${escapeHtml(msg.sender_name)}</div>
+                        <div class="grt-message-sender">
+                            ${escapeHtml(msg.sender_name)}
+                            ${internalBadge}
+                        </div>
                         ${messageBubble}
                         ${attachmentHtml}
                         <div class="grt-message-time">${time}</div>
@@ -415,7 +478,8 @@
          * Format time
          */
         function formatTime(datetime) {
-            const date = new Date(datetime);
+            const parsed = parseServerDate(datetime);
+            const date = parsed || new Date(datetime);
             const now = new Date();
             const diff = now - date;
             const minutes = Math.floor(diff / 60000);
@@ -431,6 +495,18 @@
             }
         }
 
+        function parseServerDate(datetime) {
+            if (!datetime || typeof datetime !== 'string') return null;
+            if (datetime.indexOf('T') !== -1 && (datetime.indexOf('Z') !== -1 || datetime.match(/[+-]\d{2}:\d{2}$/))) {
+                return new Date(datetime);
+            }
+            if (datetime.indexOf(' ') !== -1) {
+                const iso = datetime.replace(' ', 'T') + 'Z';
+                return new Date(iso);
+            }
+            return null;
+        }
+
         /**
          * Scroll to bottom of messages
          */
@@ -443,9 +519,14 @@
          * Start polling for new messages
          */
         function startPolling() {
+            // Clear any existing interval just in case
+            if (pollInterval) clearInterval(pollInterval);
+
+            loadNewMessages();
+
             pollInterval = setInterval(function () {
                 loadNewMessages();
-            }, grtTicketAdmin.poll_interval);
+            }, 1000);
         }
 
         /**

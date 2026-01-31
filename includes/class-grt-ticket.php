@@ -173,8 +173,8 @@ class GRT_Ticket {
 		$this->loader->add_action( 'wp_ajax_grt_ticket_send_message', $plugin_ajax, 'send_message' );
 		$this->loader->add_action( 'wp_ajax_nopriv_grt_ticket_send_message', $plugin_ajax, 'send_message' );
 
-		$this->loader->add_action( 'wp_ajax_grt_ticket_get_messages', $plugin_ajax, 'get_messages' );
-		$this->loader->add_action( 'wp_ajax_nopriv_grt_ticket_get_messages', $plugin_ajax, 'get_messages' );
+		$this->loader->add_action( 'wp_ajax_grt_ticket_get_messages', $plugin_ajax, 'grt_ticket_get_messages' );
+		$this->loader->add_action( 'wp_ajax_nopriv_grt_ticket_get_messages', $plugin_ajax, 'grt_ticket_get_messages' );
 
 		$this->loader->add_action( 'wp_ajax_grt_ticket_get_tickets', $plugin_ajax, 'get_tickets' );
 		$this->loader->add_action( 'wp_ajax_nopriv_grt_ticket_get_tickets', $plugin_ajax, 'get_tickets' );

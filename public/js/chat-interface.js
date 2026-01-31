@@ -407,7 +407,7 @@
             }
 
             const $sendBtn = $('#grt-chat-send-btn');
-            $sendBtn.prop('disabled', true).text('Sending...');
+            $sendBtn.prop('disabled', true).text('Send');
 
             // Use FormData to handle file upload
             const formData = new FormData();
@@ -421,6 +421,23 @@
                 formData.append('attachment', attachment);
             }
 
+            const tempId = 'temp-' + Date.now();
+            const tempText = message ? message : (attachment ? 'Attachment' : '');
+            const tempMessage = {
+                id: tempId,
+                sender_type: 'user',
+                sender_name: 'You',
+                message: tempText,
+                attachment_url: '',
+                created_at: new Date().toISOString(),
+                is_internal: 0,
+                avatar_url: ''
+            };
+            const $tempMessage = $(createMessageHtml(tempMessage));
+            $('.grt-chat-messages').append($tempMessage);
+            scrollToBottom();
+            $sendBtn.prop('disabled', false).text('Send');
+
             $.ajax({
                 url: grtTicketPublic.ajax_url,
                 type: 'POST',
@@ -429,6 +446,7 @@
                 contentType: false,
                 success: function (response) {
                     if (response.success) {
+                        $('.grt-chat-message[data-message-id="' + tempId + '"]').remove();
                         $('#grt-chat-input').val('');
                         $('#grt-chat-attachment').val('');
                         $('#grt-attachment-preview').hide();
@@ -442,10 +460,12 @@
                             loadNewMessages();
                         }
                     } else {
+                        $('.grt-chat-message[data-message-id="' + tempId + '"]').remove();
                         alert(response.data.message || 'Failed to send message.');
                     }
                 },
                 error: function (xhr, status, error) {
+                    $('.grt-chat-message[data-message-id="' + tempId + '"]').remove();
                     console.error('GRT Ticket AJAX Error:', status, error);
                     alert('An error occurred: ' + (error || status));
                 },
@@ -501,10 +521,14 @@
             let lastMsg = null;
 
             messages.forEach(function (msg) {
-                if (msg.id > lastMessageId) {
+                if (msg.is_internal == 1) {
+                    return;
+                }
+                const msgId = parseInt(msg.id);
+                if (msgId > lastMessageId) {
                     const messageHtml = createMessageHtml(msg);
                     $messagesContainer.append(messageHtml);
-                    lastMessageId = msg.id;
+                    lastMessageId = msgId;
                     
                     // Only notify for messages from others (admin)
                     if (msg.sender_type !== 'user') {
@@ -547,6 +571,8 @@
             let avatarHtml = '';
             if (msg.avatar_url) {
                 avatarHtml = `<div class="grt-message-avatar"><img src="${escapeHtml(msg.avatar_url)}" alt="${escapeHtml(msg.sender_name)}"></div>`;
+            } else if (grtTicketPublic.default_avatar_url) {
+                avatarHtml = `<div class="grt-message-avatar"><img src="${escapeHtml(grtTicketPublic.default_avatar_url)}" alt="${escapeHtml(msg.sender_name)}"></div>`;
             } else {
                 const initial = msg.sender_name.charAt(0).toUpperCase();
                 avatarHtml = `<div class="grt-message-avatar"><div class="grt-avatar-placeholder">${initial}</div></div>`;
@@ -569,7 +595,8 @@
          * Format time
          */
         function formatTime(datetime) {
-            const date = new Date(datetime);
+            const parsed = parseServerDate(datetime);
+            const date = parsed || new Date(datetime);
             const now = new Date();
             const diff = now - date;
             const minutes = Math.floor(diff / 60000);
@@ -585,6 +612,18 @@
             }
         }
 
+        function parseServerDate(datetime) {
+            if (!datetime || typeof datetime !== 'string') return null;
+            if (datetime.indexOf('T') !== -1 && (datetime.indexOf('Z') !== -1 || datetime.match(/[+-]\d{2}:\d{2}$/))) {
+                return new Date(datetime);
+            }
+            if (datetime.indexOf(' ') !== -1) {
+                const iso = datetime.replace(' ', 'T') + 'Z';
+                return new Date(iso);
+            }
+            return null;
+        }
+
         /**
          * Scroll to bottom of messages
          */
@@ -597,9 +636,14 @@
          * Start polling for new messages
          */
         function startPolling() {
+            // Clear any existing interval just in case
+            if (pollInterval) clearInterval(pollInterval);
+
+            loadNewMessages();
+
             pollInterval = setInterval(function () {
                 loadNewMessages();
-            }, grtTicketPublic.poll_interval);
+            }, 1000);
         }
 
         /**

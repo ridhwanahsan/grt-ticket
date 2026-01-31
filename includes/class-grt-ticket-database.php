@@ -107,6 +107,32 @@ class GRT_Ticket_Database {
 	}
 
 	/**
+	 * Ensure the messages table has the is_internal column.
+	 *
+	 * @since    1.0.8
+	 */
+	public static function ensure_is_internal_column() {
+		global $wpdb;
+		
+		// Only check once per request
+		static $checked = false;
+		if ( $checked ) {
+			return;
+		}
+
+		$table_name = self::get_messages_table();
+		if ( ! $table_name ) {
+			return;
+		}
+
+		if ( ! self::check_column_exists( $table_name, 'is_internal' ) ) {
+			$wpdb->query( "ALTER TABLE $table_name ADD COLUMN is_internal tinyint(1) NOT NULL DEFAULT 0 AFTER message" );
+		}
+		
+		$checked = true;
+	}
+
+	/**
 	 * Get the tickets table name.
 	 *
 	 * @since    1.0.0
@@ -680,6 +706,7 @@ class GRT_Ticket_Database {
 
 		// Ensure schema is up to date
 		self::ensure_sender_id_column();
+		self::ensure_is_internal_column();
 
 		$table = self::get_messages_table();
 		if ( ! $table ) {
@@ -692,9 +719,10 @@ class GRT_Ticket_Database {
 			'sender_id'   => isset( $data['sender_id'] ) ? (int) $data['sender_id'] : 0,
 			'sender_name' => sanitize_text_field( $data['sender_name'] ),
 			'message'     => wp_kses_post( $data['message'] ),
+			'is_internal' => isset( $data['is_internal'] ) ? (int) $data['is_internal'] : 0,
 		);
 
-		$formats = array( '%d', '%s', '%d', '%s', '%s' );
+		$formats = array( '%d', '%s', '%d', '%s', '%s', '%d' );
 
 		// Add attachment URL if provided
 		if ( ! empty( $data['attachment_url'] ) ) {
@@ -741,6 +769,39 @@ class GRT_Ticket_Database {
 			$message->sender_name    = esc_html( $message->sender_name );
 			$message->message        = wp_kses_post( $message->message );
 			$message->attachment_url = ! empty( $message->attachment_url ) ? esc_url( $message->attachment_url ) : '';
+
+			// Calculate avatar URL (Reuse logic from get_messages)
+			$ticket = self::get_ticket( $message->ticket_id );
+			$user_id = $ticket ? $ticket->user_id : 0;
+			$user_email = $ticket ? $ticket->user_email : '';
+			$agent_id = $ticket ? $ticket->assigned_agent_id : 0;
+
+			$avatar_id_or_email = 0;
+			if ( ! empty( $message->sender_id ) && $message->sender_id > 0 ) {
+				$avatar_id_or_email = $message->sender_id;
+			} else {
+				// Fallback for old messages
+				if ( $message->sender_type === 'user' ) {
+					$avatar_id_or_email = $user_id ? $user_id : $user_email;
+				} else { // admin
+					$avatar_id_or_email = $agent_id;
+				}
+			}
+			
+			// Check for custom profile image first
+			$custom_avatar_url = '';
+			if ( is_numeric( $avatar_id_or_email ) && $avatar_id_or_email > 0 ) {
+				$profile_image_id = get_user_meta( $avatar_id_or_email, 'grt_profile_image', true );
+				if ( $profile_image_id ) {
+					$custom_avatar_url = wp_get_attachment_url( $profile_image_id );
+				}
+			}
+
+			if ( $custom_avatar_url ) {
+				$message->avatar_url = $custom_avatar_url;
+			} else {
+				$message->avatar_url = get_avatar_url( $avatar_id_or_email, array( 'size' => 64 ) );
+			}
 		}
 
 		return $message;
@@ -759,6 +820,7 @@ class GRT_Ticket_Database {
 
 		// Ensure schema is up to date
 		self::ensure_sender_id_column();
+		self::ensure_is_internal_column();
 
 		$table = self::get_messages_table();
 		if ( ! $table ) {

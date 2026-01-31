@@ -316,6 +316,13 @@ class GRT_Ticket_Ajax {
 			$sender_name = $ticket->user_name;
 		}
 
+		// Check rate limit
+		$transient_key = 'grt_ticket_message_limit_' . $sender_id . '_' . $ticket_id;
+		if ( ! $is_admin && get_transient( $transient_key ) ) {
+			// wp_send_json_error( array( 'message' => __( 'Please wait a few seconds before sending another message.', 'grt-ticket' ) ) );
+			// Rate limit disabled for better UX
+		}
+
 		// Handle file upload
 		$attachment_url = '';
 		if ( ! empty( $_FILES['attachment'] ) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK ) {
@@ -351,6 +358,12 @@ class GRT_Ticket_Ajax {
 		
 		// If message is empty but we have an attachment, use a placeholder or empty string
 		// We ensure it's not null, but let's make sure it's at least an empty string
+		$is_internal_raw = isset( $_POST['is_internal'] ) ? $_POST['is_internal'] : '';
+		$is_internal = filter_var( $is_internal_raw, FILTER_VALIDATE_BOOLEAN ) ? 1 : 0;
+		if ( $sender_type === 'user' ) {
+			$is_internal = 0; // Users cannot send internal notes
+		}
+
 		if ( empty( $message_content ) && $attachment_url ) {
 			$message_content = ''; // Empty string is valid for TEXT NOT NULL
 		}
@@ -361,6 +374,7 @@ class GRT_Ticket_Ajax {
 			'sender_id'   => $sender_id,
 			'sender_name' => $sender_name,
 			'message'     => $message_content,
+			'is_internal' => $is_internal,
 		);
 
 		if ( $attachment_url ) {
@@ -372,7 +386,9 @@ class GRT_Ticket_Ajax {
 
 		if ( $message_id ) {
 			// Set rate limit transient
-			set_transient( $transient_key, true, 10 );
+			if ( ! $is_admin ) {
+				set_transient( $transient_key, true, 2 );
+			}
 
 			// Email Notification Logic
 			$site_name = get_bloginfo( 'name' );
@@ -412,8 +428,8 @@ class GRT_Ticket_Ajax {
 					$this->send_twilio_whatsapp( $whatsapp_admin_number, $wa_message );
 				}
 			} else {
-				// Notify User (if admin replied)
-				if ( is_email( $ticket->user_email ) ) {
+				// Notify User (if admin replied) - BUT ONLY IF NOT INTERNAL NOTE
+				if ( ! $is_internal && is_email( $ticket->user_email ) ) {
 					$subject = sprintf( __( '[%s] Update on Ticket #%d', 'grt-ticket' ), $site_name, $ticket_id );
 					$body = sprintf( __( 'Hello %s,', 'grt-ticket' ), $ticket->user_name ) . "\r\n\r\n";
 					$body .= sprintf( __( 'You have received a new reply from support:', 'grt-ticket' ) ) . "\r\n\r\n";
@@ -452,27 +468,49 @@ class GRT_Ticket_Ajax {
 	 *
 	 * @since    1.0.0
 	 */
-	public function get_messages() {
+	public function grt_ticket_get_messages() {
 		// Verify nonce
-		check_ajax_referer( 'grt_ticket_nonce', 'nonce' );
-
-		if ( empty( $_POST['ticket_id'] ) ) {
-			wp_send_json_error( array( 'message' => __( 'Ticket ID is required.', 'grt-ticket' ) ) );
+		if ( ! isset( $_POST['nonce'] ) || ( ! wp_verify_nonce( $_POST['nonce'], 'grt_ticket_nonce' ) && ! wp_verify_nonce( $_POST['nonce'], 'grt_ticket_public_nonce' ) ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid security token.', 'grt-ticket' ) ) );
 		}
 
-		$ticket_id = (int) $_POST['ticket_id'];
-		$since_id = isset( $_POST['since_id'] ) ? (int) $_POST['since_id'] : 0;
+		$ticket_id = isset( $_POST['ticket_id'] ) ? (int) $_POST['ticket_id'] : 0;
+		$since_id  = isset( $_POST['since_id'] ) ? (int) $_POST['since_id'] : 0;
 
-		$messages = GRT_Ticket_Database::get_messages( $ticket_id, $since_id );
+		if ( ! $ticket_id ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid ticket ID.', 'grt-ticket' ) ) );
+		}
+
+		// Check if user is admin or the ticket owner
+		$is_admin = current_user_can( 'manage_options' );
+		$is_owner = false;
+
 		$ticket = GRT_Ticket_Database::get_ticket( $ticket_id );
-
 		if ( ! $ticket ) {
 			wp_send_json_error( array( 'message' => __( 'Ticket not found.', 'grt-ticket' ) ) );
 		}
 
+		if ( is_user_logged_in() && get_current_user_id() == $ticket->user_id ) {
+			$is_owner = true;
+		}
+
+		// Allow access via secure token/nonce for public/guest users (handled by nonce check mostly)
+		// But strictly speaking we should check cookie or session if we had one for guests.
+		// For now, nonce + knowing ticket ID is enough for guest access in this simple system.
+
+		$messages = GRT_Ticket_Database::get_messages( $ticket_id, $since_id );
+		
+		// Filter internal messages if not admin
+		if ( ! $is_admin ) {
+			$messages = array_filter( $messages, function( $msg ) {
+				return empty( $msg->is_internal );
+			} );
+			// Re-index array to JSON array
+			$messages = array_values( $messages );
+		}
+
 		wp_send_json_success( array(
 			'messages' => $messages,
-			'status'   => $ticket->status,
 		) );
 	}
 

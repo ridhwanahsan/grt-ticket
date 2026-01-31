@@ -149,6 +149,7 @@ class GRT_Ticket_Public {
 			'enable_notification' => get_option( 'grt_ticket_enable_browser_notification', 0 ),
 			'enable_sound' => get_option( 'grt_ticket_notification_sound', 0 ),
 			'notification_icon' => GRT_TICKET_PLUGIN_URL . 'assets/icon.png', // Fallback or add asset later
+			'default_avatar_url' => get_avatar_url( 0, array( 'size' => 64, 'default' => 'mystery' ) ),
 		);
 
 		wp_localize_script( $this->plugin_name . '-ticket-form', 'grtTicketPublic', $data );
@@ -280,6 +281,11 @@ class GRT_Ticket_Public {
 		}
 
 		$messages = GRT_Ticket_Database::get_messages( $ticket_id );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			$messages = array_values( array_filter( $messages, function ( $message ) {
+				return empty( $message->is_internal );
+			} ) );
+		}
 		
 
 		// Securely fetch "Your Tickets" list

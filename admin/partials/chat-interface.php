@@ -91,8 +91,10 @@ $is_solved = 'solved' === $ticket->status || 'closed' === $ticket->status;
 		</div>
 
 		<div class="grt-chat-messages">
-			<?php foreach ( $messages as $message ) : ?>
-				<div class="grt-chat-message <?php echo esc_attr( $message->sender_type ); ?>" data-message-id="<?php echo esc_attr( $message->id ); ?>">
+			<?php foreach ( $messages as $message ) : 
+				$internal_class = ! empty( $message->is_internal ) ? 'internal-note' : '';
+			?>
+				<div class="grt-chat-message <?php echo esc_attr( $message->sender_type ); ?> <?php echo esc_attr( $internal_class ); ?>" data-message-id="<?php echo esc_attr( $message->id ); ?>">
 					
 					<?php if ( ! empty( $message->avatar_url ) ) : ?>
 						<div class="grt-message-avatar"><img src="<?php echo esc_url( $message->avatar_url ); ?>" alt="<?php echo esc_attr( $message->sender_name ); ?>"></div>
@@ -101,7 +103,12 @@ $is_solved = 'solved' === $ticket->status || 'closed' === $ticket->status;
 					<?php endif; ?>
 
 					<div class="grt-message-content-wrapper">
-						<div class="grt-message-sender"><?php echo esc_html( $message->sender_name ); ?></div>
+						<div class="grt-message-sender">
+							<?php echo esc_html( $message->sender_name ); ?>
+							<?php if ( ! empty( $message->is_internal ) ) : ?>
+								<span class="grt-internal-badge"><span class="dashicons dashicons-lock"></span> <?php esc_html_e( 'Internal Note', 'grt-ticket' ); ?></span>
+							<?php endif; ?>
+						</div>
 						<?php if ( ! empty( $message->message ) ) : ?>
 							<div class="grt-message-bubble"><?php echo wp_kses_post( nl2br( $message->message ) ); ?></div>
 						<?php endif; ?>
@@ -138,14 +145,20 @@ $is_solved = 'solved' === $ticket->status || 'closed' === $ticket->status;
 				$canned_responses = GRT_Ticket_Database::get_canned_responses();
 				?>
 				<div class="grt-chat-toolbar">
-					<?php if ( ! empty( $canned_responses ) ) : ?>
-						<select id="grt-canned-response-select" class="grt-canned-response-select">
-							<option value=""><?php esc_html_e( 'Insert Saved Reply...', 'grt-ticket' ); ?></option>
-							<?php foreach ( $canned_responses as $response ) : ?>
-								<option value="<?php echo esc_attr( $response->response ); ?>"><?php echo esc_html( $response->title ); ?></option>
-							<?php endforeach; ?>
-						</select>
-					<?php endif; ?>
+					<div class="grt-chat-toolbar-left">
+						<?php if ( ! empty( $canned_responses ) ) : ?>
+							<select id="grt-canned-response-select" class="grt-canned-response-select">
+								<option value=""><?php esc_html_e( 'Insert Saved Reply...', 'grt-ticket' ); ?></option>
+								<?php foreach ( $canned_responses as $response ) : ?>
+									<option value="<?php echo esc_attr( $response->response ); ?>"><?php echo esc_html( $response->title ); ?></option>
+								<?php endforeach; ?>
+							</select>
+						<?php endif; ?>
+						<label class="grt-internal-note-label">
+							<input type="checkbox" id="grt-internal-note-toggle"> 
+							<span class="dashicons dashicons-lock"></span> <?php esc_html_e( 'Internal Note', 'grt-ticket' ); ?>
+						</label>
+					</div>
 					<button type="button" id="grt-chat-solve-btn" class="grt-chat-solve-btn"><?php esc_html_e( 'Mark as Solved', 'grt-ticket' ); ?></button>
 				</div>
 

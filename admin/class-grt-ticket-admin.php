@@ -128,6 +128,7 @@ class GRT_Ticket_Admin {
 				'enable_notification' => get_option( 'grt_ticket_enable_browser_notification', 0 ),
 				'enable_sound' => get_option( 'grt_ticket_notification_sound', 0 ),
 				'notification_icon' => GRT_TICKET_PLUGIN_URL . 'assets/icon.png',
+				'default_avatar_url' => get_avatar_url( 0, array( 'size' => 64, 'default' => 'mystery' ) ),
 				'i18n'          => array(
 					'category_name'         => __( 'Category Name', 'grt-ticket' ),
 					'select_image'          => __( 'Select Image', 'grt-ticket' ),
