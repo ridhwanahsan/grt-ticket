@@ -93,27 +93,36 @@ $is_solved = 'solved' === $ticket->status || 'closed' === $ticket->status;
 		<div class="grt-chat-messages">
 			<?php foreach ( $messages as $message ) : ?>
 				<div class="grt-chat-message <?php echo esc_attr( $message->sender_type ); ?>" data-message-id="<?php echo esc_attr( $message->id ); ?>">
-					<div class="grt-message-sender"><?php echo esc_html( $message->sender_name ); ?></div>
-					<?php if ( ! empty( $message->message ) ) : ?>
-						<div class="grt-message-bubble"><?php echo wp_kses_post( nl2br( $message->message ) ); ?></div>
+					
+					<?php if ( ! empty( $message->avatar_url ) ) : ?>
+						<div class="grt-message-avatar"><img src="<?php echo esc_url( $message->avatar_url ); ?>" alt="<?php echo esc_attr( $message->sender_name ); ?>"></div>
+					<?php else : ?>
+						<div class="grt-message-avatar"><div class="grt-avatar-placeholder"><?php echo esc_html( strtoupper( substr( $message->sender_name, 0, 1 ) ) ); ?></div></div>
 					<?php endif; ?>
-					<?php if ( ! empty( $message->attachment_url ) ) : ?>
-						<div class="grt-message-attachment">
-							<a href="<?php echo esc_url( $message->attachment_url ); ?>" target="_blank">
-								<?php 
-								$file_ext = pathinfo( $message->attachment_url, PATHINFO_EXTENSION );
-								if ( strtolower( $file_ext ) === 'pdf' ) : ?>
-									<div class="grt-pdf-attachment">
-										<span class="dashicons dashicons-pdf" style="font-size: 40px; width: 40px; height: 40px; color: #d00000;"></span>
-										<span><?php echo esc_html( basename( $message->attachment_url ) ); ?></span>
-									</div>
-								<?php else : ?>
-									<img src="<?php echo esc_url( $message->attachment_url ); ?>" alt="<?php esc_attr_e( 'Attachment', 'grt-ticket' ); ?>" style="max-width: 300px; border-radius: 8px;">
-								<?php endif; ?>
-							</a>
-						</div>
-					<?php endif; ?>
-					<div class="grt-message-time"><?php echo esc_html( human_time_diff( strtotime( $message->created_at ), current_time( 'timestamp' ) ) . ' ago' ); ?></div>
+
+					<div class="grt-message-content-wrapper">
+						<div class="grt-message-sender"><?php echo esc_html( $message->sender_name ); ?></div>
+						<?php if ( ! empty( $message->message ) ) : ?>
+							<div class="grt-message-bubble"><?php echo wp_kses_post( nl2br( $message->message ) ); ?></div>
+						<?php endif; ?>
+						<?php if ( ! empty( $message->attachment_url ) ) : ?>
+							<div class="grt-message-attachment">
+								<a href="<?php echo esc_url( $message->attachment_url ); ?>" target="_blank">
+									<?php 
+									$file_ext = pathinfo( $message->attachment_url, PATHINFO_EXTENSION );
+									if ( strtolower( $file_ext ) === 'pdf' ) : ?>
+										<div class="grt-pdf-attachment">
+											<span class="dashicons dashicons-pdf" style="font-size: 40px; width: 40px; height: 40px; color: #d00000;"></span>
+											<span><?php echo esc_html( basename( $message->attachment_url ) ); ?></span>
+										</div>
+									<?php else : ?>
+										<img src="<?php echo esc_url( $message->attachment_url ); ?>" alt="<?php esc_attr_e( 'Attachment', 'grt-ticket' ); ?>" style="max-width: 300px; border-radius: 8px;">
+									<?php endif; ?>
+								</a>
+							</div>
+						<?php endif; ?>
+						<div class="grt-message-time"><?php echo esc_html( human_time_diff( strtotime( $message->created_at ), current_time( 'timestamp' ) ) . ' ago' ); ?></div>
+					</div>
 				</div>
 			<?php endforeach; ?>
 		</div>

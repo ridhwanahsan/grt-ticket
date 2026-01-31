@@ -318,12 +318,24 @@
                 messageBubble = `<div class="grt-message-bubble">${escapeHtml(msg.message)}</div>`;
             }
 
+            // Avatar Logic
+            let avatarHtml = '';
+            if (msg.avatar_url) {
+                avatarHtml = `<div class="grt-message-avatar"><img src="${escapeHtml(msg.avatar_url)}" alt="${escapeHtml(msg.sender_name)}"></div>`;
+            } else {
+                const initial = msg.sender_name.charAt(0).toUpperCase();
+                avatarHtml = `<div class="grt-message-avatar"><div class="grt-avatar-placeholder">${initial}</div></div>`;
+            }
+
             return `
                 <div class="grt-chat-message ${senderClass}" data-message-id="${msg.id}">
-                    <div class="grt-message-sender">${escapeHtml(msg.sender_name)}</div>
-                    ${messageBubble}
-                    ${attachmentHtml}
-                    <div class="grt-message-time">${time}</div>
+                    ${avatarHtml}
+                    <div class="grt-message-content-wrapper">
+                        <div class="grt-message-sender">${escapeHtml(msg.sender_name)}</div>
+                        ${messageBubble}
+                        ${attachmentHtml}
+                        <div class="grt-message-time">${time}</div>
+                    </div>
                 </div>
             `;
         }
