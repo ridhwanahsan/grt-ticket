@@ -13,6 +13,10 @@ GRT Ticket is a complete support ticket system for WordPress, providing real-tim
 
 * Create and manage tickets from WordPress admin and frontend
 * Real-time chat between users and admins
+* Guest Ticket Submission: Users can submit tickets without an account (auto-creates account)
+* User Profile: Users can manage their profile and upload avatars
+* Auto-Assignment: Automatically assign tickets to agents based on category
+* Agent Performance: View stats on agent performance and ticket resolution
 * Email Piping: User replies via email are automatically added to ticket chat
 * Email Notifications: Chat replies are sent to user email
 * IMAP/SMTP settings configurable via plugin settings
