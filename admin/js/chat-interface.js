@@ -17,6 +17,12 @@
      * Initialize chat interface
      */
     function initChatInterface() {
+        // Ensure localization object exists
+        if (typeof grtTicketAdmin === 'undefined') {
+            console.error('GRT Ticket: grtTicketAdmin object is missing.');
+            return;
+        }
+
         const ticketId = $('#grt-ticket-id').val();
         let lastMessageId = 0;
         let pollInterval;
@@ -50,6 +56,15 @@
             }
         });
 
+        // Auto-resize textarea
+        $('#grt-chat-input').on('input', function () {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            
+            // Check if it exceeds max-height (defined in CSS, e.g. 200px)
+            // If scrollHeight > clientHeight when max-height is reached, it will scroll automatically
+        });
+
         // Mark as solved
         $('#grt-chat-solve-btn').on('click', function () {
             markAsSolved();
@@ -76,8 +91,9 @@
                         alert(response.data.message);
                     }
                 },
-                error: function () {
-                    alert('Error assigning agent.');
+                error: function (xhr, status, error) {
+                    console.error('GRT Ticket AJAX Error:', status, error);
+                    alert('Error assigning agent: ' + (error || status));
                 }
             });
         });
@@ -194,8 +210,9 @@
                         alert(response.data.message || 'Failed to send message.');
                     }
                 },
-                error: function () {
-                    alert('An error occurred. Please try again.');
+                error: function (xhr, status, error) {
+                    console.error('GRT Ticket AJAX Error:', status, error);
+                    alert('An error occurred: ' + (error || status));
                 },
                 complete: function () {
                     $sendBtn.prop('disabled', false).text('Send');
@@ -230,8 +247,9 @@
                         $solveBtn.prop('disabled', false).text('Mark as Solved');
                     }
                 },
-                error: function () {
-                    alert('An error occurred. Please try again.');
+                error: function (xhr, status, error) {
+                    console.error('GRT Ticket AJAX Error:', status, error);
+                    alert('An error occurred: ' + (error || status));
                     $solveBtn.prop('disabled', false).text('Mark as Solved');
                 }
             });
@@ -255,6 +273,9 @@
                         appendMessages(response.data.messages);
                         scrollToBottom();
                     }
+                },
+                error: function (xhr, status, error) {
+                    console.error('GRT Ticket Polling Error:', status, error);
                 }
             });
         }

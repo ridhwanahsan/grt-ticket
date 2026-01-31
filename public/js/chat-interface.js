@@ -18,6 +18,12 @@
      * Initialize chat interface
      */
     function initChatInterface() {
+        // Ensure localization object exists
+        if (typeof grtTicketPublic === 'undefined') {
+            console.error('GRT Ticket: grtTicketPublic object is missing.');
+            return;
+        }
+
         const ticketId = $('#grt-ticket-id').val();
         const userEmail = $('#grt-user-email').val();
         let lastMessageId = 0;
@@ -74,8 +80,9 @@
                         $btn.prop('disabled', false).text('Submit Rating');
                     }
                 },
-                error: function() {
-                    alert('Error submitting rating. Please try again.');
+                error: function(xhr, status, error) {
+                    console.error('GRT Ticket AJAX Error:', status, error);
+                    alert('Error submitting rating: ' + (error || status));
                     $btn.prop('disabled', false).text('Submit Rating');
                 }
             });
@@ -100,6 +107,12 @@
         // Sidebar Toggle
         $('#grt-sidebar-toggle').on('click', function() {
             $('.grt-chat-container').toggleClass('sidebar-collapsed');
+        });
+
+        // Auto-resize textarea
+        $('#grt-chat-input').on('input', function () {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
         });
 
         // Send message
@@ -208,8 +221,9 @@
                         alert(response.data.message || 'Failed to send message.');
                     }
                 },
-                error: function () {
-                    alert('An error occurred. Please try again.');
+                error: function (xhr, status, error) {
+                    console.error('GRT Ticket AJAX Error:', status, error);
+                    alert('An error occurred: ' + (error || status));
                 },
                 complete: function () {
                     $sendBtn.prop('disabled', false).text('Send');
@@ -247,6 +261,9 @@
                             location.reload();
                         }
                     }
+                },
+                error: function (xhr, status, error) {
+                    console.error('GRT Ticket Polling Error:', status, error);
                 }
             });
         }

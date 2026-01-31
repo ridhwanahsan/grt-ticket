@@ -174,15 +174,20 @@ $sms_body = get_option( 'grt_ticket_sms_body', 'Hello, I need help with my ticke
 			</div>
 		<?php else : ?>
 			<div class="grt-chat-input-container">
-				<div class="grt-chat-input-wrapper">
+				<div id="grt-attachment-preview" class="grt-attachment-preview" style="display: none;">
+					<div id="grt-preview-content"></div>
+					<button type="button" id="grt-remove-attachment" class="grt-remove-attachment">×</button>
+				</div>
+
+				<div class="grt-chat-input-bar">
 					<input type="file" id="grt-chat-attachment" accept="image/*,application/pdf" style="display: none;">
-					<button type="button" id="grt-chat-attach-btn" class="grt-chat-attach-btn" title="<?php esc_attr_e( 'Attach File', 'grt-ticket' ); ?>">📎</button>
-					<div id="grt-attachment-preview" class="grt-attachment-preview" style="display: none;">
-						<div id="grt-preview-content"></div>
-						<button type="button" id="grt-remove-attachment" class="grt-remove-attachment">×</button>
-					</div>
+					<button type="button" id="grt-chat-attach-btn" class="grt-chat-attach-btn" title="<?php esc_attr_e( 'Attach File', 'grt-ticket' ); ?>">
+						<span class="dashicons dashicons-paperclip"></span>
+					</button>
 					<textarea id="grt-chat-input" class="grt-chat-input" placeholder="<?php esc_attr_e( 'Type your message...', 'grt-ticket' ); ?>"></textarea>
-					<button type="button" id="grt-chat-send-btn" class="grt-chat-send-btn"><?php esc_html_e( 'Send', 'grt-ticket' ); ?></button>
+					<button type="button" id="grt-chat-send-btn" class="grt-chat-send-btn" title="<?php esc_attr_e( 'Send', 'grt-ticket' ); ?>">
+						<?php esc_html_e( 'Send', 'grt-ticket' ); ?>
+					</button>
 				</div>
 			</div>
 		<?php endif; ?>

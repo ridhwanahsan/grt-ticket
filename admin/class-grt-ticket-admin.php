@@ -63,27 +63,30 @@ class GRT_Ticket_Admin {
 	 */
 	public function enqueue_styles() {
 		$screen = get_current_screen();
+		$screen_id = $screen ? $screen->id : '';
 		
-		if ( strpos( $screen->id, 'grt-ticket' ) !== false ) {
-			// Register styles
-			wp_register_style( $this->plugin_name . '-tickets-list', GRT_TICKET_PLUGIN_URL . 'admin/css/tickets-list.css', array(), $this->version, 'all' );
-			wp_register_style( $this->plugin_name . '-chat-interface', GRT_TICKET_PLUGIN_URL . 'admin/css/chat-interface.css', array(), $this->version, 'all' );
-			wp_register_style( $this->plugin_name . '-settings-page', GRT_TICKET_PLUGIN_URL . 'admin/css/settings-page.css', array(), $this->version, 'all' );
-			wp_register_style( $this->plugin_name . '-dashboard', GRT_TICKET_PLUGIN_URL . 'admin/css/dashboard.css', array(), $this->version, 'all' );
+		// Check if we are on a plugin page (either via screen ID or GET parameter)
+		$is_plugin_page = ( strpos( $screen_id, 'grt-ticket' ) !== false ) || 
+						  ( isset( $_GET['page'] ) && strpos( $_GET['page'], 'grt-ticket' ) !== false );
 
-			// Enqueue based on screen
-			if ( $screen->id === 'toplevel_page_grt-ticket' ) {
+		if ( $is_plugin_page ) {
+			// Register styles
+			wp_register_style( $this->plugin_name . '-tickets-list', GRT_TICKET_PLUGIN_URL . 'admin/css/tickets-list.css', array(), time(), 'all' );
+			wp_register_style( $this->plugin_name . '-chat-interface', GRT_TICKET_PLUGIN_URL . 'admin/css/chat-interface.css', array(), time(), 'all' );
+			wp_register_style( $this->plugin_name . '-settings-page', GRT_TICKET_PLUGIN_URL . 'admin/css/settings-page.css', array(), time(), 'all' );
+			wp_register_style( $this->plugin_name . '-dashboard', GRT_TICKET_PLUGIN_URL . 'admin/css/dashboard.css', array(), time(), 'all' );
+
+			// Determine which style to enqueue
+			if ( $screen_id === 'toplevel_page_grt-ticket' || ( isset( $_GET['page'] ) && $_GET['page'] === 'grt-ticket' ) ) {
 				wp_enqueue_style( $this->plugin_name . '-dashboard' );
-			} elseif ( $screen->id === 'grt-ticket_page_grt-ticket-list' ) {
+			} elseif ( $screen_id === 'grt-ticket_page_grt-ticket-list' || ( isset( $_GET['page'] ) && $_GET['page'] === 'grt-ticket-list' ) ) {
 				wp_enqueue_style( $this->plugin_name . '-tickets-list' );
-			} elseif ( strpos( $screen->id, 'grt-ticket-chat' ) !== false ) {
-				if ( isset( $_GET['ticket_id'] ) && intval( $_GET['ticket_id'] ) > 0 ) {
-					wp_enqueue_style( $this->plugin_name . '-chat-interface' );
-				} else {
-					// Chat selection page uses tickets list styles (table, status, buttons)
-					wp_enqueue_style( $this->plugin_name . '-tickets-list' );
-				}
-			} elseif ( strpos( $screen->id, 'grt-ticket-settings' ) !== false ) {
+			} elseif ( strpos( $screen_id, 'grt-ticket-chat' ) !== false || ( isset( $_GET['page'] ) && $_GET['page'] === 'grt-ticket-chat' ) ) {
+				// Always enqueue chat styles on the chat page
+				wp_enqueue_style( $this->plugin_name . '-chat-interface' );
+				// Also enqueue list styles for the select screen
+				wp_enqueue_style( $this->plugin_name . '-tickets-list' );
+			} elseif ( strpos( $screen_id, 'grt-ticket-settings' ) !== false || ( isset( $_GET['page'] ) && $_GET['page'] === 'grt-ticket-settings' ) ) {
 				wp_enqueue_style( $this->plugin_name . '-settings-page' );
 			}
 		}

@@ -38,7 +38,7 @@ Unlike standard ticketing plugins, GRT Ticket offers a distraction-free experien
 *   **Direct Contact Buttons**: Integrated "Call Us" and "SMS Us" buttons within the chat for immediate escalation.
 *   **User Ratings**: Built-in feedback system allowing users to rate their support experience (1-5 stars).
 *   **Clean Interface**: Automatically hides the WordPress Admin Bar for non-admin users to maintain a professional app-like feel.
-
+  
 ### 🛠️ Ticket Management (Admin)
 *   **Admin Dashboard**: Visual overview of support performance, including ticket volume, open/closed counts, and average user ratings.
 *   **Agent Performance**: Track individual agent performance with detailed stats on assigned and solved tickets.
