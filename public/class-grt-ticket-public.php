@@ -146,6 +146,9 @@ class GRT_Ticket_Public {
 			'ajax_url'      => admin_url( 'admin-ajax.php' ),
 			'nonce'         => wp_create_nonce( 'grt_ticket_nonce' ),
 			'poll_interval' => get_option( 'grt_ticket_poll_interval', 3000 ),
+			'enable_notification' => get_option( 'grt_ticket_enable_browser_notification', 0 ),
+			'enable_sound' => get_option( 'grt_ticket_notification_sound', 0 ),
+			'notification_icon' => GRT_TICKET_PLUGIN_URL . 'assets/icon.png', // Fallback or add asset later
 		);
 
 		wp_localize_script( $this->plugin_name . '-ticket-form', 'grtTicketPublic', $data );

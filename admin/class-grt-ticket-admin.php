@@ -88,6 +88,8 @@ class GRT_Ticket_Admin {
 				wp_enqueue_style( $this->plugin_name . '-tickets-list' );
 			} elseif ( strpos( $screen_id, 'grt-ticket-settings' ) !== false || ( isset( $_GET['page'] ) && $_GET['page'] === 'grt-ticket-settings' ) ) {
 				wp_enqueue_style( $this->plugin_name . '-settings-page' );
+			} elseif ( strpos( $screen_id, 'grt-ticket-notifications' ) !== false || ( isset( $_GET['page'] ) && $_GET['page'] === 'grt-ticket-notifications' ) ) {
+				wp_enqueue_style( $this->plugin_name . '-settings-page' ); // Reuse settings styles
 			}
 		}
 	}
@@ -123,6 +125,9 @@ class GRT_Ticket_Admin {
 				'nonce'         => wp_create_nonce( 'grt_ticket_nonce' ),
 				'poll_interval' => get_option( 'grt_ticket_poll_interval', 3000 ),
 				'agents'        => $agents_data,
+				'enable_notification' => get_option( 'grt_ticket_enable_browser_notification', 0 ),
+				'enable_sound' => get_option( 'grt_ticket_notification_sound', 0 ),
+				'notification_icon' => GRT_TICKET_PLUGIN_URL . 'assets/icon.png',
 				'i18n'          => array(
 					'category_name'         => __( 'Category Name', 'grt-ticket' ),
 					'select_image'          => __( 'Select Image', 'grt-ticket' ),
@@ -211,6 +216,16 @@ class GRT_Ticket_Admin {
 			'manage_options',
 			'grt-ticket-settings',
 			array( $this, 'display_settings_page' )
+		);
+
+		// Notification Settings submenu
+		add_submenu_page(
+			'grt-ticket',
+			__( 'Notification Settings', 'grt-ticket' ),
+			__( 'Notification Settings', 'grt-ticket' ),
+			'manage_options',
+			'grt-ticket-notifications',
+			array( $this, 'display_notification_settings_page' )
 		);
 	}
 
@@ -304,6 +319,15 @@ class GRT_Ticket_Admin {
 	}
 
 	/**
+	 * Display notification settings page.
+	 *
+	 * @since    1.0.6
+	 */
+	public function display_notification_settings_page() {
+		include GRT_TICKET_PLUGIN_DIR . 'admin/partials/notification-settings.php';
+	}
+
+	/**
 	 * Register settings.
 	 *
 	 * @since    1.0.0
@@ -313,5 +337,7 @@ class GRT_Ticket_Admin {
 		register_setting( 'grt_ticket_settings', 'grt_ticket_admin_name', array( 'sanitize_callback' => 'sanitize_text_field' ) );
 		register_setting( 'grt_ticket_settings', 'grt_ticket_per_page', array( 'sanitize_callback' => 'absint' ) );
 		register_setting( 'grt_ticket_settings', 'grt_ticket_poll_interval', array( 'sanitize_callback' => 'absint' ) );
+		register_setting( 'grt_ticket_settings', 'grt_ticket_enable_browser_notification', array( 'sanitize_callback' => 'absint' ) );
+		register_setting( 'grt_ticket_settings', 'grt_ticket_notification_sound', array( 'sanitize_callback' => 'absint' ) );
 	}
 }

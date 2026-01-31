@@ -27,6 +27,67 @@
         let lastMessageId = 0;
         let pollInterval;
 
+        // Request notification permission if enabled
+        if (grtTicketAdmin.enable_notification == 1) {
+            if ('Notification' in window && Notification.permission !== 'granted') {
+                Notification.requestPermission();
+            }
+        }
+
+        /**
+         * Trigger Browser Notification
+         */
+        function triggerNotification(title, body) {
+            if (grtTicketAdmin.enable_notification != 1) return;
+            
+            if (!('Notification' in window)) return;
+
+            if (Notification.permission === 'granted') {
+                // Only show if window is hidden
+                if (document.hidden) {
+                    const notification = new Notification(title, {
+                        body: body,
+                        icon: grtTicketAdmin.notification_icon || ''
+                    });
+
+                    notification.onclick = function() {
+                        window.focus();
+                        notification.close();
+                    };
+                }
+            }
+        }
+
+        /**
+         * Play Notification Sound
+         */
+        function playNotificationSound() {
+            if (grtTicketAdmin.enable_sound != 1) return;
+            
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    const ctx = new AudioContext();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    
+                    osc.type = 'sine';
+                    osc.frequency.value = 800; // Hz
+                    gain.gain.value = 0.1; // Volume
+                    
+                    osc.start();
+                    setTimeout(function() {
+                        osc.stop();
+                    }, 200);
+                }
+            } catch (e) {
+                console.error('Audio error', e);
+            }
+        }
+
         // Get initial last message ID
         $('.grt-chat-message').each(function () {
             const msgId = parseInt($(this).data('message-id'));
@@ -285,14 +346,27 @@
          */
         function appendMessages(messages) {
             const $messagesContainer = $('.grt-chat-messages');
+            let hasNewMessages = false;
+            let lastMsg = null;
 
             messages.forEach(function (msg) {
                 if (msg.id > lastMessageId) {
                     const messageHtml = createMessageHtml(msg);
                     $messagesContainer.append(messageHtml);
                     lastMessageId = msg.id;
+                    
+                    // Only notify for messages from user (not admin self)
+                    if (msg.sender_type === 'user') {
+                        hasNewMessages = true;
+                        lastMsg = msg;
+                    }
                 }
             });
+
+            if (hasNewMessages && lastMsg) {
+                playNotificationSound();
+                triggerNotification('New Ticket Message', lastMsg.sender_name + ': ' + (lastMsg.message ? lastMsg.message.substring(0, 50) : 'Sent an attachment'));
+            }
         }
 
         /**

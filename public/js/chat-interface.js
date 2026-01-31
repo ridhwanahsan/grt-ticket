@@ -29,6 +29,102 @@
         let lastMessageId = 0;
         let pollInterval;
 
+        // Request notification permission if enabled
+        if (grtTicketPublic.enable_notification == 1) {
+            if ('Notification' in window && Notification.permission !== 'granted') {
+                Notification.requestPermission();
+            }
+        }
+
+        // Load user notification preferences
+        loadUserNotificationPreferences();
+
+        function loadUserNotificationPreferences() {
+            const soundPref = localStorage.getItem('grt_user_notification_sound');
+            const $soundToggle = $('#grt-user-notification-sound');
+            
+            if (soundPref === 'true') {
+                $soundToggle.prop('checked', true);
+            } else if (soundPref === 'false') {
+                $soundToggle.prop('checked', false);
+            } else {
+                // Default to admin setting if not set by user
+                $soundToggle.prop('checked', grtTicketPublic.enable_sound == 1);
+            }
+        }
+
+        // Handle user notification preference change
+        $('#grt-user-notification-sound').on('change', function() {
+            const isChecked = $(this).is(':checked');
+            localStorage.setItem('grt_user_notification_sound', isChecked);
+        });
+
+        /**
+         * Trigger Browser Notification
+         */
+        function triggerNotification(title, body) {
+            if (grtTicketPublic.enable_notification != 1) return;
+            
+            if (!('Notification' in window)) return;
+
+            if (Notification.permission === 'granted') {
+                // Only show if window is hidden
+                if (document.hidden) {
+                    const notification = new Notification(title, {
+                        body: body,
+                        icon: grtTicketPublic.notification_icon || ''
+                    });
+
+                    notification.onclick = function() {
+                        window.focus();
+                        notification.close();
+                    };
+                }
+            }
+        }
+
+        /**
+         * Play Notification Sound
+         */
+        function playNotificationSound() {
+            // Check user preference
+            const userPref = localStorage.getItem('grt_user_notification_sound');
+            
+            // If user explicitly disabled it, don't play
+            if (userPref === 'false') return;
+            
+            // If user hasn't set preference, use global setting
+            if (userPref === null && grtTicketPublic.enable_sound != 1) return;
+            
+            // Simple beep or use a custom audio file if provided
+            // For now, we can use a small base64 encoded audio or just rely on OS notification sound (which happens with browser notification)
+            // But user asked for explicit sound setting.
+            
+            // Let's use a simple beep
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    const ctx = new AudioContext();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    
+                    osc.type = 'sine';
+                    osc.frequency.value = 800; // Hz
+                    gain.gain.value = 0.1; // Volume
+                    
+                    osc.start();
+                    setTimeout(function() {
+                        osc.stop();
+                    }, 200);
+                }
+            } catch (e) {
+                console.error('Audio error', e);
+            }
+        }
+
         // Star Rating System
         $('.grt-rating-stars .grt-star').hover(
             function() {
@@ -404,14 +500,27 @@
          */
         function appendMessages(messages) {
             const $messagesContainer = $('.grt-chat-messages');
+            let hasNewMessages = false;
+            let lastMsg = null;
 
             messages.forEach(function (msg) {
                 if (msg.id > lastMessageId) {
                     const messageHtml = createMessageHtml(msg);
                     $messagesContainer.append(messageHtml);
                     lastMessageId = msg.id;
+                    
+                    // Only notify for messages from others (admin)
+                    if (msg.sender_type !== 'user') {
+                        hasNewMessages = true;
+                        lastMsg = msg;
+                    }
                 }
             });
+
+            if (hasNewMessages && lastMsg) {
+                playNotificationSound();
+                triggerNotification('New Support Message', lastMsg.sender_name + ': ' + (lastMsg.message ? lastMsg.message.substring(0, 50) : 'Sent an attachment'));
+            }
         }
 
         /**

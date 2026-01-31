@@ -110,6 +110,17 @@ $sms_body = get_option( 'grt_ticket_sms_body', 'Hello, I need help with my ticke
 						<p><strong><?php esc_html_e( 'Username:', 'grt-ticket' ); ?></strong> <?php echo esc_html( $current_user->user_login ); ?></p>
 						<p><strong><?php esc_html_e( 'Email:', 'grt-ticket' ); ?></strong> <?php echo esc_html( $current_user->user_email ); ?></p>
 					</div>
+
+					<div class="grt-profile-notifications">
+						<h4><?php esc_html_e( 'Notifications', 'grt-ticket' ); ?></h4>
+						<div class="grt-notification-toggle">
+							<label><?php esc_html_e( 'Enable Notification Sound', 'grt-ticket' ); ?></label>
+							<label class="grt-switch">
+								<input type="checkbox" id="grt-user-notification-sound" value="1">
+								<span class="slider round"></span>
+							</label>
+						</div>
+					</div>
 				</div>
 			<?php else : ?>
 				<div class="grt-profile-section">
