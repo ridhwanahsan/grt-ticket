@@ -43,18 +43,15 @@
             if (!('Notification' in window)) return;
 
             if (Notification.permission === 'granted') {
-                // Only show if window is hidden
-                if (document.hidden) {
-                    const notification = new Notification(title, {
-                        body: body,
-                        icon: grtTicketAdmin.notification_icon || ''
-                    });
+                const notification = new Notification(title, {
+                    body: body,
+                    icon: grtTicketAdmin.notification_icon || ''
+                });
 
-                    notification.onclick = function() {
-                        window.focus();
-                        notification.close();
-                    };
-                }
+                notification.onclick = function() {
+                    window.focus();
+                    notification.close();
+                };
             }
         }
 
