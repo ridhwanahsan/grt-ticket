@@ -262,7 +262,7 @@
         });
 
         // Profile Image Upload
-        $('.grt-profile-wrapper').on('click', function() {
+        $('.grt-profile-wrapper').not('.big').on('click', function() {
             $('#grt-profile-upload').click();
         });
 
@@ -301,6 +301,11 @@
                             // Replace text with image and re-add overlay
                             $icon.html('<img src="' + response.data.image_url + '" alt="Profile"><div class="grt-profile-overlay"><span class="dashicons dashicons-camera"></span></div>');
                         }
+
+                        // Update all user avatars in chat
+                        $('.grt-chat-message.user .grt-message-avatar img').attr('src', response.data.image_url);
+                        $('.grt-chat-message.user .grt-message-avatar .grt-avatar-placeholder').parent().html('<img src="' + response.data.image_url + '" alt="Profile">');
+
                     } else {
                         alert(response.data.message || 'Upload failed');
                     }
@@ -378,6 +383,11 @@
                         } else {
                             $headerIcon.html(newImageHtml);
                         }
+
+                        // Update all user avatars in chat
+                        $('.grt-chat-message.user .grt-message-avatar img').attr('src', response.data.image_url);
+                        $('.grt-chat-message.user .grt-message-avatar .grt-avatar-placeholder').parent().html('<img src="' + response.data.image_url + '" alt="Profile">');
+
                     } else {
                         alert(response.data.message || 'Upload failed');
                     }
@@ -667,6 +677,22 @@
                         console.log('New message received:', payload);
                         const newMsg = payload.new;
                         
+                        // Inject avatar_url if missing (Supabase doesn't store it)
+                        if (!newMsg.avatar_url) {
+                            if (newMsg.sender_type === 'user') {
+                                // Try to get current user's avatar from the profile icon
+                                const $profileImg = $('.grt-profile-icon img');
+                                if ($profileImg.length) {
+                                    newMsg.avatar_url = $profileImg.attr('src');
+                                }
+                            } else {
+                                // Admin/Support - use default if available
+                                if (grtTicketPublic.default_avatar_url) {
+                                    newMsg.avatar_url = grtTicketPublic.default_avatar_url;
+                                }
+                            }
+                        }
+
                         // Append message
                         appendMessages([newMsg]);
                         scrollToBottom();

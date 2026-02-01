@@ -88,6 +88,26 @@ To enable ultra-fast real-time chat, GRT Ticket integrates with Supabase. Follow
     *   Click **Test Connection** to verify everything is working.
     *   Check **Enable Supabase Realtime** and Save Settings.
 
+4.  **Create Database Table**:
+    *   Go to your Supabase Project > **SQL Editor**.
+    *   Click **New Query**.
+    *   Paste and run the following SQL command to create the required table:
+
+    ```sql
+    create table public.grt_messages ( 
+      id bigint not null, 
+      ticket_id bigint not null, 
+      sender_type text not null, 
+      sender_name text not null, 
+      message text null, 
+      attachment_url text null, 
+      is_internal integer null default 0, 
+      created_at timestamp with time zone null default now(), 
+      constraint grt_messages_pkey primary key (id) 
+    ) TABLESPACE pg_default;
+    ```
+    *   This table stores temporary real-time messages. Your WordPress database remains the primary storage.
+
 ## 📦 Installation
 
 1.  **Upload**: Upload the `grt-ticket` folder to the `/wp-content/plugins/` directory.

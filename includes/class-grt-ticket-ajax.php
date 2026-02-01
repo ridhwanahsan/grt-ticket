@@ -758,12 +758,12 @@ class GRT_Ticket_Ajax {
 			return;
 		}
 
-		if ( empty( $_FILES['file'] ) ) {
+		if ( empty( $_FILES['profile_image'] ) ) {
 			wp_send_json_error( array( 'message' => __( 'No file uploaded.', 'grt-ticket' ) ) );
 			return;
 		}
 
-		$file = $_FILES['file'];
+		$file = $_FILES['profile_image'];
 		
 		// Use media_handle_sideload or similar, but for direct upload we can use wp_handle_upload
 		// However, media_handle_upload is easier as it creates attachment
@@ -771,7 +771,7 @@ class GRT_Ticket_Ajax {
 		require_once( ABSPATH . 'wp-admin/includes/file.php' );
 		require_once( ABSPATH . 'wp-admin/includes/media.php' );
 
-		$attachment_id = media_handle_upload( 'file', 0 );
+		$attachment_id = media_handle_upload( 'profile_image', 0 );
 
 		if ( is_wp_error( $attachment_id ) ) {
 			wp_send_json_error( array( 'message' => $attachment_id->get_error_message() ) );
@@ -783,7 +783,7 @@ class GRT_Ticket_Ajax {
 
 		wp_send_json_success( array( 
 			'message' => __( 'Profile image updated.', 'grt-ticket' ),
-			'url' => wp_get_attachment_url( $attachment_id )
+			'image_url' => wp_get_attachment_url( $attachment_id )
 		) );
 	}
 
