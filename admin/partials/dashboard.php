@@ -15,9 +15,49 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="wrap grt-dashboard-wrap">
 	<div class="grt-header">
 		<h1><?php esc_html_e( 'Support Dashboard', 'grt-ticket' ); ?></h1>
-		<p class="description"><?php esc_html_e( 'Overview of your support performance.', 'grt-ticket' ); ?></p>
+		<p class="description"><?php esc_html_e( 'Overview of your support performance and statistics.', 'grt-ticket' ); ?></p>
 	</div>
 
+	<!-- General Overview -->
+	<div class="grt-stats-grid">
+		<!-- Total Agents -->
+		<div class="grt-stat-card">
+			<div class="stat-icon dashicons dashicons-businessperson"></div>
+			<div class="stat-content">
+				<h3><?php echo esc_html( $stats['total_agents'] ); ?></h3>
+				<p><?php esc_html_e( 'Total Agents', 'grt-ticket' ); ?></p>
+			</div>
+		</div>
+
+		<!-- Total Customers -->
+		<div class="grt-stat-card">
+			<div class="stat-icon dashicons dashicons-groups"></div>
+			<div class="stat-content">
+				<h3><?php echo esc_html( $stats['total_customers'] ); ?></h3>
+				<p><?php esc_html_e( 'Total Customers', 'grt-ticket' ); ?></p>
+			</div>
+		</div>
+
+		<!-- Departments -->
+		<div class="grt-stat-card">
+			<div class="stat-icon dashicons dashicons-category"></div>
+			<div class="stat-content">
+				<h3><?php echo esc_html( $stats['total_departments'] ); ?></h3>
+				<p><?php esc_html_e( 'Departments', 'grt-ticket' ); ?></p>
+			</div>
+		</div>
+
+		<!-- Projects -->
+		<div class="grt-stat-card">
+			<div class="stat-icon dashicons dashicons-portfolio"></div>
+			<div class="stat-content">
+				<h3><?php echo esc_html( $stats['total_projects'] ); ?></h3>
+				<p><?php esc_html_e( 'Projects', 'grt-ticket' ); ?></p>
+			</div>
+		</div>
+	</div>
+
+	<!-- Ticket Statistics -->
 	<div class="grt-stats-grid">
 		<!-- Total Tickets -->
 		<div class="grt-stat-card">
@@ -54,6 +94,92 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<p><?php esc_html_e( 'Avg Resolution Time', 'grt-ticket' ); ?></p>
 			</div>
 		</div>
+	</div>
+
+	<!-- Charts Row -->
+	<div class="grt-dashboard-row" style="grid-template-columns: 1fr 1fr 1fr; margin-bottom: 20px;">
+		
+		<!-- Ticket Status Chart -->
+		<div class="grt-dashboard-widget chart-widget">
+			<h2><?php esc_html_e( 'Ticket Status', 'grt-ticket' ); ?></h2>
+			<div class="chart-container">
+				<?php 
+				$total_status = $stats['open_tickets'] + $stats['solved_tickets'] + $stats['closed_tickets'];
+				$statuses = array(
+					'open'   => array( 'label' => __( 'Open', 'grt-ticket' ), 'count' => $stats['open_tickets'], 'class' => 'status-open' ),
+					'solved' => array( 'label' => __( 'Solved', 'grt-ticket' ), 'count' => $stats['solved_tickets'], 'class' => 'status-solved' ),
+					'closed' => array( 'label' => __( 'Closed', 'grt-ticket' ), 'count' => $stats['closed_tickets'], 'class' => 'status-closed' ),
+				);
+				
+				foreach ( $statuses as $status ) :
+					$percent = $total_status > 0 ? ( $status['count'] / $total_status ) * 100 : 0;
+				?>
+				<div class="chart-row <?php echo esc_attr( $status['class'] ); ?>">
+					<div class="chart-label"><?php echo esc_html( $status['label'] ); ?></div>
+					<div class="chart-bar-bg">
+						<div class="chart-bar-fill" style="width: <?php echo esc_attr( $percent ); ?>%;"></div>
+					</div>
+					<div class="chart-value"><?php echo esc_html( $status['count'] ); ?></div>
+				</div>
+				<?php endforeach; ?>
+			</div>
+		</div>
+
+		<!-- Ticket Priority Chart -->
+		<div class="grt-dashboard-widget chart-widget">
+			<h2><?php esc_html_e( 'Ticket Priority', 'grt-ticket' ); ?></h2>
+			<div class="chart-container">
+				<?php 
+				$priorities = $stats['stats_by_priority'];
+				$total_priority = array_sum( $priorities );
+				// Sort by count desc if not already
+				arsort($priorities);
+				
+				if ( empty( $priorities ) ) {
+					echo '<p>' . esc_html__( 'No data available.', 'grt-ticket' ) . '</p>';
+				} else {
+					foreach ( $priorities as $priority => $count ) :
+						$percent = $total_priority > 0 ? ( $count / $total_priority ) * 100 : 0;
+						$priority_class = 'priority-' . strtolower( $priority );
+					?>
+					<div class="chart-row <?php echo esc_attr( $priority_class ); ?>">
+						<div class="chart-label"><?php echo esc_html( ucfirst( $priority ) ); ?></div>
+						<div class="chart-bar-bg">
+							<div class="chart-bar-fill" style="width: <?php echo esc_attr( $percent ); ?>%;"></div>
+						</div>
+						<div class="chart-value"><?php echo esc_html( $count ); ?></div>
+					</div>
+					<?php endforeach;
+				} ?>
+			</div>
+		</div>
+
+		<!-- Tickets per Product -->
+		<div class="grt-dashboard-widget chart-widget">
+			<h2><?php esc_html_e( 'Tickets per Product', 'grt-ticket' ); ?></h2>
+			<div class="chart-container">
+				<?php 
+				$products = $stats['stats_by_product'];
+				$total_products = array_sum( $products );
+				
+				if ( empty( $products ) ) {
+					echo '<p>' . esc_html__( 'No data available.', 'grt-ticket' ) . '</p>';
+				} else {
+					foreach ( $products as $product => $count ) :
+						$percent = $total_products > 0 ? ( $count / $total_products ) * 100 : 0;
+					?>
+					<div class="chart-row">
+						<div class="chart-label" title="<?php echo esc_attr( $product ); ?>"><?php echo esc_html( $product ); ?></div>
+						<div class="chart-bar-bg">
+							<div class="chart-bar-fill" style="width: <?php echo esc_attr( $percent ); ?>%;"></div>
+						</div>
+						<div class="chart-value"><?php echo esc_html( $count ); ?></div>
+					</div>
+					<?php endforeach;
+				} ?>
+			</div>
+		</div>
+
 	</div>
 
 	<div class="grt-dashboard-row">
@@ -114,11 +240,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</div>
 
-	<!-- Agent Performance -->
+	<!-- Agent Performance (Top Agents) -->
 	<?php if ( ! empty( $stats['agent_stats'] ) ) : ?>
 	<div class="grt-dashboard-row" style="margin-top: 20px; grid-template-columns: 1fr;">
 		<div class="grt-dashboard-widget agent-stats-widget">
-			<h2><?php esc_html_e( 'Agent Performance', 'grt-ticket' ); ?></h2>
+			<h2><?php esc_html_e( 'Top Agents', 'grt-ticket' ); ?></h2>
 			<div class="agent-stats-list">
 				<?php foreach ( $stats['agent_stats'] as $agent ) : ?>
 					<div class="agent-stat-item">

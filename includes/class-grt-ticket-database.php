@@ -133,6 +133,32 @@ class GRT_Ticket_Database {
 	}
 
 	/**
+	 * Ensure the tickets table has the custom_fields column.
+	 *
+	 * @since    1.1.0
+	 */
+	public static function ensure_custom_fields_column() {
+		global $wpdb;
+		
+		// Only check once per request
+		static $checked = false;
+		if ( $checked ) {
+			return;
+		}
+
+		$table_name = self::get_tickets_table();
+		if ( ! $table_name ) {
+			return;
+		}
+
+		if ( ! self::check_column_exists( $table_name, 'custom_fields' ) ) {
+			$wpdb->query( "ALTER TABLE $table_name ADD COLUMN custom_fields longtext DEFAULT NULL AFTER description" );
+		}
+		
+		$checked = true;
+	}
+
+	/**
 	 * Get the tickets table name.
 	 *
 	 * @since    1.0.0
@@ -280,6 +306,19 @@ class GRT_Ticket_Database {
 		// Total Tickets
 		$total_tickets = (int) $wpdb->get_var( "SELECT COUNT(*) FROM $tickets_table" );
 
+		// Total Customers (Unique users who submitted tickets)
+		$total_customers = (int) $wpdb->get_var( "SELECT COUNT(DISTINCT user_id) FROM $tickets_table WHERE user_id > 0" );
+
+		// Total Departments (Categories)
+		$total_departments = (int) $wpdb->get_var( "SELECT COUNT(DISTINCT category) FROM $tickets_table WHERE category != ''" );
+
+		// Total Projects (Themes/Products)
+		$total_projects = (int) $wpdb->get_var( "SELECT COUNT(DISTINCT theme_name) FROM $tickets_table WHERE theme_name != ''" );
+
+		// Total Agents (Users with capability to manage tickets - assuming admins for now)
+		$agent_user_query = new WP_User_Query( array( 'role' => 'administrator', 'fields' => 'ID' ) );
+		$total_agents = $agent_user_query->get_total();
+
 		// Tickets by Status
 		$status_counts   = $wpdb->get_results( "SELECT status, COUNT(*) as count FROM $tickets_table GROUP BY status", ARRAY_A );
 		$stats_by_status = array(
@@ -289,6 +328,20 @@ class GRT_Ticket_Database {
 		);
 		foreach ( $status_counts as $row ) {
 			$stats_by_status[ $row['status'] ] = (int) $row['count'];
+		}
+
+		// Tickets by Priority
+		$priority_counts = $wpdb->get_results( "SELECT priority, COUNT(*) as count FROM $tickets_table GROUP BY priority", ARRAY_A );
+		$stats_by_priority = array();
+		foreach ( $priority_counts as $row ) {
+			$stats_by_priority[ $row['priority'] ] = (int) $row['count'];
+		}
+
+		// Tickets by Product (Theme)
+		$product_counts = $wpdb->get_results( "SELECT theme_name, COUNT(*) as count FROM $tickets_table WHERE theme_name != '' GROUP BY theme_name ORDER BY count DESC LIMIT 5", ARRAY_A );
+		$stats_by_product = array();
+		foreach ( $product_counts as $row ) {
+			$stats_by_product[ $row['theme_name'] ] = (int) $row['count'];
 		}
 
 		// Tickets Today
@@ -350,9 +403,15 @@ class GRT_Ticket_Database {
 
 		return array(
 			'total_tickets'       => $total_tickets,
+			'total_customers'     => $total_customers,
+			'total_agents'        => $total_agents,
+			'total_departments'   => $total_departments,
+			'total_projects'      => $total_projects,
 			'open_tickets'        => $stats_by_status['open'],
 			'solved_tickets'      => $stats_by_status['solved'],
 			'closed_tickets'      => $stats_by_status['closed'],
+			'stats_by_priority'   => $stats_by_priority,
+			'stats_by_product'    => $stats_by_product,
 			'tickets_today'       => $tickets_today,
 			'avg_resolution_time' => $avg_resolution_hours,
 			'avg_rating'          => $avg_rating,
@@ -510,6 +569,33 @@ class GRT_Ticket_Database {
 			$prepare_args[] = $args['assigned_agent_id'];
 		}
 
+		if ( ! empty( $args['date'] ) ) {
+			$where[]        = 'DATE(created_at) = %s';
+			$prepare_args[] = $args['date'];
+		}
+
+		if ( ! empty( $args['start_date'] ) ) {
+			$where[]        = 'DATE(created_at) >= %s';
+			$prepare_args[] = $args['start_date'];
+		}
+
+		if ( ! empty( $args['end_date'] ) ) {
+			$where[]        = 'DATE(created_at) <= %s';
+			$prepare_args[] = $args['end_date'];
+		}
+
+		if ( ! empty( $args['search'] ) ) {
+			$search_like = '%' . $wpdb->esc_like( $args['search'] ) . '%';
+			if ( is_numeric( $args['search'] ) ) {
+				$where[]        = '(user_name LIKE %s OR id = %d)';
+				$prepare_args[] = $search_like;
+				$prepare_args[] = $args['search'];
+			} else {
+				$where[]        = '(user_name LIKE %s)';
+				$prepare_args[] = $search_like;
+			}
+		}
+
 		$where_clause = implode( ' AND ', $where );
 
 		$orderby = in_array( $args['orderby'], array( 'id', 'created_at', 'updated_at', 'status' ), true ) ? $args['orderby'] : 'created_at';
@@ -582,6 +668,33 @@ class GRT_Ticket_Database {
 		if ( isset( $args['assigned_agent_id'] ) ) {
 			$where[]        = 'assigned_agent_id = %d';
 			$prepare_args[] = $args['assigned_agent_id'];
+		}
+
+		if ( ! empty( $args['date'] ) ) {
+			$where[]        = 'DATE(created_at) = %s';
+			$prepare_args[] = $args['date'];
+		}
+
+		if ( ! empty( $args['start_date'] ) ) {
+			$where[]        = 'DATE(created_at) >= %s';
+			$prepare_args[] = $args['start_date'];
+		}
+
+		if ( ! empty( $args['end_date'] ) ) {
+			$where[]        = 'DATE(created_at) <= %s';
+			$prepare_args[] = $args['end_date'];
+		}
+
+		if ( ! empty( $args['search'] ) ) {
+			$search_like = '%' . $wpdb->esc_like( $args['search'] ) . '%';
+			if ( is_numeric( $args['search'] ) ) {
+				$where[]        = '(user_name LIKE %s OR id = %d)';
+				$prepare_args[] = $search_like;
+				$prepare_args[] = $args['search'];
+			} else {
+				$where[]        = '(user_name LIKE %s)';
+				$prepare_args[] = $search_like;
+			}
 		}
 
 		$where_clause = implode( ' AND ', $where );

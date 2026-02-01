@@ -189,6 +189,7 @@ class GRT_Ticket {
 		$this->loader->add_action( 'wp_ajax_grt_ticket_mark_solved', $plugin_ajax, 'mark_solved' );
 		$this->loader->add_action( 'wp_ajax_grt_ticket_delete', $plugin_ajax, 'delete_ticket' );
 		$this->loader->add_action( 'wp_ajax_grt_ticket_assign_agent', $plugin_ajax, 'assign_ticket' );
+		$this->loader->add_action( 'wp_ajax_grt_save_form_builder', $plugin_ajax, 'save_form_builder' );
 	}
 
 	/**

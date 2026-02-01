@@ -133,6 +133,39 @@ class GRT_Ticket_Ajax {
 		$description = wp_kses_post( $_POST['description'] ); // Allow HTML in description (it becomes the first message)
 		$priority = sanitize_text_field( $_POST['priority'] );
 
+		// Process Custom Fields
+		$custom_fields_data = array();
+		if ( isset( $_POST['custom_fields'] ) && is_array( $_POST['custom_fields'] ) ) {
+			$defined_fields = get_option( 'grt_ticket_custom_fields', array() );
+			if ( is_array( $defined_fields ) ) {
+				foreach ( $defined_fields as $field ) {
+					$field_id = isset( $field['id'] ) ? $field['id'] : '';
+					if ( empty( $field_id ) ) continue;
+
+					if ( isset( $_POST['custom_fields'][ $field_id ] ) ) {
+						$value = $_POST['custom_fields'][ $field_id ];
+						
+						// Validation based on type
+						if ( ! empty( $field['required'] ) && empty( $value ) ) {
+							wp_send_json_error( array( 'message' => sprintf( __( 'Field %s is required.', 'grt-ticket' ), $field['label'] ) ) );
+							return;
+						}
+
+						if ( $field['type'] === 'textarea' ) {
+							$value = sanitize_textarea_field( $value );
+						} else {
+							$value = sanitize_text_field( $value );
+						}
+
+						$custom_fields_data[ $field_id ] = array(
+							'label' => $field['label'],
+							'value' => $value
+						);
+					}
+				}
+			}
+		}
+
 		// Auto-assign agent based on category
 		$assigned_agent_id = 0;
 		$categories_option = get_option( 'grt_ticket_categories' );
@@ -162,6 +195,7 @@ class GRT_Ticket_Ajax {
 			'description'       => $description,
 			'priority'          => $priority,
 			'assigned_agent_id' => $assigned_agent_id,
+			'custom_fields'     => ! empty( $custom_fields_data ) ? json_encode( $custom_fields_data ) : null,
 		) );
 
 		if ( $ticket_id ) {
@@ -720,63 +754,104 @@ class GRT_Ticket_Ajax {
 		}
 
 		if ( ! is_user_logged_in() ) {
-			wp_send_json_error( array( 'message' => __( 'You must be logged in to upload a profile image.', 'grt-ticket' ) ) );
+			wp_send_json_error( array( 'message' => __( 'You must be logged in to upload an image.', 'grt-ticket' ) ) );
 			return;
 		}
 
-		if ( empty( $_FILES['profile_image'] ) ) {
+		if ( empty( $_FILES['file'] ) ) {
 			wp_send_json_error( array( 'message' => __( 'No file uploaded.', 'grt-ticket' ) ) );
 			return;
 		}
 
-		$file = $_FILES['profile_image'];
+		$file = $_FILES['file'];
+		
+		// Use media_handle_sideload or similar, but for direct upload we can use wp_handle_upload
+		// However, media_handle_upload is easier as it creates attachment
+		require_once( ABSPATH . 'wp-admin/includes/image.php' );
+		require_once( ABSPATH . 'wp-admin/includes/file.php' );
+		require_once( ABSPATH . 'wp-admin/includes/media.php' );
 
-		// Check file type
-		$file_type = wp_check_filetype( $file['name'] );
-		if ( ! in_array( $file_type['type'], array( 'image/jpeg', 'image/png', 'image/gif', 'image/webp' ) ) ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid file type. Please upload an image.', 'grt-ticket' ) ) );
+		$attachment_id = media_handle_upload( 'file', 0 );
+
+		if ( is_wp_error( $attachment_id ) ) {
+			wp_send_json_error( array( 'message' => $attachment_id->get_error_message() ) );
 			return;
 		}
 
-		// Handle upload
-		if ( ! function_exists( 'wp_handle_upload' ) ) {
-			require_once( ABSPATH . 'wp-admin/includes/file.php' );
+		// Save user meta
+		update_user_meta( get_current_user_id(), 'grt_profile_image', $attachment_id );
+
+		wp_send_json_success( array( 
+			'message' => __( 'Profile image updated.', 'grt-ticket' ),
+			'url' => wp_get_attachment_url( $attachment_id )
+		) );
+	}
+
+	/**
+	 * Save form builder fields.
+	 *
+	 * @since    1.0.0
+	 */
+	public function save_form_builder() {
+		// Verify nonce and capability
+		if ( ! check_ajax_referer( 'grt_ticket_nonce', 'nonce', false ) || ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'grt-ticket' ) ) );
+			return;
 		}
 
-		$upload_overrides = array( 'test_form' => false );
-		$movefile = wp_handle_upload( $file, $upload_overrides );
+		if ( ! isset( $_POST['fields'] ) ) {
+			wp_send_json_error( array( 'message' => __( 'No data received.', 'grt-ticket' ) ) );
+			return;
+		}
 
-		if ( $movefile && ! isset( $movefile['error'] ) ) {
-			// Insert attachment
-			$attachment = array(
-				'guid'           => $movefile['url'], 
-				'post_mime_type' => $movefile['type'],
-				'post_title'     => preg_replace( '/\.[^.]+$/', '', basename( $file['name'] ) ),
-				'post_content'   => '',
-				'post_status'    => 'inherit'
-			);
+		$fields_json = stripslashes( $_POST['fields'] );
+		$fields = json_decode( $fields_json, true );
 
-			$attach_id = wp_insert_attachment( $attachment, $movefile['file'] );
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid JSON data.', 'grt-ticket' ) ) );
+			return;
+		}
 
-			if ( ! is_wp_error( $attach_id ) ) {
-				require_once( ABSPATH . 'wp-admin/includes/image.php' );
-				$attach_data = wp_generate_attachment_metadata( $attach_id, $movefile['file'] );
-				wp_update_attachment_metadata( $attach_id, $attach_data );
+		// Sanitize fields
+		$sanitized_structure = array();
+		$custom_fields_only = array();
 
-				// Save to user meta
-				$user_id = get_current_user_id();
-				update_user_meta( $user_id, 'grt_profile_image', $attach_id );
+		if ( is_array( $fields ) ) {
+			foreach ( $fields as $field ) {
+				if ( ! isset( $field['id'], $field['type'], $field['label'] ) ) {
+					continue;
+				}
 
-				wp_send_json_success( array(
-					'message' => __( 'Profile image updated successfully.', 'grt-ticket' ),
-					'image_url' => $movefile['url']
-				) );
-			} else {
-				wp_send_json_error( array( 'message' => __( 'Failed to save image.', 'grt-ticket' ) ) );
+				$clean_field = array(
+					'id'          => sanitize_text_field( $field['id'] ),
+					'type'        => sanitize_text_field( $field['type'] ),
+					'label'       => sanitize_text_field( $field['label'] ),
+					'placeholder' => isset( $field['placeholder'] ) ? sanitize_text_field( $field['placeholder'] ) : '',
+					'required'    => ! empty( $field['required'] ),
+					'width'       => isset( $field['width'] ) ? sanitize_text_field( $field['width'] ) : '100',
+					'is_system'   => ! empty( $field['is_system'] ),
+				);
+
+				if ( isset( $field['options'] ) ) {
+					$clean_field['options'] = sanitize_textarea_field( $field['options'] );
+				}
+
+				$sanitized_structure[] = $clean_field;
+
+				// If it's a custom field, add to custom_fields_only
+				if ( empty( $clean_field['is_system'] ) ) {
+					$custom_fields_only[] = $clean_field;
+				}
 			}
-		} else {
-			wp_send_json_error( array( 'message' => $movefile['error'] ) );
 		}
+
+		// Save the full structure (including system fields and order)
+		update_option( 'grt_ticket_form_structure', $sanitized_structure );
+		
+		// Save only custom fields (for backward compatibility and validation logic)
+		update_option( 'grt_ticket_custom_fields', $custom_fields_only );
+
+		wp_send_json_success( array( 'message' => __( 'Form structure saved successfully.', 'grt-ticket' ) ) );
 	}
 
 	/**

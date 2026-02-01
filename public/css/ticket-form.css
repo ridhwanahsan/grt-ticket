@@ -230,14 +230,14 @@
 
 /* Ticket Form */
 .grt-ticket-form {
-    display: none;
-}
-
-.grt-ticket-form.active {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     animation: fadeIn 0.3s;
+}
+
+.grt-ticket-form.active {
+    display: flex;
 }
 
 @keyframes fadeIn {
@@ -255,14 +255,26 @@
 .grt-form-group {
     width: 48%;
     margin-bottom: 20px;
+    box-sizing: border-box;
 }
 
-.grt-form-group.grt-full-width {
+.grt-form-group.grt-full-width,
+.grt-form-group.grt-width-100 {
     width: 100%;
 }
 
+.grt-form-group.grt-width-50 {
+    width: 48%;
+}
+
+.grt-form-group.grt-width-33 {
+    width: 31%;
+}
+
 @media (max-width: 768px) {
-    .grt-form-group {
+    .grt-form-group,
+    .grt-form-group.grt-width-50,
+    .grt-form-group.grt-width-33 {
         width: 100%;
     }
 }

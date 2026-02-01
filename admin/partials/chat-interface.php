@@ -66,6 +66,23 @@ $is_solved = 'solved' === $ticket->status || 'closed' === $ticket->status;
 						<span class="dashicons dashicons-desktop"></span>
 						<span><?php echo esc_html( $ticket->theme_name ); ?></span>
 					</div>
+					<?php 
+					// Display Custom Fields
+					if ( ! empty( $ticket->custom_fields ) ) {
+						$custom_fields = json_decode( $ticket->custom_fields, true );
+						if ( is_array( $custom_fields ) ) {
+							foreach ( $custom_fields as $field_id => $field_data ) {
+								if ( ! isset( $field_data['label'] ) || ! isset( $field_data['value'] ) ) continue;
+								?>
+								<div class="grt-info-item" title="<?php echo esc_attr( $field_data['label'] ); ?>">
+									<span class="dashicons dashicons-admin-generic"></span>
+									<span><strong><?php echo esc_html( $field_data['label'] ); ?>:</strong> <?php echo esc_html( $field_data['value'] ); ?></span>
+								</div>
+								<?php
+							}
+						}
+					}
+					?>
 					<div class="grt-info-item grt-assign-wrapper">
 						<span class="dashicons dashicons-businessperson"></span>
 						<select id="grt-assign-agent" data-ticket-id="<?php echo esc_attr( $ticket->id ); ?>" class="grt-assign-select">

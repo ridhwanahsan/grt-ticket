@@ -1,6 +1,6 @@
 /* Dashboard Styles */
 .grt-dashboard-wrap {
-    max-width: 1200px;
+    max-width: 1600px;
 }
 
 .grt-header {
@@ -240,3 +240,58 @@
     margin-right: 5px;
     vertical-align: text-bottom;
 }
+
+/* Chart Widgets */
+.chart-widget .chart-container {
+    margin-top: 15px;
+}
+
+.chart-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.chart-label {
+    width: 100px;
+    font-size: 13px;
+    color: #50575e;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 10px;
+}
+
+.chart-bar-bg {
+    flex: 1;
+    background: #f0f0f1;
+    height: 16px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-right: 10px;
+}
+
+.chart-bar-fill {
+    height: 100%;
+    background: #2271b1;
+    border-radius: 8px;
+    transition: width 0.5s ease-in-out;
+    min-width: 2px;
+}
+
+.chart-value {
+    width: 40px;
+    text-align: right;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+/* Status Colors */
+.status-open .chart-bar-fill { background: #f0ad4e; }
+.status-solved .chart-bar-fill { background: #28a745; }
+.status-closed .chart-bar-fill { background: #50575e; }
+
+/* Priority Colors */
+.priority-high .chart-bar-fill { background: #d63638; }
+.priority-medium .chart-bar-fill { background: #f0ad4e; }
+.priority-low .chart-bar-fill { background: #2271b1; }

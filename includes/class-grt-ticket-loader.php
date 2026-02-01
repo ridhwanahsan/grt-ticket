@@ -110,5 +110,11 @@ class GRT_Ticket_Loader {
 		foreach ( $this->actions as $hook ) {
 			add_action( $hook['hook'], array( $hook['component'], $hook['callback'] ), $hook['priority'], $hook['accepted_args'] );
 		}
+
+		// Check for database updates
+		GRT_Ticket_Database::ensure_assigned_agent_column();
+		GRT_Ticket_Database::ensure_sender_id_column();
+		GRT_Ticket_Database::ensure_is_internal_column();
+		GRT_Ticket_Database::ensure_custom_fields_column();
 	}
 }

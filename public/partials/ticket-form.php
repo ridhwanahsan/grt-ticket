@@ -27,6 +27,34 @@ if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
 		}
 	}
 }
+
+// Get Form Structure
+$form_structure = get_option( 'grt_ticket_form_structure', array() );
+
+// If structure is empty (first run), initialize with default fields + existing custom fields
+if ( empty( $form_structure ) ) {
+	$default_fields = array(
+		array( 'id' => 'category', 'type' => 'select', 'label' => 'Category', 'required' => true, 'width' => '100', 'is_system' => true ),
+		array( 'id' => 'user_name', 'type' => 'text', 'label' => 'Your Name', 'required' => true, 'width' => '50', 'is_system' => true ),
+		array( 'id' => 'user_email', 'type' => 'email', 'label' => 'Your Email', 'required' => true, 'width' => '50', 'is_system' => true ),
+		array( 'id' => 'theme_name', 'type' => 'text', 'label' => 'Theme / Template Name', 'required' => true, 'width' => '50', 'is_system' => true ),
+		array( 'id' => 'license_code', 'type' => 'text', 'label' => 'License Code', 'required' => true, 'width' => '50', 'is_system' => true ),
+		array( 'id' => 'title', 'type' => 'text', 'label' => 'Issue Title', 'required' => true, 'width' => '100', 'is_system' => true ),
+		array( 'id' => 'priority', 'type' => 'select', 'label' => 'Priority', 'required' => true, 'width' => '100', 'is_system' => true ),
+		array( 'id' => 'description', 'type' => 'textarea', 'label' => 'Describe Your Issue', 'required' => true, 'width' => '100', 'is_system' => true ),
+	);
+
+	$existing_custom_fields = get_option( 'grt_ticket_custom_fields', array() );
+	if ( is_array( $existing_custom_fields ) ) {
+		foreach ( $existing_custom_fields as &$field ) {
+			$field['width'] = '100'; 
+			$field['is_system'] = false;
+		}
+		$form_structure = array_merge( $default_fields, $existing_custom_fields );
+	} else {
+		$form_structure = $default_fields;
+	}
+}
 ?>
 
 <div class="grt-ticket-container">
@@ -48,85 +76,129 @@ if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
 		</div>
 
 		<div class="grt-tabs-content-wrapper"> 
-			<!-- Tab 1: Submit Ticket (Default for all) -->
+			<!-- Tab 1: Submit Ticket -->
 			<div id="grt-tab-submit" class="grt-tab-content active"> 
-				<div class="grt-category-selector">
-					<label><?php esc_html_e( 'What can we help you with?', 'grt-ticket' ); ?></label>
-					
-					<div class="grt-custom-dropdown" id="grt-category-dropdown">
-						<div class="grt-dropdown-selected">
-							<span class="grt-selected-text"><?php esc_html_e( 'Select an issue category', 'grt-ticket' ); ?></span>
-							<span class="grt-dropdown-arrow">▼</span>
-						</div>
-						<div class="grt-dropdown-options">
-							<?php foreach ( $categories as $cat ) : ?>
-								<div class="grt-dropdown-item" data-value="<?php echo esc_attr( $cat['name'] ); ?>">
-									<div class="grt-item-icon">
-										<?php if ( ! empty( $cat['image'] ) ) : ?>
-											<img src="<?php echo esc_url( $cat['image'] ); ?>" alt="<?php echo esc_attr( $cat['name'] ); ?>">
-										<?php else: ?>
-											<span class="grt-item-icon-placeholder">?</span>
-										<?php endif; ?>
-									</div>
-									<span class="grt-item-name"><?php echo esc_html( $cat['name'] ); ?></span>
-								</div>
-							<?php endforeach; ?>
-						</div>
-					</div>
-				</div>
-
+				
 				<form id="grt-ticket-submit-form" class="grt-ticket-form">
-					<input type="hidden" id="grt-selected-category" name="category" value="">
+					
+					<?php foreach ( $form_structure as $field ) : 
+						$field_id = isset( $field['id'] ) ? esc_attr( $field['id'] ) : '';
+						$field_type = isset( $field['type'] ) ? esc_attr( $field['type'] ) : 'text';
+						$field_label = isset( $field['label'] ) ? esc_html( $field['label'] ) : '';
+						$field_placeholder = isset( $field['placeholder'] ) ? esc_attr( $field['placeholder'] ) : '';
+						$field_width = isset( $field['width'] ) ? esc_attr( $field['width'] ) : '100';
+						$is_required_attr = ! empty( $field['required'] ) ? 'required' : '';
+						$required_class = ! empty( $field['required'] ) ? 'required' : '';
+						$required_mark = ! empty( $field['required'] ) ? '<span class="required">*</span>' : '';
+						
+						// Handle System Fields
+						if ( ! empty( $field['is_system'] ) ) {
+							if ( $field_id === 'category' ) : ?>
+								<div class="grt-category-selector grt-full-width" style="width: 100%; margin-bottom: 30px;">
+									<label><?php echo $field_label; ?></label>
+									<input type="hidden" id="grt-selected-category" name="category" value="">
+									<div class="grt-custom-dropdown" id="grt-category-dropdown">
+										<div class="grt-dropdown-selected">
+											<span class="grt-selected-text"><?php esc_html_e( 'Select an issue category', 'grt-ticket' ); ?></span>
+											<span class="grt-dropdown-arrow">▼</span>
+										</div>
+										<div class="grt-dropdown-options">
+											<?php foreach ( $categories as $cat ) : ?>
+												<div class="grt-dropdown-item" data-value="<?php echo esc_attr( $cat['name'] ); ?>">
+													<div class="grt-item-icon">
+														<?php if ( ! empty( $cat['image'] ) ) : ?>
+															<img src="<?php echo esc_url( $cat['image'] ); ?>" alt="<?php echo esc_attr( $cat['name'] ); ?>">
+														<?php else: ?>
+															<span class="grt-item-icon-placeholder">?</span>
+														<?php endif; ?>
+													</div>
+													<span class="grt-item-name"><?php echo esc_html( $cat['name'] ); ?></span>
+												</div>
+											<?php endforeach; ?>
+										</div>
+									</div>
+								</div>
+							<?php elseif ( $field_id === 'user_name' ) : ?>
+								<div class="grt-form-group <?php echo $required_class; ?> grt-width-<?php echo $field_width; ?>">
+									<label for="grt-user-name"><?php echo $field_label . ' ' . $required_mark; ?></label>
+									<input type="text" id="grt-user-name" name="user_name" value="<?php echo esc_attr( $user_name ); ?>" <?php echo $is_logged_in ? 'readonly' : ''; ?> <?php echo $is_required_attr; ?>>
+								</div>
+							<?php elseif ( $field_id === 'user_email' ) : ?>
+								<div class="grt-form-group <?php echo $required_class; ?> grt-width-<?php echo $field_width; ?>">
+									<label for="grt-user-email"><?php echo $field_label . ' ' . $required_mark; ?></label>
+									<input type="email" id="grt-user-email" name="user_email" value="<?php echo esc_attr( $user_email ); ?>" <?php echo $is_logged_in ? 'readonly' : ''; ?> <?php echo $is_required_attr; ?>>
+								</div>
+								
+							<?php elseif ( $field_id === 'user_password' ) : 
+								if ( ! $is_logged_in ) : ?>
+									<div class="grt-form-group grt-width-<?php echo $field_width; ?>">
+										<label for="grt-user-password"><?php echo $field_label; ?></label>
+										<input type="password" id="grt-user-password" name="user_password" placeholder="<?php esc_attr_e( 'Leave empty to auto-generate', 'grt-ticket' ); ?>">
+										<small class="grt-form-help"><?php esc_html_e( 'Create a password to access your tickets later. If left empty, we will email you one.', 'grt-ticket' ); ?></small>
+									</div>
+								<?php endif; ?>
+							
+							<?php elseif ( $field_id === 'theme_name' ) : ?>
+								<div class="grt-form-group <?php echo $required_class; ?> grt-width-<?php echo $field_width; ?>">
+									<label for="grt-theme-name"><?php echo $field_label . ' ' . $required_mark; ?></label>
+									<input type="text" id="grt-theme-name" name="theme_name" <?php echo $is_required_attr; ?>>
+								</div>
+							<?php elseif ( $field_id === 'license_code' ) : ?>
+								<div class="grt-form-group <?php echo $required_class; ?> grt-width-<?php echo $field_width; ?>">
+									<label for="grt-license-code"><?php echo $field_label . ' ' . $required_mark; ?></label>
+									<input type="text" id="grt-license-code" name="license_code" <?php echo $is_required_attr; ?>>
+								</div>
+							<?php elseif ( $field_id === 'title' ) : ?>
+								<div class="grt-form-group <?php echo $required_class; ?> grt-width-<?php echo $field_width; ?>">
+									<label for="grt-issue-title"><?php echo $field_label . ' ' . $required_mark; ?></label>
+									<input type="text" id="grt-issue-title" name="title" <?php echo $is_required_attr; ?>>
+								</div>
+							<?php elseif ( $field_id === 'priority' ) : ?>
+								<div class="grt-form-group <?php echo $required_class; ?> grt-width-<?php echo $field_width; ?>">
+									<label for="grt-issue-priority"><?php echo $field_label . ' ' . $required_mark; ?></label>
+									<select id="grt-issue-priority" name="priority" <?php echo $is_required_attr; ?>>
+										<option value="low"><?php esc_html_e( 'Low - General Question', 'grt-ticket' ); ?></option>
+										<option value="medium" selected><?php esc_html_e( 'Medium - Normal Issue', 'grt-ticket' ); ?></option>
+										<option value="high"><?php esc_html_e( 'High - Critical Issue', 'grt-ticket' ); ?></option>
+									</select>
+								</div>
+							<?php elseif ( $field_id === 'description' ) : ?>
+								<div class="grt-form-group <?php echo $required_class; ?> grt-width-<?php echo $field_width; ?>">
+									<label for="grt-issue-description"><?php echo $field_label . ' ' . $required_mark; ?></label>
+									<textarea id="grt-issue-description" name="description" <?php echo $is_required_attr; ?>></textarea>
+								</div>
+							<?php endif; 
+						} else { 
+							// Handle Custom Fields
+							$options = isset( $field['options'] ) ? $field['options'] : '';
+							?>
+							<div class="grt-form-group <?php echo $required_class; ?> grt-custom-field-<?php echo $field_type; ?> grt-width-<?php echo $field_width; ?>">
+								<label for="<?php echo $field_id; ?>"><?php echo $field_label . ' ' . $required_mark; ?></label>
+								
+								<?php if ( $field_type === 'textarea' ) : ?>
+									<textarea name="custom_fields[<?php echo $field_id; ?>]" id="<?php echo $field_id; ?>" placeholder="<?php echo $field_placeholder; ?>" <?php echo $is_required_attr; ?>></textarea>
+								
+								<?php elseif ( $field_type === 'select' ) : 
+									$opts = explode( "\n", $options );
+								?>
+									<select name="custom_fields[<?php echo $field_id; ?>]" id="<?php echo $field_id; ?>" <?php echo $is_required_attr; ?>>
+										<option value=""><?php esc_html_e( 'Select option', 'grt-ticket' ); ?></option>
+										<?php foreach ( $opts as $opt ) : 
+											$opt = trim( $opt );
+											if ( empty( $opt ) ) continue;
+										?>
+											<option value="<?php echo esc_attr( $opt ); ?>"><?php echo esc_html( $opt ); ?></option>
+										<?php endforeach; ?>
+									</select>
 
-					<div class="grt-form-group required">
-						<label for="grt-user-name"><?php esc_html_e( 'Your Name', 'grt-ticket' ); ?></label>
-						<input type="text" id="grt-user-name" name="user_name" value="<?php echo esc_attr( $user_name ); ?>" <?php echo $is_logged_in ? 'readonly' : ''; ?> required>
-					</div>
+								<?php else : ?>
+									<input type="<?php echo $field_type; ?>" name="custom_fields[<?php echo $field_id; ?>]" id="<?php echo $field_id; ?>" placeholder="<?php echo $field_placeholder; ?>" <?php echo $is_required_attr; ?>>
+								<?php endif; ?>
+							</div>
+						<?php } 
+					endforeach; ?>
 
-					<div class="grt-form-group required">
-						<label for="grt-user-email"><?php esc_html_e( 'Your Email', 'grt-ticket' ); ?></label>
-						<input type="email" id="grt-user-email" name="user_email" value="<?php echo esc_attr( $user_email ); ?>" <?php echo $is_logged_in ? 'readonly' : ''; ?> required>
-					</div>
-
-					<?php if ( ! $is_logged_in ) : ?>
-						<!-- Password field for guests only -->
-						<div class="grt-form-group">
-							<label for="grt-user-password"><?php esc_html_e( 'Set a Password (Optional)', 'grt-ticket' ); ?></label>
-							<input type="password" id="grt-user-password" name="user_password" placeholder="<?php esc_attr_e( 'Leave empty to auto-generate', 'grt-ticket' ); ?>">
-							<small class="grt-form-help"><?php esc_html_e( 'Create a password to access your tickets later. If left empty, we will email you one.', 'grt-ticket' ); ?></small>
-						</div>
-					<?php endif; ?>
-
-					<div class="grt-form-group required">
-						<label for="grt-theme-name"><?php esc_html_e( 'Theme / Template Name', 'grt-ticket' ); ?></label>
-						<input type="text" id="grt-theme-name" name="theme_name" required>
-					</div>
-
-					<div class="grt-form-group required">
-						<label for="grt-license-code"><?php esc_html_e( 'License Code', 'grt-ticket' ); ?></label>
-						<input type="text" id="grt-license-code" name="license_code" required>
-					</div>
-
-					<div class="grt-form-group required">
-						<label for="grt-issue-title"><?php esc_html_e( 'Issue Title', 'grt-ticket' ); ?></label>
-						<input type="text" id="grt-issue-title" name="title" required>
-					</div>
-
-					<div class="grt-form-group required">
-						<label for="grt-issue-priority"><?php esc_html_e( 'Priority', 'grt-ticket' ); ?></label>
-						<select id="grt-issue-priority" name="priority" required>
-							<option value="low"><?php esc_html_e( 'Low - General Question', 'grt-ticket' ); ?></option>
-							<option value="medium" selected><?php esc_html_e( 'Medium - Normal Issue', 'grt-ticket' ); ?></option>
-							<option value="high"><?php esc_html_e( 'High - Critical Issue', 'grt-ticket' ); ?></option>
-						</select>
-					</div>
-
-					<div class="grt-form-group required grt-full-width">
-						<label for="grt-issue-description"><?php esc_html_e( 'Describe Your Issue', 'grt-ticket' ); ?></label>
-						<textarea id="grt-issue-description" name="description" required></textarea>
-					</div>
-
-					<button type="submit" id="grt-submit-btn" class="grt-submit-btn">
+					<button type="submit" id="grt-submit-btn" class="grt-submit-btn grt-full-width">
 						<?php esc_html_e( 'Submit Ticket', 'grt-ticket' ); ?>
 					</button>
 				</form>

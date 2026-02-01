@@ -154,6 +154,27 @@ class GRT_Ticket_Public {
 
 		wp_localize_script( $this->plugin_name . '-ticket-form', 'grtTicketPublic', $data );
 		wp_localize_script( $this->plugin_name . '-chat-interface', 'grtTicketPublic', $data );
+
+		// Check if we should enqueue scripts (same logic as styles)
+		global $post;
+		$should_enqueue = false;
+
+		if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'grt_ticket' ) ) {
+			$should_enqueue = true;
+		}
+
+		if ( get_query_var( 'grt_ticket_id' ) || get_query_var( 'ticket' ) || isset( $_GET['ticket_id'] ) ) {
+			$should_enqueue = true;
+		}
+
+		if ( is_singular() ) {
+			$should_enqueue = true;
+		}
+
+		if ( $should_enqueue ) {
+			wp_enqueue_script( $this->plugin_name . '-ticket-form' );
+			wp_enqueue_script( $this->plugin_name . '-chat-interface' );
+		}
 	}
 
 	/**

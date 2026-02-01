@@ -3,7 +3,7 @@ Contributors: ridhwanahsan
 Tags: support, ticket, chat, email piping, helpdesk
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 1.0.7
+Stable tag: 1.0.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,6 +13,8 @@ GRT Ticket is a complete support ticket system for WordPress, providing real-tim
 
 * Create and manage tickets from WordPress admin and frontend
 * Real-time chat between users and admins
+* **Custom Fields Builder**: Create custom forms with Text, Textarea, Number, Email, URL, Select, and Date fields
+* **Advanced Search**: Filter tickets by User Name or Ticket ID instantly
 * Guest Ticket Submission: Users can submit tickets without an account (auto-creates account)
 * User Profile: Users can manage their profile and upload avatars
 * Auto-Assignment: Automatically assign tickets to agents based on category
@@ -31,6 +33,11 @@ GRT Ticket is a complete support ticket system for WordPress, providing real-tim
 4. Add the shortcode `[grt_ticket_form]` to any page to display the ticket submission form.
 
 == Changelog ==
+
+= 1.0.8 =
+* Feature: Added Advanced Search Filter in Tickets List (Search by Name or Ticket ID).
+* Feature: Introduced Custom Fields Builder for ticket submission forms.
+* Improvement: Enhanced ticket list query performance.
 
 = 1.0.7 =
 * Fix: Browser notifications now trigger even when the tab is active.

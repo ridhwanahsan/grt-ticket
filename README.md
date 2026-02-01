@@ -1,6 +1,6 @@
 # GRT Ticket - Professional WordPress Support Ticket System
 
-**Version:** 1.0.7  
+**Version:** 1.0.8  
 **Requires at least:** 5.0  
 **Tested up to:** 6.4  
 **Requires PHP:** 7.4  
@@ -29,6 +29,7 @@ Unlike standard ticketing plugins, GRT Ticket offers a distraction-free experien
 ## 🚀 Key Features
 
 ### 🎨 User Experience (Frontend)
+*   **Custom Fields Builder**: Admins can create dynamic forms with Text, Number, Date, URL, and Select fields to capture specific ticket details.
 *   **Full-Screen Live Chat**: A distraction-free, WhatsApp-like chat interface for real-time communication.
 *   **Modern Ticket Form**: Beautifully designed submission form with custom category icons and validation.
 *   **Guest Ticket Submission**: Users don't need an account to submit tickets. The system automatically creates an account and handles secure password generation.
@@ -41,6 +42,7 @@ Unlike standard ticketing plugins, GRT Ticket offers a distraction-free experien
 *   **Clean Interface**: Automatically hides the WordPress Admin Bar for non-admin users to maintain a professional app-like feel.
   
 ### 🛠️ Ticket Management (Admin)
+*   **Advanced Search**: Quickly find tickets by User Name or Ticket ID using the smart search filter.
 *   **Admin Dashboard**: Visual overview of support performance, including ticket volume, open/closed counts, and average user ratings.
 *   **Agent Performance**: Track individual agent performance with detailed stats on assigned and solved tickets.
 *   **Auto-Assignment**: Automatically assign tickets to specific agents based on the issue category.
@@ -94,6 +96,11 @@ Add the following shortcode to any page to display the ticket form and user dash
 4.  Update the ticket status to **Solved** when finished.
 
 ## 📋 Changelog
+
+### 1.0.8
+*   **Feature**: Added Advanced Search Filter in Tickets List (Search by Name or Ticket ID).
+*   **Feature**: Introduced Custom Fields Builder for ticket submission forms.
+*   **Improvement**: Enhanced ticket list query performance.
 
 ### 1.0.7
 *   **Fix**: Browser notifications now trigger even when the tab/window is active/focused.
