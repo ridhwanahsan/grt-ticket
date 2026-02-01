@@ -24,6 +24,9 @@ Unlike standard ticketing plugins, GRT Ticket offers a distraction-free experien
   <img src="https://github.com/user-attachments/assets/14054b67-c991-4a5a-9903-bd89131ab63d" width="100%" alt="User View" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
   <br /><br />
   <img src="https://github.com/user-attachments/assets/e0344a5e-f288-436d-a81f-f9bef8d11f9f" width="48%" alt="Mobile View" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
+<br /><br />
+  <img width="1272" height="858" alt="image" src="https://github.com/user-attachments/assets/d503a9a8-d965-4b80-9c15-ba61488a108b" />
+
 </p>
 
 ## 🚀 Key Features
