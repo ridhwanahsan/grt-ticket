@@ -1,16 +1,17 @@
 === GRT Ticket ===
 Contributors: ridhwanahsan
-Tags: support, ticket, chat, email piping, helpdesk
+Tags: support, ticket, chat, email piping, helpdesk, supabase, realtime
 Requires at least: 5.0
-Tested up to: 6.9
-Stable tag: 1.0.8
+Tested up to: 6.7
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-GRT Ticket is a complete support ticket system for WordPress, providing real-time chat functionality, email piping, and seamless ticket management. Users can create tickets via the website, reply directly through email, and have two-way conversation sync between chat and email.
+GRT Ticket is a complete support ticket system for WordPress, providing real-time chat functionality, email piping, and seamless ticket management. Users can create tickets via the website, reply directly through email, and have two-way conversation sync between chat and email. Now with **Supabase Realtime** integration for instant messaging!
 
 == Features ==
 
+* **Supabase Integration (New!)**: True real-time chat powered by Supabase Realtime DB (optional)
 * Create and manage tickets from WordPress admin and frontend
 * Real-time chat between users and admins
 * **Custom Fields Builder**: Create custom forms with Text, Textarea, Number, Email, URL, Select, and Date fields
@@ -30,9 +31,26 @@ GRT Ticket is a complete support ticket system for WordPress, providing real-tim
 1. Upload the plugin files to the `/wp-content/plugins/grt-ticket` directory, or install the plugin through the WordPress plugins screen directly.
 2. Activate the plugin through the 'Plugins' screen in WordPress.
 3. Use the Settings->GRT Ticket screen to configure the plugin.
-4. Add the shortcode `[grt_ticket_form]` to any page to display the ticket submission form.
+4. Add the shortcode `[grt_ticket]` to any page to display the ticket submission form.
+
+=== Supabase Configuration (Optional for Realtime) ===
+
+1. Create a project at [Supabase](https://supabase.com).
+2. Get your **Project URL**, **Anon Key**, and **Service Role Secret**.
+3. In WordPress, go to **GRT Ticket > Settings** and enter these credentials.
+4. In Supabase SQL Editor, run this command to create the messages table:
+   `create table public.grt_messages ( id bigint not null, ticket_id bigint not null, sender_type text not null, sender_name text not null, message text null, attachment_url text null, is_internal integer null default 0, created_at timestamp with time zone null default now(), constraint grt_messages_pkey primary key (id) ) TABLESPACE pg_default;`
+5. Enable "Realtime Chat" in plugin settings.
 
 == Changelog ==
+
+= 1.1.0 =
+* Feature: Added **Supabase Realtime Integration** for instant chat updates without polling.
+* Feature: Hybrid architecture (WordPress DB for storage + Supabase for realtime sync).
+* Improvement: Added "Test Connection" buttons for Supabase (Read/Write).
+* Improvement: Secure Service Role handling in settings.
+* Fix: Solved profile image upload issues.
+* Fix: Resolved redirect 404 error after ticket submission.
 
 = 1.0.8 =
 * Feature: Added Advanced Search Filter in Tickets List (Search by Name or Ticket ID).
