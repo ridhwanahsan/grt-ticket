@@ -1,6 +1,6 @@
 # GRT Ticket - Professional WordPress Support Ticket System
 
-**Version:** 1.0.8  
+**Version:** 1.1.0  
 **Requires at least:** 5.0  
 **Tested up to:** 6.4  
 **Requires PHP:** 7.4  
@@ -27,6 +27,11 @@ Unlike standard ticketing plugins, GRT Ticket offers a distraction-free experien
 </p>
 
 ## 🚀 Key Features
+
+### ⚡ Supabase Integration (New!)
+*   **True Real-Time Chat**: Integrated with Supabase Realtime DB for instant, zero-latency messaging.
+*   **Hybrid Architecture**: Keeps your WordPress database as the main source of truth while using Supabase for high-speed message delivery.
+*   **Zero Server Load**: Offloads chat polling to Supabase, significantly reducing the load on your WordPress server.
 
 ### 🎨 User Experience (Frontend)
 *   **Custom Fields Builder**: Admins can create dynamic forms with Text, Number, Date, URL, and Select fields to capture specific ticket details.
@@ -66,6 +71,23 @@ Unlike other plugins that charge for essential features, GRT Ticket includes the
 *   **Real-time Chat**: Full-screen, real-time communication interface for users and admins without relying on external services.
 *   **Guest Ticket Submission**: Seamless support for non-logged-in users with automatic secure account creation.
 
+## ⚡ Supabase Configuration (Real-Time Chat)
+
+To enable ultra-fast real-time chat, GRT Ticket integrates with Supabase. Follow these steps to get your credentials:
+
+1.  **Create a Project**: Go to [Supabase](https://supabase.com) and create a new project.
+2.  **Get Credentials**:
+    *   Go to **Project Settings** (Cog icon) > **API**.
+    *   **Supabase URL**: Copy the "Project URL".
+    *   **Supabase Anon Key**: Copy the "anon" / "public" key.
+    *   **Supabase Service Role (Secret)**: Copy the "service_role" / "secret" key.
+3.  **Configure Plugin**:
+    *   Go to your WordPress Admin > **GRT Ticket** > **Settings**.
+    *   Scroll down to **Supabase Configuration**.
+    *   Enter the URL, Anon Key, and Service Role Secret.
+    *   Click **Test Connection** to verify everything is working.
+    *   Check **Enable Supabase Realtime** and Save Settings.
+
 ## 📦 Installation
 
 1.  **Upload**: Upload the `grt-ticket` folder to the `/wp-content/plugins/` directory.
@@ -74,6 +96,7 @@ Unlike other plugins that charge for essential features, GRT Ticket includes the
 4.  **Configure**: Go to **GRT Ticket > Settings** in your dashboard to configure:
     *   Support Categories
     *   Twilio API (Optional)
+    *   Supabase Realtime (Optional but Recommended)
     *   Direct Contact Numbers
     *   Chat Poll Interval
 
@@ -96,6 +119,12 @@ Add the following shortcode to any page to display the ticket form and user dash
 4.  Update the ticket status to **Solved** when finished.
 
 ## 📋 Changelog
+
+### 1.1.0
+*   **New Feature**: Supabase Realtime Integration! Now you can use Supabase as a real-time engine for instant chat updates.
+*   **Feature**: Added "Service Role" support for secure server-side message syncing.
+*   **Feature**: Added "Test Connection" button in settings to verify Supabase credentials.
+*   **Improvement**: Hybrid architecture ensures all data remains safely stored in your WordPress database while using Supabase for speed.
 
 ### 1.0.8
 *   **Feature**: Added Advanced Search Filter in Tickets List (Search by Name or Ticket ID).
@@ -141,3 +170,6 @@ A: Yes, GRT Ticket is designed to work independently of your theme's styling, us
 
 **Q: Where are files stored?**  
 A: Uploaded files are securely stored in your WordPress Media Library and attached to the ticket.
+
+**Q: Do I need Supabase for the plugin to work?**
+A: No! Supabase is optional. If you don't enable it, the plugin will use standard AJAX polling (checking for messages every few seconds) which works on any hosting environment.
