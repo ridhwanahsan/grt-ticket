@@ -392,8 +392,12 @@
             });
         });
 
-        // Start polling for new messages
-        startPolling();
+        // Start Chat (Realtime or Polling)
+        if (grtTicketPublic.supabase && grtTicketPublic.supabase.enabled) {
+            initSupabase();
+        } else {
+            startPolling();
+        }
 
         /**
          * Send a message
@@ -634,6 +638,41 @@
         function scrollToBottom() {
             const $messages = $('.grt-chat-messages');
             $messages.scrollTop($messages[0].scrollHeight);
+        }
+
+        /**
+         * Initialize Supabase Realtime
+         */
+        function initSupabase() {
+            if (typeof supabase === 'undefined') {
+                console.error('Supabase client not loaded. Falling back to polling.');
+                startPolling();
+                return;
+            }
+
+            console.log('Initializing Supabase Realtime for Ticket #' + ticketId);
+            const sb = supabase.createClient(grtTicketPublic.supabase.url, grtTicketPublic.supabase.anon_key);
+
+            const channel = sb
+                .channel('public:grt_messages')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: 'INSERT',
+                        schema: 'public',
+                        table: 'grt_messages',
+                        filter: `ticket_id=eq.${ticketId}`
+                    },
+                    (payload) => {
+                        console.log('New message received:', payload);
+                        const newMsg = payload.new;
+                        
+                        // Append message
+                        appendMessages([newMsg]);
+                        scrollToBottom();
+                    }
+                )
+                .subscribe();
         }
 
         /**

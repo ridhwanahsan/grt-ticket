@@ -850,7 +850,15 @@ class GRT_Ticket_Database {
 		);
 
 		if ( $result ) {
-			return $wpdb->insert_id;
+			$message_id = $wpdb->insert_id;
+
+			// Sync to Supabase
+			if ( class_exists( 'GRT_Supabase' ) ) {
+				$insert_data['id'] = $message_id;
+				GRT_Supabase::sync_message( $insert_data );
+			}
+
+			return $message_id;
 		}
 
 		return false;

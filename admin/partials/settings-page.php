@@ -58,6 +58,15 @@ if ( isset( $_POST['grt_ticket_save_settings'] ) && check_admin_referer( 'grt_ti
 	}
 	update_option( 'grt_ticket_imap_ssl', isset( $_POST['grt_ticket_imap_ssl'] ) ? 1 : 0 );
 
+	// Supabase Settings
+	update_option( 'grt_ticket_enable_supabase', isset( $_POST['grt_ticket_enable_supabase'] ) ? 1 : 0 );
+	update_option( 'grt_ticket_supabase_url', sanitize_text_field( $_POST['grt_ticket_supabase_url'] ) );
+	update_option( 'grt_ticket_supabase_anon_key', sanitize_text_field( $_POST['grt_ticket_supabase_anon_key'] ) );
+	// Only update secret if provided (password field)
+	if ( ! empty( $_POST['grt_ticket_supabase_service_role'] ) ) {
+		update_option( 'grt_ticket_supabase_service_role', sanitize_text_field( $_POST['grt_ticket_supabase_service_role'] ) );
+	}
+
 	echo '<div class="notice notice-success"><p>' . esc_html__( 'Settings saved successfully!', 'grt-ticket' ) . '</p></div>';
 }
 
@@ -109,6 +118,12 @@ $imap_port = get_option( 'grt_ticket_imap_port', 993 );
 $imap_user = get_option( 'grt_ticket_imap_user', '' );
 $imap_pass = get_option( 'grt_ticket_imap_pass', '' );
 $imap_ssl = get_option( 'grt_ticket_imap_ssl', 1 );
+
+// Supabase Options
+$enable_supabase = get_option( 'grt_ticket_enable_supabase', 0 );
+$supabase_url = get_option( 'grt_ticket_supabase_url', '' );
+$supabase_anon_key = get_option( 'grt_ticket_supabase_anon_key', '' );
+$supabase_service_role = get_option( 'grt_ticket_supabase_service_role', '' );
 ?>
 
 <div class="wrap grt-ticket-wrap">
@@ -123,6 +138,7 @@ $imap_ssl = get_option( 'grt_ticket_imap_ssl', 1 );
 		<a href="#grt-tab-piping" class="nav-tab"><?php esc_html_e( 'Email Piping (Reply via Email)', 'grt-ticket' ); ?></a>
 		<a href="#grt-tab-whatsapp" class="nav-tab"><?php esc_html_e( 'WhatsApp Integrations', 'grt-ticket' ); ?></a>
 		<a href="#grt-tab-contact" class="nav-tab"><?php esc_html_e( 'Direct Contact', 'grt-ticket' ); ?></a>
+		<a href="#grt-tab-realtime" class="nav-tab"><?php esc_html_e( 'Realtime Chat', 'grt-ticket' ); ?></a>
 	</h2>
 
 	<form method="post" action="" class="grt-settings-form">
@@ -420,6 +436,170 @@ $imap_ssl = get_option( 'grt_ticket_imap_ssl', 1 );
 				</tbody>
 			</table>
 		</div>
+
+		<!-- Realtime Chat Tab -->
+		<div id="grt-tab-realtime" class="grt-tab-content">
+			<div class="grt-settings-section-header">
+				<h2><?php esc_html_e( 'Supabase Realtime Chat', 'grt-ticket' ); ?></h2>
+				<p><?php esc_html_e( 'Enable real-time chat updates using Supabase. This replaces polling for a faster experience.', 'grt-ticket' ); ?></p>
+			</div>
+			
+			<table class="form-table">
+				<tbody>
+					<tr>
+						<th scope="row">
+							<label for="grt_ticket_enable_supabase"><?php esc_html_e( 'Enable Realtime Chat', 'grt-ticket' ); ?></label>
+						</th>
+						<td>
+							<label class="grt-switch">
+								<input type="checkbox" name="grt_ticket_enable_supabase" id="grt_ticket_enable_supabase" value="1" <?php checked( $enable_supabase, 1 ); ?>>
+								<span class="slider round"></span>
+							</label>
+							<p class="description"><?php esc_html_e( 'Enable Supabase integration for instant message updates.', 'grt-ticket' ); ?></p>
+						</td>
+					</tr>
+
+					<tr>
+						<th scope="row">
+							<label for="grt_ticket_supabase_url"><?php esc_html_e( 'Supabase URL', 'grt-ticket' ); ?></label>
+						</th>
+						<td>
+							<input type="text" name="grt_ticket_supabase_url" id="grt_ticket_supabase_url" value="<?php echo esc_attr( $supabase_url ); ?>" class="regular-text" placeholder="https://xyz.supabase.co">
+							<p class="description"><?php esc_html_e( 'Your Supabase Project URL.', 'grt-ticket' ); ?></p>
+						</td>
+					</tr>
+
+					<tr>
+						<th scope="row">
+							<label for="grt_ticket_supabase_anon_key"><?php esc_html_e( 'Supabase Anon Key (Public)', 'grt-ticket' ); ?></label>
+						</th>
+						<td>
+							<input type="text" name="grt_ticket_supabase_anon_key" id="grt_ticket_supabase_anon_key" value="<?php echo esc_attr( $supabase_anon_key ); ?>" class="regular-text">
+							<p class="description"><?php esc_html_e( 'The "anon" public key. Used by the frontend.', 'grt-ticket' ); ?></p>
+						</td>
+					</tr>
+
+					<tr>
+						<th scope="row">
+							<label for="grt_ticket_supabase_service_role"><?php esc_html_e( 'Supabase Service Role (Secret)', 'grt-ticket' ); ?></label>
+						</th>
+						<td>
+							<div style="display: flex; align-items: center; gap: 10px;">
+								<input type="password" name="grt_ticket_supabase_service_role" id="grt_ticket_supabase_service_role" value="<?php echo esc_attr( $supabase_service_role ); ?>" class="regular-text">
+								<button type="button" class="button" id="grt-toggle-secret"><?php esc_html_e( 'Show', 'grt-ticket' ); ?></button>
+							</div>
+							<p class="description"><?php esc_html_e( 'The "service_role" secret key. Used by the backend to push messages. Keep this safe!', 'grt-ticket' ); ?></p>
+						</td>
+					</tr>
+					
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Test Connection', 'grt-ticket' ); ?></th>
+						<td>
+							<button type="button" class="button button-secondary" id="grt-test-supabase"><?php esc_html_e( 'Test Read', 'grt-ticket' ); ?></button>
+							<button type="button" class="button button-secondary" id="grt-test-supabase-push" style="margin-left: 5px;"><?php esc_html_e( 'Test Write', 'grt-ticket' ); ?></button>
+							<span id="grt-supabase-test-result" style="margin-left: 10px; font-weight: bold;"></span>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<script>
+		jQuery(document).ready(function($) {
+			// Toggle Secret Visibility
+			$('#grt-toggle-secret').on('click', function() {
+				var $input = $('#grt_ticket_supabase_service_role');
+				var type = $input.attr('type');
+				if (type === 'password') {
+					$input.attr('type', 'text');
+					$(this).text('<?php esc_html_e( 'Hide', 'grt-ticket' ); ?>');
+				} else {
+					$input.attr('type', 'password');
+					$(this).text('<?php esc_html_e( 'Show', 'grt-ticket' ); ?>');
+				}
+			});
+
+			// Test Supabase Connection (Read)
+			$('#grt-test-supabase').on('click', function() {
+				var $btn = $(this);
+				var $result = $('#grt-supabase-test-result');
+				var url = $('#grt_ticket_supabase_url').val();
+				var key = $('#grt_ticket_supabase_service_role').val();
+
+				if (!url || !key) {
+					$result.css('color', 'red').text('<?php esc_html_e( 'Please enter URL and Secret Key first.', 'grt-ticket' ); ?>');
+					return;
+				}
+
+				$btn.prop('disabled', true).text('<?php esc_html_e( 'Testing...', 'grt-ticket' ); ?>');
+				$result.text('');
+
+				$.ajax({
+					url: ajaxurl,
+					type: 'POST',
+					data: {
+						action: 'grt_test_supabase_connection',
+						nonce: '<?php echo wp_create_nonce( 'grt_ticket_settings_nonce' ); ?>',
+						supabase_url: url,
+						supabase_key: key
+					},
+					success: function(response) {
+						if (response.success) {
+							$result.css('color', 'green').text(response.data.message);
+						} else {
+							$result.css('color', 'red').text(response.data.message);
+						}
+					},
+					error: function() {
+						$result.css('color', 'red').text('<?php esc_html_e( 'Connection failed (AJAX Error).', 'grt-ticket' ); ?>');
+					},
+					complete: function() {
+						$btn.prop('disabled', false).text('<?php esc_html_e( 'Test Read', 'grt-ticket' ); ?>');
+					}
+				});
+			});
+
+			// Test Supabase Push (Write)
+			$('#grt-test-supabase-push').on('click', function() {
+				var $btn = $(this);
+				var $result = $('#grt-supabase-test-result');
+				var url = $('#grt_ticket_supabase_url').val();
+				var key = $('#grt_ticket_supabase_service_role').val();
+
+				if (!url || !key) {
+					$result.css('color', 'red').text('<?php esc_html_e( 'Please enter URL and Secret Key first.', 'grt-ticket' ); ?>');
+					return;
+				}
+
+				$btn.prop('disabled', true).text('<?php esc_html_e( 'Testing...', 'grt-ticket' ); ?>');
+				$result.text('');
+
+				$.ajax({
+					url: ajaxurl,
+					type: 'POST',
+					data: {
+						action: 'grt_test_supabase_push',
+						nonce: '<?php echo wp_create_nonce( 'grt_ticket_settings_nonce' ); ?>',
+						supabase_url: url,
+						supabase_key: key
+					},
+					success: function(response) {
+						if (response.success) {
+							$result.css('color', 'green').text(response.data.message);
+						} else {
+							$result.css('color', 'red').text(response.data.message);
+						}
+					},
+					error: function() {
+						$result.css('color', 'red').text('<?php esc_html_e( 'Connection failed (AJAX Error).', 'grt-ticket' ); ?>');
+					},
+					complete: function() {
+						$btn.prop('disabled', false).text('<?php esc_html_e( 'Test Write', 'grt-ticket' ); ?>');
+					}
+				});
+			});
+		});
+		</script>
 
 		<!-- Hidden fields for categories JS to work -->
 		<!-- JS Logic moved to admin/js/settings-page.js -->

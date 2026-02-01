@@ -152,6 +152,19 @@ class GRT_Ticket_Public {
 			'default_avatar_url' => get_avatar_url( 0, array( 'size' => 64, 'default' => 'mystery' ) ),
 		);
 
+		// Supabase Config
+		if ( get_option( 'grt_ticket_enable_supabase', 0 ) ) {
+			wp_enqueue_script( 'supabase-js', 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2', array(), '2.0.0', true );
+			
+			$data['supabase'] = array(
+				'enabled'  => true,
+				'url'      => get_option( 'grt_ticket_supabase_url', '' ),
+				'anon_key' => get_option( 'grt_ticket_supabase_anon_key', '' ),
+			);
+		} else {
+			$data['supabase'] = array( 'enabled' => false );
+		}
+
 		wp_localize_script( $this->plugin_name . '-ticket-form', 'grtTicketPublic', $data );
 		wp_localize_script( $this->plugin_name . '-chat-interface', 'grtTicketPublic', $data );
 
@@ -189,10 +202,10 @@ class GRT_Ticket_Public {
 		add_rewrite_endpoint( 'ticket', EP_PAGES );
 		
 		// Flush rewrite rules if our rule is missing (auto-heal)
-		if ( ! get_option( 'grt_ticket_flush_rewrite_rules' ) ) {
+		if ( ! get_option( 'grt_ticket_flush_rewrite_rules_v2' ) ) {
 			add_action( 'shutdown', function() {
 				flush_rewrite_rules();
-				update_option( 'grt_ticket_flush_rewrite_rules', true );
+				update_option( 'grt_ticket_flush_rewrite_rules_v2', true );
 			});
 		}
 	}
@@ -206,7 +219,7 @@ class GRT_Ticket_Public {
 	 */
 	public function render_ticket_shortcode( $atts ) {
 		// Check for pretty permalink usage first (ticket_id via rewrite endpoint)
-		$ticket_id_query_var = get_query_var( 'grt_ticket_id' );
+		$ticket_id_query_var = get_query_var( 'ticket' );
 		if ( $ticket_id_query_var ) {
 			return $this->render_chat_interface( (int) $ticket_id_query_var );
 		}

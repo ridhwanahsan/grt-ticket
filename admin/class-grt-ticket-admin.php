@@ -383,5 +383,11 @@ class GRT_Ticket_Admin {
 		register_setting( 'grt_ticket_settings', 'grt_ticket_poll_interval', array( 'sanitize_callback' => 'absint' ) );
 		register_setting( 'grt_ticket_settings', 'grt_ticket_enable_browser_notification', array( 'sanitize_callback' => 'absint' ) );
 		register_setting( 'grt_ticket_settings', 'grt_ticket_notification_sound', array( 'sanitize_callback' => 'absint' ) );
+		
+		// Supabase Settings
+		register_setting( 'grt_ticket_settings', 'grt_ticket_enable_supabase', array( 'sanitize_callback' => 'absint' ) );
+		register_setting( 'grt_ticket_settings', 'grt_ticket_supabase_url', array( 'sanitize_callback' => 'esc_url_raw' ) );
+		register_setting( 'grt_ticket_settings', 'grt_ticket_supabase_anon_key', array( 'sanitize_callback' => 'sanitize_text_field' ) );
+		register_setting( 'grt_ticket_settings', 'grt_ticket_supabase_service_role', array( 'sanitize_callback' => 'sanitize_text_field' ) );
 	}
 }

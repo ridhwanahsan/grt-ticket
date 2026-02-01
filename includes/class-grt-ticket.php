@@ -86,6 +86,9 @@ class GRT_Ticket {
 		// The class responsible for email piping.
 		require_once GRT_TICKET_PLUGIN_DIR . 'includes/class-grt-ticket-email-piping.php';
 
+		// The class responsible for Supabase integration.
+		require_once GRT_TICKET_PLUGIN_DIR . 'includes/class-grt-supabase.php';
+
 		$this->loader = new GRT_Ticket_Loader();
 	}
 
@@ -190,6 +193,8 @@ class GRT_Ticket {
 		$this->loader->add_action( 'wp_ajax_grt_ticket_delete', $plugin_ajax, 'delete_ticket' );
 		$this->loader->add_action( 'wp_ajax_grt_ticket_assign_agent', $plugin_ajax, 'assign_ticket' );
 		$this->loader->add_action( 'wp_ajax_grt_save_form_builder', $plugin_ajax, 'save_form_builder' );
+		$this->loader->add_action( 'wp_ajax_grt_test_supabase_connection', $plugin_ajax, 'test_supabase_connection' );
+		$this->loader->add_action( 'wp_ajax_grt_test_supabase_push', $plugin_ajax, 'test_supabase_push' );
 	}
 
 	/**

@@ -898,4 +898,119 @@ class GRT_Ticket_Ajax {
 			wp_send_json_error( array( 'message' => __( 'Failed to assign agent.', 'grt-ticket' ) ) );
 		}
 	}
+
+	/**
+	 * Test Supabase Connection.
+	 *
+	 * @since    1.0.0
+	 */
+	public function test_supabase_connection() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'grt-ticket' ) ) );
+		}
+
+		check_ajax_referer( 'grt_ticket_settings_nonce', 'nonce' );
+
+		$url = isset( $_POST['supabase_url'] ) ? sanitize_text_field( $_POST['supabase_url'] ) : '';
+		$key = isset( $_POST['supabase_key'] ) ? sanitize_text_field( $_POST['supabase_key'] ) : '';
+
+		if ( empty( $url ) || empty( $key ) ) {
+			wp_send_json_error( array( 'message' => __( 'Missing URL or Key.', 'grt-ticket' ) ) );
+		}
+
+		// Try to fetch 1 row from 'grt_messages'
+		$api_url = rtrim( $url, '/' ) . '/rest/v1/grt_messages?select=id&limit=1';
+
+		$response = wp_remote_get( $api_url, array(
+			'headers' => array(
+				'apikey'        => $key,
+				'Authorization' => 'Bearer ' . $key,
+			),
+			'timeout' => 10,
+		) );
+
+		if ( is_wp_error( $response ) ) {
+			wp_send_json_error( array( 'message' => __( 'Connection failed: ' . $response->get_error_message(), 'grt-ticket' ) ) );
+		}
+
+		$code = wp_remote_retrieve_response_code( $response );
+		
+		if ( $code >= 200 && $code < 300 ) {
+			wp_send_json_success( array( 'message' => __( 'Connection successful! Table found.', 'grt-ticket' ) ) );
+		} elseif ( $code === 404 ) {
+			wp_send_json_error( array( 'message' => __( 'Connected, but table "grt_messages" not found. Did you run the SQL?', 'grt-ticket' ) ) );
+		} elseif ( $code === 401 || $code === 403 ) {
+			wp_send_json_error( array( 'message' => __( 'Authentication failed. Check your Secret Key.', 'grt-ticket' ) ) );
+		} else {
+			$body = wp_remote_retrieve_body( $response );
+			wp_send_json_error( array( 'message' => sprintf( __( 'Error %d: %s', 'grt-ticket' ), $code, $body ) ) );
+		}
+	}
+
+	/**
+	 * Test Supabase Push (Write).
+	 *
+	 * @since    1.0.0
+	 */
+	public function test_supabase_push() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'grt-ticket' ) ) );
+		}
+
+		check_ajax_referer( 'grt_ticket_settings_nonce', 'nonce' );
+
+		$url = isset( $_POST['supabase_url'] ) ? sanitize_text_field( $_POST['supabase_url'] ) : '';
+		$key = isset( $_POST['supabase_key'] ) ? sanitize_text_field( $_POST['supabase_key'] ) : '';
+
+		if ( empty( $url ) || empty( $key ) ) {
+			wp_send_json_error( array( 'message' => __( 'Missing URL or Key.', 'grt-ticket' ) ) );
+		}
+
+		// Prepare dummy data
+		$dummy_data = array(
+			'id'             => 999999, // Dummy ID
+			'ticket_id'      => 0,
+			'sender_type'    => 'admin',
+			'sender_name'    => 'System Test',
+			'message'        => 'This is a test message from GRT Ticket Settings.',
+			'is_internal'    => 1, // Mark as internal so it doesn't show up in user chats if accidentally synced
+			'created_at'     => gmdate( 'Y-m-d\TH:i:s\Z' )
+		);
+
+		$api_url = rtrim( $url, '/' ) . '/rest/v1/grt_messages';
+
+		$response = wp_remote_post( $api_url, array(
+			'headers' => array(
+				'Content-Type'  => 'application/json',
+				'apikey'        => $key,
+				'Authorization' => 'Bearer ' . $key,
+				'Prefer'        => 'return=representation' // Return the inserted row
+			),
+			'body'    => json_encode( $dummy_data ),
+			'timeout' => 15,
+		) );
+
+		if ( is_wp_error( $response ) ) {
+			wp_send_json_error( array( 'message' => __( 'Connection failed: ' . $response->get_error_message(), 'grt-ticket' ) ) );
+		}
+
+		$code = wp_remote_retrieve_response_code( $response );
+		$body = wp_remote_retrieve_body( $response );
+
+		if ( $code >= 200 && $code < 300 ) {
+			// Success! Now let's delete it to clean up
+			wp_remote_request( $api_url . '?id=eq.999999', array(
+				'method'  => 'DELETE',
+				'headers' => array(
+					'apikey'        => $key,
+					'Authorization' => 'Bearer ' . $key,
+				),
+				'timeout' => 10,
+			) );
+
+			wp_send_json_success( array( 'message' => __( 'Write test successful! Message pushed and deleted.', 'grt-ticket' ) ) );
+		} else {
+			wp_send_json_error( array( 'message' => sprintf( __( 'Write failed (Error %d): %s', 'grt-ticket' ), $code, $body ) ) );
+		}
+	}
 }
