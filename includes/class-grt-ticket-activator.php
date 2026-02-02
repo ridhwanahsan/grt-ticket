@@ -123,5 +123,22 @@ class GRT_Ticket_Activator {
 		update_option( 'grt_ticket_per_page', 20 );
 		update_option( 'grt_ticket_poll_interval', 3000 ); // 3 seconds in milliseconds
 		update_option( 'grt_ticket_version', GRT_TICKET_VERSION );
+
+		// Create "GRT Ticket" page with shortcode if it doesn't exist
+		$page_slug = 'grt-ticket';
+		$page_check = get_page_by_path( $page_slug );
+		
+		if ( ! isset( $page_check->ID ) ) {
+			wp_insert_post(
+				array(
+					'post_title'     => 'GRT Ticket',
+					'post_content'   => '[grt_ticket]',
+					'post_status'    => 'publish',
+					'post_type'      => 'page',
+					'post_name'      => $page_slug,
+					'comment_status' => 'closed',
+				)
+			);
+		}
 	}
 }
