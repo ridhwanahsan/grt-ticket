@@ -40,7 +40,8 @@ GRT Ticket is a complete support ticket system for WordPress, providing real-tim
 3. In WordPress, go to **GRT Ticket > Settings** and enter these credentials.
 4. In Supabase SQL Editor, run this command to create the messages table:
    `create table public.grt_messages ( id bigint not null, ticket_id bigint not null, sender_type text not null, sender_name text not null, message text null, attachment_url text null, is_internal integer null default 0, created_at timestamp with time zone null default now(), constraint grt_messages_pkey primary key (id) ) TABLESPACE pg_default;`
-5. Enable "Realtime Chat" in plugin settings.
+5. **IMPORTANT**: Go to **Supabase Dashboard > Database > Publications** (or Replication) and enable **"grt_messages"** for Realtime. (Otherwise, no messages will be received!)
+6. Enable "Realtime Chat" in plugin settings.
 
 == Changelog ==
 

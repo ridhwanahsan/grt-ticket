@@ -93,20 +93,18 @@
             // If user hasn't set preference, use global setting
             if (userPref === null && grtTicketPublic.enable_sound != 1) return;
             
-            // Simple beep or use a custom audio file if provided
-            // For now, we can use a small base64 encoded audio or just rely on OS notification sound (which happens with browser notification)
-            // But user asked for explicit sound setting.
-            
             // Let's use a simple beep
             try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (AudioContext) {
-                    const ctx = new AudioContext();
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
+                if (!audioCtx) {
+                    unlockAudio();
+                }
+
+                if (audioCtx && audioCtx.state === 'running') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
                     
                     osc.connect(gain);
-                    gain.connect(ctx.destination);
+                    gain.connect(audioCtx.destination);
                     
                     osc.type = 'sine';
                     osc.frequency.value = 800; // Hz
@@ -116,6 +114,8 @@
                     setTimeout(function() {
                         osc.stop();
                     }, 200);
+                } else {
+                    console.warn('AudioContext not running (waiting for user interaction)');
                 }
             } catch (e) {
                 console.error('Audio error', e);
@@ -674,7 +674,10 @@
                         filter: `ticket_id=eq.${ticketId}`
                     },
                     (payload) => {
-                        console.log('New message received:', payload);
+                        if (payload.errors) {
+                            console.error('Supabase Payload Error:', payload.errors);
+                            return;
+                        }
                         const newMsg = payload.new;
                         
                         // Inject avatar_url if missing (Supabase doesn't store it)
@@ -712,7 +715,7 @@
 
             pollInterval = setInterval(function () {
                 loadNewMessages();
-            }, 1000);
+            }, parseInt(grtTicketPublic.poll_interval) || 3000);
         }
 
         /**
