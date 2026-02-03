@@ -70,7 +70,7 @@ GRT Ticket is a complete support ticket system for WordPress, providing real-tim
 * Feature: Introduced Custom Fields Builder for ticket submission forms.
 * Improvement: Enhanced ticket list query performance.
 
-= 1.0.7 =
+= 1.0.7 ==
 * Fix: Browser notifications now trigger even when the tab is active.
 
 = 1.0.6 =
