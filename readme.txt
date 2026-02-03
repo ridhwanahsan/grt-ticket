@@ -1,17 +1,19 @@
 === GRT Ticket ===
 Contributors: ridhwanahsan
-Tags: support, ticket, chat, email piping, helpdesk, supabase, realtime
+Tags: support, ticket, chat, email piping, helpdesk, supabase, realtime, slack, discord, zapier, webhooks
 Requires at least: 5.0
 Tested up to: 6.7
-Stable tag: 1.1.0
+Stable tag: 1.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-GRT Ticket is a complete support ticket system for WordPress, providing real-time chat functionality, email piping, and seamless ticket management. Users can create tickets via the website, reply directly through email, and have two-way conversation sync between chat and email. Now with **Supabase Realtime** integration for instant messaging!
+GRT Ticket is a complete support ticket system for WordPress, providing real-time chat functionality, email piping, and seamless ticket management. Users can create tickets via the website, reply directly through email, and have two-way conversation sync between chat and email. Now with **Supabase Realtime** integration and **Webhook Notifications**!
 
 == Features ==
 
-* **Supabase Integration (New!)**: True real-time chat powered by Supabase Realtime DB (optional)
+* **Webhooks & Integrations (New!)**: Send notifications to **Slack**, **Discord**, or **Zapier** when a new ticket is created.
+* **Supabase Integration**: True real-time chat powered by Supabase Realtime DB (optional)
+* **Guest Access (New!)**: Guests can view and reply to their tickets immediately after submission via secure cookie (no login required).
 * Create and manage tickets from WordPress admin and frontend
 * Real-time chat between users and admins
 * **Custom Fields Builder**: Create custom forms with Text, Textarea, Number, Email, URL, Select, and Date fields
@@ -21,7 +23,7 @@ GRT Ticket is a complete support ticket system for WordPress, providing real-tim
 * Auto-Assignment: Automatically assign tickets to agents based on category
 * Agent Performance: View stats on agent performance and ticket resolution
 * Email Piping: User replies via email are automatically added to ticket chat
-* Email Notifications: Chat replies are sent to user email
+* Email Notifications: Chat replies are sent to user email (with direct frontend links)
 * IMAP/SMTP settings configurable via plugin settings
 * Secure input handling and WordPress coding standards compliant
 * Fully GPL-2.0 compatible
@@ -44,6 +46,16 @@ GRT Ticket is a complete support ticket system for WordPress, providing real-tim
 6. Enable "Realtime Chat" in plugin settings.
 
 == Changelog ==
+
+= 1.1.2 =
+* Feature: **Webhooks & Integrations** - Added support for Slack, Discord, and Zapier notifications.
+* Feature: **Guest Access** - Implemented secure cookie-based access for guests (no login required to view own ticket).
+* Improvement: Updated email notifications to include direct frontend links to tickets.
+* Improvement: Added "Webhooks & Integrations" tab in Settings.
+
+= 1.1.1 =
+* Improvement: Updated documentation and README.
+* Improvement: Minor UI tweaks.
 
 = 1.1.0 =
 * Feature: Added **Supabase Realtime Integration** for instant chat updates without polling.

@@ -1,8 +1,8 @@
 # GRT Ticket - Professional WordPress Support Ticket System
 
-**Version:** 1.1.1  
+**Version:** 1.1.2  
 **Requires at least:** 5.0  
-**Tested up to:** 6.4  
+**Tested up to:** 6.7  
 **Requires PHP:** 7.4  
 **License:** GPLv2 or later  
 
@@ -15,23 +15,32 @@ GRT Ticket is a powerful, modern support ticket management plugin for WordPress 
 Unlike standard ticketing plugins, GRT Ticket offers a distraction-free experience with a beautiful UI, AJAX-powered live updates, and smart features like guest submission and direct contact options.
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/9ac1849a-40e4-47c5-b864-ed1cc7671070" width="100%" alt="GRT Ticket Dashboard" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
+  <img src="https://github.com/user-attachments/assets/9ac1849a-40e4-47c5-b864-ed1cc7671070" width="80%" alt="GRT Ticket Dashboard" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
   <br /><br />
-  <img src="https://github.com/user-attachments/assets/b5f15e43-3eb0-4204-98a3-b4d06f56709c" width="100%" alt="Ticket List" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
+  <img src="https://github.com/user-attachments/assets/b5f15e43-3eb0-4204-98a3-b4d06f56709c" width="80%" alt="Ticket List" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
   <br /><br />
-  <img src="https://github.com/user-attachments/assets/6ddb5ea5-174a-4333-861f-85c773ce9671" width="100%" alt="Chat Interface" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
+  <img src="https://github.com/user-attachments/assets/6ddb5ea5-174a-4333-861f-85c773ce9671" width="80%" alt="Chat Interface" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
   <br /><br />
-  <img src="https://github.com/user-attachments/assets/14054b67-c991-4a5a-9903-bd89131ab63d" width="100%" alt="User View" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
+  <img src="https://github.com/user-attachments/assets/14054b67-c991-4a5a-9903-bd89131ab63d" width="80%" alt="User View" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
   <br /><br />
-  <img src="https://github.com/user-attachments/assets/e0344a5e-f288-436d-a81f-f9bef8d11f9f" width="48%" alt="Mobile View" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
-<br /><br />
-  <img width="1272" height="858" alt="image" src="https://github.com/user-attachments/assets/d503a9a8-d965-4b80-9c15-ba61488a108b" />
+  <img src="https://github.com/user-attachments/assets/e0344a5e-f288-436d-a81f-f9bef8d11f9f" width="40%" alt="Mobile View" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
+  <br /><br />
+  <img src="https://github.com/user-attachments/assets/d503a9a8-d965-4b80-9c15-ba61488a108b" width="80%" alt="Feature Overview" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
 
 </p>
 
 ## 🚀 Key Features
 
-### ⚡ Supabase Integration (New!)
+### 🔗 Webhooks & Integrations (New!)
+*   **Slack Notifications**: Receive instant alerts in your Slack channels when a new ticket is created.
+*   **Discord Notifications**: Get real-time updates in your Discord server for every new support request.
+*   **Zapier Integration**: Connect with thousands of other apps (like Trello, Asana, Google Sheets) via Zapier webhooks.
+
+### 👤 Seamless Guest Experience (New!)
+*   **Instant Access**: Guests can view and reply to their tickets immediately after submission without needing to log in (via secure cookie).
+*   **Smart Links**: Email notifications contain direct access links to the frontend ticket view.
+
+### ⚡ Supabase Integration
 *   **True Real-Time Chat**: Integrated with Supabase Realtime DB for instant, zero-latency messaging.
 *   **Hybrid Architecture**: Keeps your WordPress database as the main source of truth while using Supabase for high-speed message delivery.
 *   **Zero Server Load**: Offloads chat polling to Supabase, significantly reducing the load on your WordPress server.
@@ -70,12 +79,12 @@ Unlike standard ticketing plugins, GRT Ticket offers a distraction-free experien
 
 ### 💎 Advanced & Premium Capabilities (Included)
 Unlike other plugins that charge for essential features, GRT Ticket includes these powerful capabilities out of the box:
-*   **Email Piping (Beta)**: Two-way sync between email and chat. Reply to ticket notifications via email to automatically update the chat.
-*   **Twilio Integration**: Get notified via SMS or WhatsApp when a new ticket is created (requires Twilio API credentials).
-*   **Auto-Assignment**: Smart routing of tickets to specific agents based on the issue category.
-*   **Agent Performance Analytics**: Detailed insights into agent productivity with visual stats on assigned and solved tickets.
-*   **Real-time Chat**: Full-screen, real-time communication interface for users and admins without relying on external services.
-*   **Guest Ticket Submission**: Seamless support for non-logged-in users with automatic secure account creation.
+*   <mark>**Email Piping (Beta)**</mark>: Two-way sync between email and chat. Reply to ticket notifications via email to automatically update the chat.
+*   <mark>**Twilio Integration**</mark>: Get notified via SMS or WhatsApp when a new ticket is created (requires Twilio API credentials).
+*   <mark>**Auto-Assignment**</mark>: Smart routing of tickets to specific agents based on the issue category.
+*   <mark>**Agent Performance Analytics**</mark>: Detailed insights into agent productivity with visual stats on assigned and solved tickets.
+*   <mark>**Real-time Chat**</mark>: Full-screen, real-time communication interface for users and admins without relying on external services.
+*   <mark>**Guest Ticket Submission**</mark>: Seamless support for non-logged-in users with automatic secure account creation.
 
 ## ⚡ Supabase Configuration (Real-Time Chat)
 
