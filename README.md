@@ -123,7 +123,35 @@ To enable ultra-fast real-time chat, GRT Ticket integrates with Supabase. Follow
     ```
     *   This table stores temporary real-time messages. Your WordPress database remains the primary storage.
 
-## 📦 Installation
+## � Webhooks Configuration Guide
+
+GRT Ticket allows you to send notifications to external services like Slack, Discord, and Zapier when a new ticket is created. Here's how to set them up:
+
+### 1. Slack Integration
+1.  Go to [api.slack.com/apps](https://api.slack.com/apps) and create a new app.
+2.  Enable **Incoming Webhooks** from the features menu.
+3.  Click **Activate Incoming Webhooks** to turn it on.
+4.  Click **Add New Webhook to Workspace** and select the channel where you want notifications to appear.
+5.  Copy the **Webhook URL** (it looks like `https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX`).
+6.  Paste this URL into **GRT Ticket > Settings > Webhooks & Integrations > Slack Webhook URL**.
+
+### 2. Discord Integration
+1.  Open Discord and go to the server settings of your desired server.
+2.  Navigate to **Integrations > Webhooks**.
+3.  Click **New Webhook**.
+4.  Name your webhook (e.g., "Support Bot") and choose the channel.
+5.  Click **Copy Webhook URL** (it looks like `https://discord.com/api/webhooks/123456789/abcdef...`).
+6.  Paste this URL into **GRT Ticket > Settings > Webhooks & Integrations > Discord Webhook URL**.
+
+### 3. Zapier Integration
+1.  Log in to Zapier and click **Create Zap**.
+2.  For the **Trigger**, search for and select **Webhooks by Zapier**.
+3.  Choose **Catch Hook** as the event and click Continue.
+4.  Copy the **Webhook URL** provided by Zapier (it looks like `https://hooks.zapier.com/hooks/catch/123456/abcdef/`).
+5.  Paste this URL into **GRT Ticket > Settings > Webhooks & Integrations > Zapier Webhook URL**.
+6.  Send a test ticket to verify Zapier receives the data (JSON format).
+
+## �📦 Installation
 
 1.  **Upload**: Upload the `grt-ticket` folder to the `/wp-content/plugins/` directory.
 2.  **Activate**: Activate the plugin through the 'Plugins' menu in WordPress.
