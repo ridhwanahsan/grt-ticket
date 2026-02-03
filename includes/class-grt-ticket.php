@@ -127,6 +127,9 @@ class GRT_Ticket {
 		} else {
 			error_log( 'GRT Ticket: GRT_Ticket_Email_Piping class not found.' );
 		}
+
+		// Auto Close Cron
+		$this->loader->add_action( 'grt_ticket_auto_close_cron', 'GRT_Ticket_Database', 'auto_close_inactive_tickets' );
 	}
 
 	/**

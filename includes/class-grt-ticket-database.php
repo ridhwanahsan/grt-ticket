@@ -1076,4 +1076,83 @@ class GRT_Ticket_Database {
 			return false;
 		}
 	}
+
+	/**
+	 * Auto close inactive tickets.
+	 *
+	 * @since    1.1.2
+	 */
+	public static function auto_close_inactive_tickets() {
+		global $wpdb;
+
+		$auto_close_days = (int) get_option( 'grt_ticket_auto_close_days', 0 );
+		if ( $auto_close_days <= 0 ) {
+			return;
+		}
+
+		$tickets_table = self::get_tickets_table();
+		$messages_table = self::get_messages_table();
+
+		if ( ! $tickets_table || ! $messages_table ) {
+			return;
+		}
+
+		$cutoff_date = date( 'Y-m-d H:i:s', strtotime( "-$auto_close_days days" ) );
+
+		// Get all tickets that are not closed
+		$sql = "SELECT id, status FROM $tickets_table WHERE status != 'closed'";
+		$tickets = $wpdb->get_results( $sql );
+
+		if ( empty( $tickets ) ) {
+			return;
+		}
+
+		foreach ( $tickets as $ticket ) {
+			// Get the last message for this ticket
+			$last_message = $wpdb->get_row( $wpdb->prepare( "
+				SELECT sender_type, created_at 
+				FROM $messages_table 
+				WHERE ticket_id = %d 
+				ORDER BY created_at DESC 
+				LIMIT 1
+			", $ticket->id ) );
+
+			// If last message is from admin/agent and older than cutoff
+			$should_close = false;
+
+			if ( $last_message ) {
+				if ( 'admin' === $last_message->sender_type && $last_message->created_at < $cutoff_date ) {
+					$should_close = true;
+				}
+			}
+
+			if ( $should_close ) {
+				// Close the ticket
+				$wpdb->update(
+					$tickets_table,
+					array( 
+						'status' => 'closed',
+						'updated_at' => current_time( 'mysql' )
+					),
+					array( 'id' => $ticket->id ),
+					array( '%s', '%s' ),
+					array( '%d' )
+				);
+
+				// Add system message
+				$wpdb->insert(
+					$messages_table,
+					array(
+						'ticket_id'   => $ticket->id,
+						'sender_type' => 'admin',
+						'sender_name' => 'System',
+						'message'     => sprintf( __( 'Ticket closed automatically due to inactivity (%d days).', 'grt-ticket' ), $auto_close_days ),
+						'created_at'  => current_time( 'mysql' ),
+						'is_internal' => 0
+					),
+					array( '%d', '%s', '%s', '%s', '%s', '%d' )
+				);
+			}
+		}
+	}
 }

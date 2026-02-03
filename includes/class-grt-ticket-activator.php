@@ -86,6 +86,11 @@ class GRT_Ticket_Activator {
 			wp_schedule_event( time(), 'grt_5_min', 'grt_ticket_check_emails_cron' );
 		}
 
+		// Schedule cron job for auto-closing tickets
+		if ( ! wp_next_scheduled( 'grt_ticket_auto_close_cron' ) ) {
+			wp_schedule_event( time(), 'daily', 'grt_ticket_auto_close_cron' );
+		}
+
 		// Add default canned responses if table is empty
 		$table_exists = $wpdb->get_var( "SHOW TABLES LIKE '$table_canned'" ) === $table_canned;
 		

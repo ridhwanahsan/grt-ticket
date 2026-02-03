@@ -67,6 +67,9 @@ if ( isset( $_POST['grt_ticket_save_settings'] ) && check_admin_referer( 'grt_ti
 		update_option( 'grt_ticket_supabase_service_role', sanitize_text_field( $_POST['grt_ticket_supabase_service_role'] ) );
 	}
 
+	// Automation Settings
+	update_option( 'grt_ticket_auto_close_days', absint( $_POST['grt_ticket_auto_close_days'] ) );
+
 	echo '<div class="notice notice-success"><p>' . esc_html__( 'Settings saved successfully!', 'grt-ticket' ) . '</p></div>';
 }
 
@@ -97,6 +100,7 @@ $enable_email_notifications = get_option( 'grt_ticket_enable_email_notifications
 $notification_emails = get_option( 'grt_ticket_notification_emails', get_option( 'admin_email' ) );
 $per_page = get_option( 'grt_ticket_per_page', 20 );
 $poll_interval = get_option( 'grt_ticket_poll_interval', 3000 );
+$auto_close_days = get_option( 'grt_ticket_auto_close_days', 0 );
 
 // WhatsApp Options
 $enable_whatsapp = get_option( 'grt_ticket_enable_whatsapp', 0 );
@@ -218,6 +222,16 @@ $supabase_service_role = get_option( 'grt_ticket_supabase_service_role', '' );
 						<td>
 							<input type="number" name="grt_ticket_poll_interval" id="grt_ticket_poll_interval" value="<?php echo esc_attr( $poll_interval ); ?>" class="small-text" min="1000" step="1000">
 							<p class="description"><?php esc_html_e( 'How often to check for new messages in milliseconds (1000ms = 1 second). Recommended: 3000ms.', 'grt-ticket' ); ?></p>
+						</td>
+					</tr>
+
+					<tr>
+						<th scope="row">
+							<label for="grt_ticket_auto_close_days"><?php esc_html_e( 'Auto-Close Ticket (Days)', 'grt-ticket' ); ?></label>
+						</th>
+						<td>
+							<input type="number" name="grt_ticket_auto_close_days" id="grt_ticket_auto_close_days" value="<?php echo esc_attr( $auto_close_days ); ?>" class="small-text" min="0">
+							<p class="description"><?php esc_html_e( 'Automatically close tickets if the user does not reply for this many days. Set to 0 to disable.', 'grt-ticket' ); ?></p>
 						</td>
 					</tr>
 				</tbody>

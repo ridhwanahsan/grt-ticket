@@ -23,5 +23,6 @@ class GRT_Ticket_Deactivator {
 		// Note: We don't drop tables on deactivation, only on uninstall
 		
 		wp_clear_scheduled_hook( 'grt_ticket_check_emails_cron' );
+		wp_clear_scheduled_hook( 'grt_ticket_auto_close_cron' );
 	}
 }
