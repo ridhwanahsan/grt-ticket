@@ -254,6 +254,14 @@ class GRT_Ticket_Ajax {
 			$user_subject = sprintf( __( '[%s] Ticket #%d Created: %s', 'grt-ticket' ), $site_name, $ticket_id, $title );
 			$user_message = sprintf( __( 'Hello %s,', 'grt-ticket' ), $user_name ) . "\r\n\r\n";
 			$user_message .= sprintf( __( 'Thank you for contacting support. Your ticket #%d has been created successfully.', 'grt-ticket' ), $ticket_id ) . "\r\n\r\n";
+			
+			// Generate Frontend Ticket URL
+			$page = get_page_by_path( 'grt-ticket' );
+			$ticket_base_url = $page ? get_permalink( $page->ID ) : site_url( '/grt-ticket/' );
+			$ticket_view_url = trailingslashit( $ticket_base_url ) . 'ticket/' . $ticket_id . '/';
+			
+			$user_message .= sprintf( __( 'View Ticket: %s', 'grt-ticket' ), $ticket_view_url ) . "\r\n\r\n";
+			
 			$user_message .= sprintf( __( 'You can reply directly to this email to add more information to your ticket.', 'grt-ticket' ) ) . "\r\n\r\n";
 			$user_message .= sprintf( __( 'Ticket Details:', 'grt-ticket' ) ) . "\r\n";
 			$user_message .= sprintf( __( 'Subject: %s', 'grt-ticket' ), $title ) . "\r\n";
@@ -279,6 +287,23 @@ class GRT_Ticket_Ajax {
 				$wa_message .= sprintf( "Link: %s", admin_url( 'admin.php?page=grt-ticket-chat&ticket_id=' . $ticket_id ) );
 
 				$this->send_twilio_whatsapp( $whatsapp_admin_number, $wa_message );
+			}
+
+			// Webhook Notifications
+			$this->send_webhook_notifications( $ticket_id, array(
+				'title'       => $title,
+				'description' => $description,
+				'user_name'   => $user_name,
+				'user_email'  => $user_email,
+				'category'    => $category,
+				'priority'    => $priority,
+			) );
+
+			// Set guest access cookie
+			if ( ! is_user_logged_in() ) {
+				$cookie_name = 'grt_ticket_guest_' . $ticket_id;
+				$cookie_value = hash_hmac( 'sha256', $ticket_id . $user_email, wp_salt() );
+				setcookie( $cookie_name, $cookie_value, time() + 7 * DAY_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN );
 			}
 
 			// Add initial message
@@ -1011,6 +1036,77 @@ class GRT_Ticket_Ajax {
 			wp_send_json_success( array( 'message' => __( 'Write test successful! Message pushed and deleted.', 'grt-ticket' ) ) );
 		} else {
 			wp_send_json_error( array( 'message' => sprintf( __( 'Write failed (Error %d): %s', 'grt-ticket' ), $code, $body ) ) );
+		}
+	}
+
+	/**
+	 * Send Webhook Notifications.
+	 *
+	 * @since 1.1.2
+	 * @param int   $ticket_id   Ticket ID.
+	 * @param array $ticket_data Ticket Data.
+	 */
+	private function send_webhook_notifications( $ticket_id, $ticket_data ) {
+		// Get Webhook URLs
+		$slack_webhook   = get_option( 'grt_ticket_slack_webhook', '' );
+		$discord_webhook = get_option( 'grt_ticket_discord_webhook', '' );
+		$zapier_webhook  = get_option( 'grt_ticket_zapier_webhook', '' );
+
+		if ( empty( $slack_webhook ) && empty( $discord_webhook ) && empty( $zapier_webhook ) ) {
+			return;
+		}
+
+		// Prepare Data
+		$ticket_url = admin_url( 'admin.php?page=grt-ticket-chat&ticket_id=' . $ticket_id );
+		$description_snippet = wp_trim_words( wp_strip_all_tags( $ticket_data['description'] ), 20 );
+
+		// 1. Slack Notification
+		if ( ! empty( $slack_webhook ) ) {
+			$message = sprintf( "*New Ticket #%d Created*\n", $ticket_id );
+			$message .= sprintf( "*Title:* %s\n", $ticket_data['title'] );
+			$message .= sprintf( "*From:* %s (%s)\n", $ticket_data['user_name'], $ticket_data['user_email'] );
+			$message .= sprintf( "*Category:* %s\n", $ticket_data['category'] );
+			$message .= sprintf( "*Priority:* %s\n", $ticket_data['priority'] );
+			$message .= sprintf( "*Description:* %s\n", $description_snippet );
+			$message .= sprintf( "<%s|View Ticket>", $ticket_url );
+
+			wp_remote_post( $slack_webhook, array(
+				'headers' => array( 'Content-Type' => 'application/json' ),
+				'body'    => json_encode( array( 'text' => $message ) ),
+				'blocking' => false, // Non-blocking
+			) );
+		}
+
+		// 2. Discord Notification
+		if ( ! empty( $discord_webhook ) ) {
+			$message = sprintf( "**New Ticket #%d Created**\n", $ticket_id );
+			$message .= sprintf( "**Title:** %s\n", $ticket_data['title'] );
+			$message .= sprintf( "**From:** %s (%s)\n", $ticket_data['user_name'], $ticket_data['user_email'] );
+			$message .= sprintf( "**Category:** %s\n", $ticket_data['category'] );
+			$message .= sprintf( "**Priority:** %s\n", $ticket_data['priority'] );
+			$message .= sprintf( "**Description:** %s\n", $description_snippet );
+			$message .= sprintf( "[View Ticket](%s)", $ticket_url );
+
+			wp_remote_post( $discord_webhook, array(
+				'headers' => array( 'Content-Type' => 'application/json' ),
+				'body'    => json_encode( array( 'content' => $message ) ),
+				'blocking' => false,
+			) );
+		}
+
+		// 3. Zapier Notification (Send full JSON object)
+		if ( ! empty( $zapier_webhook ) ) {
+			$zapier_data = array_merge( array(
+				'ticket_id'  => $ticket_id,
+				'ticket_url' => $ticket_url,
+				'created_at' => current_time( 'mysql' ),
+			), $ticket_data );
+
+			wp_remote_post( $zapier_webhook, array(
+				'headers' => array( 'Content-Type' => 'application/json' ),
+				'body'    => json_encode( $zapier_data ),
+				'blocking' => false,
+			) );
 		}
 	}
 }

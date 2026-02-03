@@ -303,9 +303,21 @@ class GRT_Ticket_Public {
 			if ( $user_email && $ticket->user_email === $user_email ) {
 				$has_access = true;
 			} elseif ( ! $user_email && ! is_user_logged_in() ) {
-				// Guest trying to access pretty URL without email parameter:
-				// They must login to view it.
-				return '<div class="grt-ticket-error">' . sprintf( esc_html__( 'Please %1$slogin%2$s to view this ticket.', 'grt-ticket' ), '<a href="' . wp_login_url( get_permalink() ) . '">', '</a>' ) . '</div>';
+				// Check for guest access cookie
+				$cookie_name = 'grt_ticket_guest_' . $ticket_id;
+				if ( isset( $_COOKIE[$cookie_name] ) ) {
+					$cookie_value = $_COOKIE[$cookie_name];
+					$expected_value = hash_hmac( 'sha256', $ticket_id . $ticket->user_email, wp_salt() );
+					if ( hash_equals( $expected_value, $cookie_value ) ) {
+						$has_access = true;
+					}
+				}
+
+				if ( ! $has_access ) {
+					// Guest trying to access pretty URL without email parameter:
+					// They must login to view it.
+					return '<div class="grt-ticket-error">' . sprintf( esc_html__( 'Please %1$slogin%2$s to view this ticket.', 'grt-ticket' ), '<a href="' . wp_login_url( get_permalink() ) . '">', '</a>' ) . '</div>';
+				}
 			}
 		}
 

@@ -70,6 +70,11 @@ if ( isset( $_POST['grt_ticket_save_settings'] ) && check_admin_referer( 'grt_ti
 	// Automation Settings
 	update_option( 'grt_ticket_auto_close_days', absint( $_POST['grt_ticket_auto_close_days'] ) );
 
+	// Webhooks & Integrations Settings
+	update_option( 'grt_ticket_slack_webhook', sanitize_url( $_POST['grt_ticket_slack_webhook'] ) );
+	update_option( 'grt_ticket_discord_webhook', sanitize_url( $_POST['grt_ticket_discord_webhook'] ) );
+	update_option( 'grt_ticket_zapier_webhook', sanitize_url( $_POST['grt_ticket_zapier_webhook'] ) );
+
 	echo '<div class="notice notice-success"><p>' . esc_html__( 'Settings saved successfully!', 'grt-ticket' ) . '</p></div>';
 }
 
@@ -128,6 +133,11 @@ $enable_supabase = get_option( 'grt_ticket_enable_supabase', 0 );
 $supabase_url = get_option( 'grt_ticket_supabase_url', '' );
 $supabase_anon_key = get_option( 'grt_ticket_supabase_anon_key', '' );
 $supabase_service_role = get_option( 'grt_ticket_supabase_service_role', '' );
+
+// Webhook Options
+$slack_webhook = get_option( 'grt_ticket_slack_webhook', '' );
+$discord_webhook = get_option( 'grt_ticket_discord_webhook', '' );
+$zapier_webhook = get_option( 'grt_ticket_zapier_webhook', '' );
 ?>
 
 <div class="wrap grt-ticket-wrap">
@@ -143,6 +153,7 @@ $supabase_service_role = get_option( 'grt_ticket_supabase_service_role', '' );
 		<a href="#grt-tab-whatsapp" class="nav-tab"><?php esc_html_e( 'WhatsApp Integrations', 'grt-ticket' ); ?></a>
 		<a href="#grt-tab-contact" class="nav-tab"><?php esc_html_e( 'Direct Contact', 'grt-ticket' ); ?></a>
 		<a href="#grt-tab-realtime" class="nav-tab"><?php esc_html_e( 'Realtime Chat', 'grt-ticket' ); ?></a>
+		<a href="#grt-tab-integrations" class="nav-tab"><?php esc_html_e( 'Webhooks & Integrations', 'grt-ticket' ); ?></a>
 	</h2>
 
 	<form method="post" action="" class="grt-settings-form">
@@ -512,6 +523,48 @@ $supabase_service_role = get_option( 'grt_ticket_supabase_service_role', '' );
 							<button type="button" class="button button-secondary" id="grt-test-supabase"><?php esc_html_e( 'Test Read', 'grt-ticket' ); ?></button>
 							<button type="button" class="button button-secondary" id="grt-test-supabase-push" style="margin-left: 5px;"><?php esc_html_e( 'Test Write', 'grt-ticket' ); ?></button>
 							<span id="grt-supabase-test-result" style="margin-left: 10px; font-weight: bold;"></span>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<!-- Webhooks & Integrations Tab -->
+		<div id="grt-tab-integrations" class="grt-tab-content">
+			<div class="grt-settings-section-header">
+				<h2><?php esc_html_e( 'Webhooks & Integrations', 'grt-ticket' ); ?></h2>
+				<p><?php esc_html_e( 'Connect GRT Ticket with other services like Slack, Discord, and Zapier using Webhooks.', 'grt-ticket' ); ?></p>
+			</div>
+
+			<table class="form-table">
+				<tbody>
+					<tr>
+						<th scope="row">
+							<label for="grt_ticket_slack_webhook"><?php esc_html_e( 'Slack Webhook URL', 'grt-ticket' ); ?></label>
+						</th>
+						<td>
+							<input type="text" name="grt_ticket_slack_webhook" id="grt_ticket_slack_webhook" value="<?php echo esc_attr( $slack_webhook ); ?>" class="regular-text" placeholder="https://hooks.slack.com/services/...">
+							<p class="description"><?php esc_html_e( 'Enter your Slack Incoming Webhook URL to receive notifications for new tickets.', 'grt-ticket' ); ?></p>
+						</td>
+					</tr>
+
+					<tr>
+						<th scope="row">
+							<label for="grt_ticket_discord_webhook"><?php esc_html_e( 'Discord Webhook URL', 'grt-ticket' ); ?></label>
+						</th>
+						<td>
+							<input type="text" name="grt_ticket_discord_webhook" id="grt_ticket_discord_webhook" value="<?php echo esc_attr( $discord_webhook ); ?>" class="regular-text" placeholder="https://discord.com/api/webhooks/...">
+							<p class="description"><?php esc_html_e( 'Enter your Discord Webhook URL to receive notifications for new tickets.', 'grt-ticket' ); ?></p>
+						</td>
+					</tr>
+
+					<tr>
+						<th scope="row">
+							<label for="grt_ticket_zapier_webhook"><?php esc_html_e( 'Zapier Webhook URL', 'grt-ticket' ); ?></label>
+						</th>
+						<td>
+							<input type="text" name="grt_ticket_zapier_webhook" id="grt_ticket_zapier_webhook" value="<?php echo esc_attr( $zapier_webhook ); ?>" class="regular-text" placeholder="https://hooks.zapier.com/hooks/catch/...">
+							<p class="description"><?php esc_html_e( 'Enter your Zapier Catch Hook URL to send ticket data to Zapier.', 'grt-ticket' ); ?></p>
 						</td>
 					</tr>
 				</tbody>
