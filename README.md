@@ -1,6 +1,6 @@
 # GRT Ticket - Professional WordPress Support Ticket System
 
-**Version:** 1.1.0  
+**Version:** 1.1.1  
 **Requires at least:** 5.0  
 **Tested up to:** 6.4  
 **Requires PHP:** 7.4  
@@ -35,6 +35,9 @@ Unlike standard ticketing plugins, GRT Ticket offers a distraction-free experien
 *   **True Real-Time Chat**: Integrated with Supabase Realtime DB for instant, zero-latency messaging.
 *   **Hybrid Architecture**: Keeps your WordPress database as the main source of truth while using Supabase for high-speed message delivery.
 *   **Zero Server Load**: Offloads chat polling to Supabase, significantly reducing the load on your WordPress server.
+
+### 🚀 Easy Setup
+*   **Automatic Page Creation**: The plugin automatically creates a "GRT Ticket" page with the required shortcode upon activation, so you're ready to go instantly.
 
 ### 🎨 User Experience (Frontend)
 *   **Custom Fields Builder**: Admins can create dynamic forms with Text, Number, Date, URL, and Select fields to capture specific ticket details.
@@ -115,7 +118,7 @@ To enable ultra-fast real-time chat, GRT Ticket integrates with Supabase. Follow
 
 1.  **Upload**: Upload the `grt-ticket` folder to the `/wp-content/plugins/` directory.
 2.  **Activate**: Activate the plugin through the 'Plugins' menu in WordPress.
-3.  **Setup Page**: Create a new page (e.g., "Support") and add the shortcode `[grt_ticket]`.
+3.  **Setup Page**: A "GRT Ticket" page is automatically created for you! You can also manually add the shortcode `[grt_ticket]` to any other page.
 4.  **Configure**: Go to **GRT Ticket > Settings** in your dashboard to configure:
     *   Support Categories
     *   Twilio API (Optional)
@@ -142,6 +145,10 @@ Add the following shortcode to any page to display the ticket form and user dash
 4.  Update the ticket status to **Solved** when finished.
 
 ## 📋 Changelog
+
+### 1.1.1
+*   **Feature**: Automatic creation of the support portal page upon activation.
+*   **Improvement**: Removed debug console logs for a cleaner production experience.
 
 ### 1.1.0
 *   **New Feature**: Supabase Realtime Integration! Now you can use Supabase as a real-time engine for instant chat updates.
