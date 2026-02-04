@@ -92,11 +92,15 @@ class GRT_Ticket_Activator {
 		}
 
 		// Add default canned responses if table is empty
-		$table_exists = $wpdb->get_var( "SHOW TABLES LIKE '$table_canned'" ) === $table_canned;
+		// Check if table exists
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Query needed for activation check.
+		$table_exists = $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s", $table_canned ) ) === $table_canned;
 		
 		if ( $table_exists ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is trusted, query needed for activation check.
 			$count_canned = $wpdb->get_var( "SELECT COUNT(*) FROM $table_canned" );
 			if ( 0 == $count_canned ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Initial data population.
 				$wpdb->insert(
 					$table_canned,
 					array(
@@ -104,6 +108,7 @@ class GRT_Ticket_Activator {
 						'response' => wp_kses_post( "Hello,\n\nThank you for reaching out to us. We have received your ticket and are looking into it.\n\nBest regards,\nSupport Team" ),
 					)
 				);
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Initial data population.
 				$wpdb->insert(
 					$table_canned,
 					array(

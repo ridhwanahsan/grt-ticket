@@ -16,16 +16,22 @@ $base_url = admin_url( 'admin.php?page=grt-ticket-list' );
 
 // Base args from filters
 $filter_args = array();
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context: Admin filter/sort.
 if ( isset( $_GET['s'] ) && ! empty( $_GET['s'] ) ) {
-	$filter_args['search'] = sanitize_text_field( $_GET['s'] );
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context: Admin filter/sort.
+	$filter_args['search'] = sanitize_text_field( wp_unslash( $_GET['s'] ) );
 	$base_url = add_query_arg( 's', $filter_args['search'], $base_url );
 }
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context: Admin filter/sort.
 if ( isset( $_GET['agent_id'] ) && ! empty( $_GET['agent_id'] ) ) {
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context: Admin filter/sort.
 	$filter_args['assigned_agent_id'] = (int) $_GET['agent_id'];
 	$base_url = add_query_arg( 'agent_id', $filter_args['assigned_agent_id'], $base_url );
 }
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context: Admin filter/sort.
 if ( isset( $_GET['filter_date'] ) && ! empty( $_GET['filter_date'] ) ) {
-	$filter_args['date'] = sanitize_text_field( $_GET['filter_date'] );
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context: Admin filter/sort.
+	$filter_args['date'] = sanitize_text_field( wp_unslash( $_GET['filter_date'] ) );
 	$base_url = add_query_arg( 'filter_date', $filter_args['date'], $base_url );
 }
 
@@ -52,10 +58,13 @@ $count_closed = GRT_Ticket_Database::count_tickets( $closed_args );
 
 // Current filter
 $current_filter = 'all';
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context: Admin filter/sort.
 if ( isset( $_GET['assigned_to_me'] ) ) {
 	$current_filter = 'assigned';
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context: Admin filter/sort.
 } elseif ( isset( $_GET['status'] ) ) {
-	$current_filter = $_GET['status'];
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context: Admin filter/sort.
+	$current_filter = sanitize_text_field( wp_unslash( $_GET['status'] ) );
 }
 
 $agents = get_users( array( 'role__in' => array( 'administrator', 'editor' ) ) );
@@ -97,27 +106,33 @@ $agents = get_users( array( 'role__in' => array( 'administrator', 'editor' ) ) )
 
 	<form method="get" action="" style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
 		<input type="hidden" name="page" value="grt-ticket-list">
-		<input type="search" name="s" value="<?php echo isset( $_GET['s'] ) ? esc_attr( $_GET['s'] ) : ''; ?>" placeholder="<?php esc_attr_e( 'Search by Name or ID', 'grt-ticket' ); ?>" style="width: 200px;">
+		<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Context: Admin filter/sort. ?>
+		<input type="search" name="s" value="<?php echo isset( $_GET['s'] ) ? esc_attr( wp_unslash( $_GET['s'] ) ) : ''; ?>" placeholder="<?php esc_attr_e( 'Search by Name or ID', 'grt-ticket' ); ?>" style="width: 200px;">
+		<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Context: Admin filter/sort. ?>
 		<?php if ( isset( $_GET['status'] ) ) : ?>
-			<input type="hidden" name="status" value="<?php echo esc_attr( $_GET['status'] ); ?>">
+			<input type="hidden" name="status" value="<?php echo esc_attr( sanitize_text_field( wp_unslash( $_GET['status'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>">
 		<?php endif; ?>
+		<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Context: Admin filter/sort. ?>
 		<?php if ( isset( $_GET['assigned_to_me'] ) ) : ?>
-			<input type="hidden" name="assigned_to_me" value="<?php echo esc_attr( $_GET['assigned_to_me'] ); ?>">
+			<input type="hidden" name="assigned_to_me" value="<?php echo esc_attr( sanitize_text_field( wp_unslash( $_GET['assigned_to_me'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>">
 		<?php endif; ?>
 		
 		<select name="agent_id" style="width: 200px;">
 			<option value=""><?php esc_html_e( 'All Agents', 'grt-ticket' ); ?></option>
 			<?php foreach ( $agents as $agent ) : ?>
-				<option value="<?php echo esc_attr( $agent->ID ); ?>" <?php selected( isset( $_GET['agent_id'] ) ? $_GET['agent_id'] : '', $agent->ID ); ?>>
+				<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Context: Admin filter/sort. ?>
+				<option value="<?php echo esc_attr( $agent->ID ); ?>" <?php selected( isset( $_GET['agent_id'] ) ? (int) $_GET['agent_id'] : '', $agent->ID ); ?>>
 					<?php echo esc_html( $agent->display_name ); ?>
 				</option>
 			<?php endforeach; ?>
 		</select>
 		
-		<input type="date" name="filter_date" value="<?php echo isset( $_GET['filter_date'] ) ? esc_attr( $_GET['filter_date'] ) : ''; ?>">
+		<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Context: Admin filter/sort. ?>
+		<input type="date" name="filter_date" value="<?php echo isset( $_GET['filter_date'] ) ? esc_attr( wp_unslash( $_GET['filter_date'] ) ) : ''; ?>">
 		
 		<input type="submit" class="button" value="<?php esc_attr_e( 'Filter', 'grt-ticket' ); ?>">
 		
+		<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context: Admin filter/sort. ?>
 		<?php if ( ( isset( $_GET['agent_id'] ) && '' !== $_GET['agent_id'] ) || ( isset( $_GET['filter_date'] ) && '' !== $_GET['filter_date'] ) || ( isset( $_GET['s'] ) && '' !== $_GET['s'] ) ) : ?>
 			<a href="<?php echo esc_url( admin_url( 'admin.php?page=grt-ticket-list' ) ); ?>" class="button"><?php esc_html_e( 'Reset', 'grt-ticket' ); ?></a>
 		<?php endif; ?>
@@ -203,7 +218,7 @@ $agents = get_users( array( 'role__in' => array( 'administrator', 'editor' ) ) )
 						</td>
 						<td>
 							<div class="grt-priority-info <?php echo esc_attr( $priority_class ); ?>">
-								<span class="dashicons <?php echo $priority_icon; ?>"></span>
+								<span class="dashicons <?php echo esc_attr( $priority_icon ); ?>"></span>
 								<span><?php echo esc_html( $priority_label ); ?></span>
 							</div>
 						</td>

@@ -30,6 +30,7 @@ class GRT_Supabase {
         $supabase_key = get_option( 'grt_ticket_supabase_service_role', '' ); // Use Service Role for backend writes
 
         if ( empty( $supabase_url ) || empty( $supabase_key ) ) {
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Essential for debugging integration issues.
             error_log( 'GRT Supabase: Missing URL or Key' );
             return;
         }
@@ -63,6 +64,7 @@ class GRT_Supabase {
         ));
 
         if ( is_wp_error( $response ) ) {
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Essential for debugging integration issues.
             error_log( 'GRT Supabase Error: ' . $response->get_error_message() );
         }
     }

@@ -18,6 +18,7 @@ class GRT_Ticket_Email_Piping {
 		}
 
 		if ( ! function_exists( 'imap_open' ) ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Essential for debugging email piping issues.
 			error_log( 'GRT Ticket: IMAP extension not enabled.' );
 			return;
 		}
@@ -50,6 +51,7 @@ class GRT_Ticket_Email_Piping {
 		}
 
 		if ( ! $inbox ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Essential for debugging email piping issues.
 			error_log( 'GRT Ticket: IMAP connection failed after ' . $max_retries . ' attempts: ' . imap_last_error() );
 			return;
 		}
@@ -221,6 +223,7 @@ class GRT_Ticket_Email_Piping {
 	private function add_reply( $ticket_id, $message, $sender_email ) {
 		$ticket = GRT_Ticket_Database::get_ticket( $ticket_id );
 		if ( ! $ticket ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Essential for debugging email piping issues.
 			error_log( "GRT Ticket: Ticket #$ticket_id not found for incoming email." );
 			return;
 		}
@@ -238,12 +241,14 @@ class GRT_Ticket_Email_Piping {
 		} else {
 			if ( strcasecmp( $sender_email, $ticket->user_email ) !== 0 ) {
 				 // Unknown sender
+				 // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Essential for debugging email piping issues.
 				 error_log( "GRT Ticket: Unknown sender $sender_email for ticket #$ticket_id. Reply rejected." );
 				 return;
 			}
 		}
 
 		if ( empty( trim( $message ) ) ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Essential for debugging email piping issues.
 			error_log( "GRT Ticket: Empty message body for ticket #$ticket_id from $sender_email." );
 			return;
 		}
@@ -256,6 +261,7 @@ class GRT_Ticket_Email_Piping {
 		) );
 		
 		if ( ! $result ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Essential for debugging email piping issues.
 			error_log( "GRT Ticket: Failed to add message to DB for ticket #$ticket_id." );
 		}
 	}

@@ -6,6 +6,11 @@
  * @subpackage GRT_Ticket/public
  */
 
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * The public-facing functionality of the plugin.
  *
@@ -104,6 +109,7 @@ class GRT_Ticket_Public {
 		}
 
 		// Check 2: Query Vars or GET param (stronger signal)
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context: Enqueuing scripts based on URL parameter.
 		if ( get_query_var( 'grt_ticket_id' ) || get_query_var( 'ticket' ) || isset( $_GET['ticket_id'] ) ) {
 			$should_enqueue = true;
 		}
@@ -154,7 +160,7 @@ class GRT_Ticket_Public {
 
 		// Supabase Config
 		if ( get_option( 'grt_ticket_enable_supabase', 0 ) ) {
-			wp_enqueue_script( 'supabase-js', 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2', array(), '2.0.0', true );
+			wp_enqueue_script( 'supabase-js', plugins_url( 'js/supabase.js', __FILE__ ), array(), '2.0.0', true );
 			
 			$data['supabase'] = array(
 				'enabled'  => true,
@@ -176,6 +182,7 @@ class GRT_Ticket_Public {
 			$should_enqueue = true;
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context: Enqueuing scripts based on URL parameter.
 		if ( get_query_var( 'grt_ticket_id' ) || get_query_var( 'ticket' ) || isset( $_GET['ticket_id'] ) ) {
 			$should_enqueue = true;
 		}
@@ -225,9 +232,11 @@ class GRT_Ticket_Public {
 		}
 
 		// Fallback to GET parameters (for compatibility or if rewrite rules fail)
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context: Reading URL parameter for display.
 		$ticket_id = isset( $_GET['ticket_id'] ) ? (int) $_GET['ticket_id'] : 0;
 		// Legacy support or specific use cases (user_email now optional in URL as we prefer checking logged-in state)
-		$user_email = isset( $_GET['user_email'] ) ? sanitize_email( $_GET['user_email'] ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context: Reading URL parameter for display.
+		$user_email = isset( $_GET['user_email'] ) ? sanitize_email( wp_unslash( $_GET['user_email'] ) ) : '';
 
 		if ( $ticket_id ) {
 			return $this->render_chat_interface( $ticket_id, $user_email );
@@ -306,7 +315,7 @@ class GRT_Ticket_Public {
 				// Check for guest access cookie
 				$cookie_name = 'grt_ticket_guest_' . $ticket_id;
 				if ( isset( $_COOKIE[$cookie_name] ) ) {
-					$cookie_value = $_COOKIE[$cookie_name];
+					$cookie_value = sanitize_text_field( wp_unslash( $_COOKIE[$cookie_name] ) );
 					$expected_value = hash_hmac( 'sha256', $ticket_id . $ticket->user_email, wp_salt() );
 					if ( hash_equals( $expected_value, $cookie_value ) ) {
 						$has_access = true;
@@ -316,6 +325,7 @@ class GRT_Ticket_Public {
 				if ( ! $has_access ) {
 					// Guest trying to access pretty URL without email parameter:
 					// They must login to view it.
+					/* translators: 1: Login URL start tag, 2: Login URL end tag */
 					return '<div class="grt-ticket-error">' . sprintf( esc_html__( 'Please %1$slogin%2$s to view this ticket.', 'grt-ticket' ), '<a href="' . wp_login_url( get_permalink() ) . '">', '</a>' ) . '</div>';
 				}
 			}

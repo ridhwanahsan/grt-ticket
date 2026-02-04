@@ -255,11 +255,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<h4><?php echo esc_html( $agent['agent_name'] ); ?></h4>
 							<div class="agent-ticket-count">
 								<span class="dashicons dashicons-tickets-alt"></span>
-								<?php echo sprintf( _n( '%s Ticket Assigned', '%s Tickets Assigned', $agent['open_count'], 'grt-ticket' ), number_format_i18n( $agent['open_count'] ) ); ?>
+								<?php
+								/* translators: %s: Number of tickets assigned */
+								echo esc_html( sprintf( _n( '%s Ticket Assigned', '%s Tickets Assigned', $agent['open_count'], 'grt-ticket' ), number_format_i18n( $agent['open_count'] ) ) );
+								?>
 							</div>
 							<div class="agent-solved-count">
 								<span class="dashicons dashicons-yes-alt"></span>
-								<?php echo sprintf( _n( '%s Solved Ticket', '%s Solved Tickets', $agent['solved_count'], 'grt-ticket' ), number_format_i18n( $agent['solved_count'] ) ); ?>
+								<?php
+								/* translators: %s: Number of solved tickets */
+								echo esc_html( sprintf( _n( '%s Solved Ticket', '%s Solved Tickets', $agent['solved_count'], 'grt-ticket' ), number_format_i18n( $agent['solved_count'] ) ) );
+								?>
 							</div>
 						</div>
 					</div>

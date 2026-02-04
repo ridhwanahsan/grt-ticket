@@ -68,6 +68,7 @@ if ( empty( $form_structure ) ) {
 				</div>
 			<button class="grt-tab-link active" data-tab="grt-tab-submit"><?php esc_html_e( 'Submit a Support Ticket', 'grt-ticket' ); ?></button>
 			<?php if ( $is_logged_in ) : ?>
+				<?php /* translators: %s: User name */ ?>
 				<button class="grt-tab-link" data-tab="grt-tab-profile"><?php printf( esc_html__( 'Your Profile: %s', 'grt-ticket' ), esc_html( $user_name ) ); ?></button>
 				<button class="grt-tab-link" data-tab="grt-tab-recent"><?php esc_html_e( 'Your Recent Tickets', 'grt-ticket' ); ?></button>
 			<?php else : ?>
@@ -95,7 +96,7 @@ if ( empty( $form_structure ) ) {
 						if ( ! empty( $field['is_system'] ) ) {
 							if ( $field_id === 'category' ) : ?>
 								<div class="grt-category-selector grt-full-width" style="width: 100%; margin-bottom: 30px;">
-									<label><?php echo $field_label; ?></label>
+									<label><?php echo esc_html( $field_label ); ?></label>
 									<input type="hidden" id="grt-selected-category" name="category" value="">
 									<div class="grt-custom-dropdown" id="grt-category-dropdown">
 										<div class="grt-dropdown-selected">
@@ -119,69 +120,69 @@ if ( empty( $form_structure ) ) {
 									</div>
 								</div>
 							<?php elseif ( $field_id === 'user_name' ) : ?>
-								<div class="grt-form-group <?php echo $required_class; ?> grt-width-<?php echo $field_width; ?>">
-									<label for="grt-user-name"><?php echo $field_label . ' ' . $required_mark; ?></label>
-									<input type="text" id="grt-user-name" name="user_name" value="<?php echo esc_attr( $user_name ); ?>" <?php echo $is_logged_in ? 'readonly' : ''; ?> <?php echo $is_required_attr; ?>>
+								<div class="grt-form-group <?php echo esc_attr( $required_class ); ?> grt-width-<?php echo esc_attr( $field_width ); ?>">
+									<label for="grt-user-name"><?php echo esc_html( $field_label ) . ' ' . wp_kses_post( $required_mark ); ?></label>
+									<input type="text" id="grt-user-name" name="user_name" value="<?php echo esc_attr( $user_name ); ?>" <?php echo $is_logged_in ? 'readonly' : ''; ?> <?php echo esc_attr( $is_required_attr ); ?>>
 								</div>
 							<?php elseif ( $field_id === 'user_email' ) : ?>
-								<div class="grt-form-group <?php echo $required_class; ?> grt-width-<?php echo $field_width; ?>">
-									<label for="grt-user-email"><?php echo $field_label . ' ' . $required_mark; ?></label>
-									<input type="email" id="grt-user-email" name="user_email" value="<?php echo esc_attr( $user_email ); ?>" <?php echo $is_logged_in ? 'readonly' : ''; ?> <?php echo $is_required_attr; ?>>
+								<div class="grt-form-group <?php echo esc_attr( $required_class ); ?> grt-width-<?php echo esc_attr( $field_width ); ?>">
+									<label for="grt-user-email"><?php echo esc_html( $field_label ) . ' ' . wp_kses_post( $required_mark ); ?></label>
+									<input type="email" id="grt-user-email" name="user_email" value="<?php echo esc_attr( $user_email ); ?>" <?php echo $is_logged_in ? 'readonly' : ''; ?> <?php echo esc_attr( $is_required_attr ); ?>>
 								</div>
 								
 							<?php elseif ( $field_id === 'user_password' ) : 
 								if ( ! $is_logged_in ) : ?>
-									<div class="grt-form-group grt-width-<?php echo $field_width; ?>">
-										<label for="grt-user-password"><?php echo $field_label; ?></label>
+									<div class="grt-form-group grt-width-<?php echo esc_attr( $field_width ); ?>">
+										<label for="grt-user-password"><?php echo esc_html( $field_label ); ?></label>
 										<input type="password" id="grt-user-password" name="user_password" placeholder="<?php esc_attr_e( 'Leave empty to auto-generate', 'grt-ticket' ); ?>">
 										<small class="grt-form-help"><?php esc_html_e( 'Create a password to access your tickets later. If left empty, we will email you one.', 'grt-ticket' ); ?></small>
 									</div>
 								<?php endif; ?>
 							
 							<?php elseif ( $field_id === 'theme_name' ) : ?>
-								<div class="grt-form-group <?php echo $required_class; ?> grt-width-<?php echo $field_width; ?>">
-									<label for="grt-theme-name"><?php echo $field_label . ' ' . $required_mark; ?></label>
-									<input type="text" id="grt-theme-name" name="theme_name" <?php echo $is_required_attr; ?>>
+								<div class="grt-form-group <?php echo esc_attr( $required_class ); ?> grt-width-<?php echo esc_attr( $field_width ); ?>">
+									<label for="grt-theme-name"><?php echo esc_html( $field_label ) . ' ' . wp_kses_post( $required_mark ); ?></label>
+									<input type="text" id="grt-theme-name" name="theme_name" <?php echo esc_attr( $is_required_attr ); ?>>
 								</div>
 							<?php elseif ( $field_id === 'license_code' ) : ?>
-								<div class="grt-form-group <?php echo $required_class; ?> grt-width-<?php echo $field_width; ?>">
-									<label for="grt-license-code"><?php echo $field_label . ' ' . $required_mark; ?></label>
-									<input type="text" id="grt-license-code" name="license_code" <?php echo $is_required_attr; ?>>
+								<div class="grt-form-group <?php echo esc_attr( $required_class ); ?> grt-width-<?php echo esc_attr( $field_width ); ?>">
+									<label for="grt-license-code"><?php echo esc_html( $field_label ) . ' ' . wp_kses_post( $required_mark ); ?></label>
+									<input type="text" id="grt-license-code" name="license_code" <?php echo esc_attr( $is_required_attr ); ?>>
 								</div>
 							<?php elseif ( $field_id === 'title' ) : ?>
-								<div class="grt-form-group <?php echo $required_class; ?> grt-width-<?php echo $field_width; ?>">
-									<label for="grt-issue-title"><?php echo $field_label . ' ' . $required_mark; ?></label>
-									<input type="text" id="grt-issue-title" name="title" <?php echo $is_required_attr; ?>>
+								<div class="grt-form-group <?php echo esc_attr( $required_class ); ?> grt-width-<?php echo esc_attr( $field_width ); ?>">
+									<label for="grt-issue-title"><?php echo esc_html( $field_label ) . ' ' . wp_kses_post( $required_mark ); ?></label>
+									<input type="text" id="grt-issue-title" name="title" <?php echo esc_attr( $is_required_attr ); ?>>
 								</div>
 							<?php elseif ( $field_id === 'priority' ) : ?>
-								<div class="grt-form-group <?php echo $required_class; ?> grt-width-<?php echo $field_width; ?>">
-									<label for="grt-issue-priority"><?php echo $field_label . ' ' . $required_mark; ?></label>
-									<select id="grt-issue-priority" name="priority" <?php echo $is_required_attr; ?>>
+								<div class="grt-form-group <?php echo esc_attr( $required_class ); ?> grt-width-<?php echo esc_attr( $field_width ); ?>">
+									<label for="grt-issue-priority"><?php echo esc_html( $field_label ) . ' ' . wp_kses_post( $required_mark ); ?></label>
+									<select id="grt-issue-priority" name="priority" <?php echo esc_attr( $is_required_attr ); ?>>
 										<option value="low"><?php esc_html_e( 'Low - General Question', 'grt-ticket' ); ?></option>
 										<option value="medium" selected><?php esc_html_e( 'Medium - Normal Issue', 'grt-ticket' ); ?></option>
 										<option value="high"><?php esc_html_e( 'High - Critical Issue', 'grt-ticket' ); ?></option>
 									</select>
 								</div>
 							<?php elseif ( $field_id === 'description' ) : ?>
-								<div class="grt-form-group <?php echo $required_class; ?> grt-width-<?php echo $field_width; ?>">
-									<label for="grt-issue-description"><?php echo $field_label . ' ' . $required_mark; ?></label>
-									<textarea id="grt-issue-description" name="description" <?php echo $is_required_attr; ?>></textarea>
+								<div class="grt-form-group <?php echo esc_attr( $required_class ); ?> grt-width-<?php echo esc_attr( $field_width ); ?>">
+									<label for="grt-issue-description"><?php echo esc_html( $field_label ) . ' ' . wp_kses_post( $required_mark ); ?></label>
+									<textarea id="grt-issue-description" name="description" <?php echo esc_attr( $is_required_attr ); ?>></textarea>
 								</div>
 							<?php endif; 
 						} else { 
 							// Handle Custom Fields
 							$options = isset( $field['options'] ) ? $field['options'] : '';
 							?>
-							<div class="grt-form-group <?php echo $required_class; ?> grt-custom-field-<?php echo $field_type; ?> grt-width-<?php echo $field_width; ?>">
-								<label for="<?php echo $field_id; ?>"><?php echo $field_label . ' ' . $required_mark; ?></label>
+							<div class="grt-form-group <?php echo esc_attr( $required_class ); ?> grt-custom-field-<?php echo esc_attr( $field_type ); ?> grt-width-<?php echo esc_attr( $field_width ); ?>">
+								<label for="<?php echo esc_attr( $field_id ); ?>"><?php echo esc_html( $field_label ) . ' ' . wp_kses_post( $required_mark ); ?></label>
 								
 								<?php if ( $field_type === 'textarea' ) : ?>
-									<textarea name="custom_fields[<?php echo $field_id; ?>]" id="<?php echo $field_id; ?>" placeholder="<?php echo $field_placeholder; ?>" <?php echo $is_required_attr; ?>></textarea>
+									<textarea name="custom_fields[<?php echo esc_attr( $field_id ); ?>]" id="<?php echo esc_attr( $field_id ); ?>" placeholder="<?php echo esc_attr( $field_placeholder ); ?>" <?php echo esc_attr( $is_required_attr ); ?>></textarea>
 								
 								<?php elseif ( $field_type === 'select' ) : 
 									$opts = explode( "\n", $options );
 								?>
-									<select name="custom_fields[<?php echo $field_id; ?>]" id="<?php echo $field_id; ?>" <?php echo $is_required_attr; ?>>
+									<select name="custom_fields[<?php echo esc_attr( $field_id ); ?>]" id="<?php echo esc_attr( $field_id ); ?>" <?php echo esc_attr( $is_required_attr ); ?>>
 										<option value=""><?php esc_html_e( 'Select option', 'grt-ticket' ); ?></option>
 										<?php foreach ( $opts as $opt ) : 
 											$opt = trim( $opt );
@@ -192,7 +193,7 @@ if ( empty( $form_structure ) ) {
 									</select>
 
 								<?php else : ?>
-									<input type="<?php echo $field_type; ?>" name="custom_fields[<?php echo $field_id; ?>]" id="<?php echo $field_id; ?>" placeholder="<?php echo $field_placeholder; ?>" <?php echo $is_required_attr; ?>>
+									<input type="<?php echo esc_attr( $field_type ); ?>" name="custom_fields[<?php echo esc_attr( $field_id ); ?>]" id="<?php echo esc_attr( $field_id ); ?>" placeholder="<?php echo esc_attr( $field_placeholder ); ?>" <?php echo esc_attr( $is_required_attr ); ?>>
 								<?php endif; ?>
 							</div>
 						<?php } 

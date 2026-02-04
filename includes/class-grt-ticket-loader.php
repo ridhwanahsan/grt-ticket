@@ -13,6 +13,10 @@
  * the plugin, and register them with the WordPress API. Call the
  * run function to execute the list of actions and filters.
  */
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class GRT_Ticket_Loader {
 
 	/**

@@ -6,6 +6,11 @@
  * @subpackage GRT_Ticket/includes
  */
 
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * The core plugin class.
  *
@@ -125,6 +130,7 @@ class GRT_Ticket {
 			$this->loader->add_action( 'grt_ticket_check_emails_cron', $plugin_piping, 'check_emails' );
 			$this->loader->add_filter( 'cron_schedules', $this, 'add_cron_schedules' );
 		} else {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Logging missing class dependency.
 			error_log( 'GRT Ticket: GRT_Ticket_Email_Piping class not found.' );
 		}
 

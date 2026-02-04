@@ -91,8 +91,7 @@ $is_solved = 'solved' === $ticket->status || 'closed' === $ticket->status;
 							$agents = get_users( array( 'role__in' => array( 'administrator', 'editor' ) ) );
 							$current_assigned = isset( $ticket->assigned_agent_id ) ? $ticket->assigned_agent_id : 0;
 							foreach ( $agents as $agent ) {
-								$selected = ( $current_assigned == $agent->ID ) ? 'selected' : '';
-								echo '<option value="' . esc_attr( $agent->ID ) . '" ' . $selected . '>' . esc_html( $agent->display_name ) . '</option>';
+								echo '<option value="' . esc_attr( $agent->ID ) . '" ' . selected( $current_assigned, $agent->ID, false ) . '>' . esc_html( $agent->display_name ) . '</option>';
 							}
 							?>
 						</select>

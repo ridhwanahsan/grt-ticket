@@ -30,19 +30,20 @@ class GRT_Ticket_Ajax {
 		$required_fields = array( 'user_name', 'user_email', 'theme_name', 'license_code', 'category', 'title', 'description' );
 		foreach ( $required_fields as $field ) {
 			if ( empty( $_POST[ $field ] ) ) {
+				/* translators: %s: Field name */
 				wp_send_json_error( array( 'message' => sprintf( __( 'Field %s is required.', 'grt-ticket' ), $field ) ) );
 			}
 		}
 
 		// Validate email
-		if ( ! is_email( $_POST['user_email'] ) ) {
+		if ( empty( $_POST['user_email'] ) || ! is_email( wp_unslash( $_POST['user_email'] ) ) ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid email address.', 'grt-ticket' ) ) );
 		}
 
 
 		// Check if user exists or create new one
-		$user_email = sanitize_email( $_POST['user_email'] );
-		$user_name = sanitize_text_field( $_POST['user_name'] );
+		$user_email = isset( $_POST['user_email'] ) ? sanitize_email( wp_unslash( $_POST['user_email'] ) ) : '';
+		$user_name = isset( $_POST['user_name'] ) ? sanitize_text_field( wp_unslash( $_POST['user_name'] ) ) : '';
 		$user_id = 0;
 		$new_account_created = false;
 		
@@ -60,7 +61,8 @@ class GRT_Ticket_Ajax {
 			// Try to auto-login if password is provided
 			if ( ! empty( $_POST['user_password'] ) ) {
 				$user = get_user_by( 'email', $user_email );
-				if ( $user && wp_check_password( $_POST['user_password'], $user->data->user_pass, $user->ID ) ) {
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Password content.
+				if ( $user && wp_check_password( wp_unslash( $_POST['user_password'] ), $user->data->user_pass, $user->ID ) ) {
 					wp_set_current_user( $user->ID );
 					wp_set_auth_cookie( $user->ID );
 				}
@@ -68,7 +70,8 @@ class GRT_Ticket_Ajax {
 		} else {
 			// Create new user
 			// Use custom password if provided, otherwise auto-generate
-			$custom_password = ! empty( $_POST['user_password'] ) ? $_POST['user_password'] : '';
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Password content.
+			$custom_password = ! empty( $_POST['user_password'] ) ? wp_unslash( $_POST['user_password'] ) : '';
 			$user_pass = $custom_password ? $custom_password : wp_generate_password();
 			$password_was_custom = ! empty( $custom_password );
 			
@@ -93,28 +96,51 @@ class GRT_Ticket_Ajax {
 					'first_name'   => $user_name,
 				) );
 
+				// Auto-login the newly created user
+				$creds = array(
+					'user_login'    => $user_name_login,
+					'user_password' => $user_pass,
+					'remember'      => true,
+				);
+
+				$signon = wp_signon( $creds, is_ssl() );
+
+				if ( is_wp_error( $signon ) ) {
+					// Fallback if signon fails (e.g. headers sent?)
+					wp_set_current_user( $user_id );
+					wp_set_auth_cookie( $user_id, true );
+				} else {
+					wp_set_current_user( $signon->ID );
+				}
+
 				// Send email with credentials
 				$site_name = get_bloginfo( 'name' );
+				/* translators: %s: Site name */
 				$message  = sprintf( __( 'Welcome to %s Support!', 'grt-ticket' ), $site_name ) . "\r\n\r\n";
 				$message .= sprintf( __( 'A support account has been created for you so you can track your tickets.', 'grt-ticket' ) ) . "\r\n\r\n";
+				/* translators: %s: Username */
 				$message .= sprintf( __( 'Username: %s', 'grt-ticket' ), $user_name_login ) . "\r\n";
 				
 				// Only include password in email if it was auto-generated
 				if ( ! $password_was_custom ) {
+					/* translators: %s: Password */
 					$message .= sprintf( __( 'Password: %s', 'grt-ticket' ), $user_pass ) . "\r\n\r\n";
 				} else {
 					$message .= __( 'Password: The password you set during ticket submission', 'grt-ticket' ) . "\r\n\r\n";
 				}
 				
+				/* translators: %s: Login URL */
 				$message .= sprintf( __( 'Login here: %s', 'grt-ticket' ), wp_login_url() ) . "\r\n";
 
 				// Check if email notifications are enabled
 				if ( get_option( 'grt_ticket_enable_email_notifications', 1 ) ) {
 					try {
+						/* translators: %s: Site name */
 						wp_mail( $user_email, sprintf( __( '[%s] New Support Account', 'grt-ticket' ), $site_name ), $message );
 					} catch ( \Throwable $e ) {
-						error_log( 'GRT Ticket Email Error: ' . $e->getMessage() );
-					}
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Essential for debugging.
+			error_log( 'GRT Ticket Email Error: ' . $e->getMessage() );
+		}
 				}
 				
 				// Auto-login newly created user
@@ -126,12 +152,12 @@ class GRT_Ticket_Ajax {
 		}
 
 		// Sanitize inputs
-		$theme_name = sanitize_text_field( $_POST['theme_name'] );
-		$license_code = sanitize_text_field( $_POST['license_code'] );
-		$category = sanitize_text_field( $_POST['category'] );
-		$title = sanitize_text_field( $_POST['title'] );
-		$description = wp_kses_post( $_POST['description'] ); // Allow HTML in description (it becomes the first message)
-		$priority = sanitize_text_field( $_POST['priority'] );
+		$theme_name = isset( $_POST['theme_name'] ) ? sanitize_text_field( wp_unslash( $_POST['theme_name'] ) ) : '';
+		$license_code = isset( $_POST['license_code'] ) ? sanitize_text_field( wp_unslash( $_POST['license_code'] ) ) : '';
+		$category = isset( $_POST['category'] ) ? sanitize_text_field( wp_unslash( $_POST['category'] ) ) : '';
+		$title = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '';
+		$description = isset( $_POST['description'] ) ? wp_kses_post( wp_unslash( $_POST['description'] ) ) : ''; // Allow HTML in description (it becomes the first message)
+		$priority = isset( $_POST['priority'] ) ? sanitize_text_field( wp_unslash( $_POST['priority'] ) ) : '';
 
 		// Process Custom Fields
 		$custom_fields_data = array();
@@ -143,18 +169,20 @@ class GRT_Ticket_Ajax {
 					if ( empty( $field_id ) ) continue;
 
 					if ( isset( $_POST['custom_fields'][ $field_id ] ) ) {
-						$value = $_POST['custom_fields'][ $field_id ];
+						// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized below based on type.
+						$value = wp_unslash( $_POST['custom_fields'][ $field_id ] );
 						
 						// Validation based on type
 						if ( ! empty( $field['required'] ) && empty( $value ) ) {
+							/* translators: %s: Field label */
 							wp_send_json_error( array( 'message' => sprintf( __( 'Field %s is required.', 'grt-ticket' ), $field['label'] ) ) );
 							return;
 						}
 
 						if ( $field['type'] === 'textarea' ) {
-							$value = sanitize_textarea_field( $value );
+							$value = sanitize_textarea_field( wp_unslash( $value ) );
 						} else {
-							$value = sanitize_text_field( $value );
+							$value = sanitize_text_field( wp_unslash( $value ) );
 						}
 
 						$custom_fields_data[ $field_id ] = array(
@@ -206,12 +234,17 @@ class GRT_Ticket_Ajax {
 
 			if ( ! empty( $emails ) ) {
 				$site_name = get_bloginfo( 'name' );
-				$subject = sprintf( __( '[%s] New Ticket: %s', 'grt-ticket' ), $site_name, $title );
+				/* translators: 1: Site name, 2: Ticket title */
+				$subject = sprintf( __( '[%1$s] New Ticket: %2$s', 'grt-ticket' ), $site_name, $title );
+				/* translators: %s: User name */
 				$message = sprintf( __( 'A new ticket has been created by %s.', 'grt-ticket' ), $user_name ) . "\r\n\r\n";
+				/* translators: %s: Category name */
 				$message .= sprintf( __( 'Category: %s', 'grt-ticket' ), $category ) . "\r\n";
+				/* translators: %s: Ticket title */
 				$message .= sprintf( __( 'Title: %s', 'grt-ticket' ), $title ) . "\r\n\r\n";
 				$message .= sprintf( __( 'Description:', 'grt-ticket' ) ) . "\r\n";
 				$message .= wp_strip_all_tags( $description ) . "\r\n\r\n";
+				/* translators: %s: Ticket URL */
 				$message .= sprintf( __( 'View Ticket: %s', 'grt-ticket' ), admin_url( 'admin.php?page=grt-ticket-chat&ticket_id=' . $ticket_id ) );
 
 				// Check if email notifications are enabled
@@ -220,6 +253,7 @@ class GRT_Ticket_Ajax {
 						try {
 							wp_mail( $email, $subject, $message );
 						} catch ( \Throwable $e ) {
+							// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Essential for debugging.
 							error_log( 'GRT Ticket Email Error: ' . $e->getMessage() );
 						}
 					}
@@ -231,19 +265,26 @@ class GRT_Ticket_Ajax {
 				$agent_user = get_userdata( $assigned_agent_id );
 				if ( $agent_user ) {
 					$site_name = get_bloginfo( 'name' );
-					$agent_subject = sprintf( __( '[%s] New Ticket Assigned: %s', 'grt-ticket' ), $site_name, $title );
+					/* translators: 1: Site name, 2: Ticket title */
+					$agent_subject = sprintf( __( '[%1$s] New Ticket Assigned: %2$s', 'grt-ticket' ), $site_name, $title );
+					/* translators: %s: Agent name */
 					$agent_message = sprintf( __( 'Hello %s,', 'grt-ticket' ), $agent_user->display_name ) . "\r\n\r\n";
+					/* translators: %s: Category name */
 					$agent_message .= sprintf( __( 'A new ticket has been automatically assigned to you based on the category "%s".', 'grt-ticket' ), $category ) . "\r\n\r\n";
-					$agent_message .= sprintf( __( 'Ticket Details:', 'grt-ticket' ) ) . "\r\n";
+					$agent_message .= __( 'Ticket Details:', 'grt-ticket' ) . "\r\n";
+					/* translators: %s: User name */
 					$agent_message .= sprintf( __( 'From: %s', 'grt-ticket' ), $user_name ) . "\r\n";
+					/* translators: %s: Ticket title */
 					$agent_message .= sprintf( __( 'Title: %s', 'grt-ticket' ), $title ) . "\r\n\r\n";
-					$agent_message .= sprintf( __( 'Description:', 'grt-ticket' ) ) . "\r\n";
+					$agent_message .= __( 'Description:', 'grt-ticket' ) . "\r\n";
 					$agent_message .= wp_strip_all_tags( $description ) . "\r\n\r\n";
+					/* translators: %s: Ticket URL */
 					$agent_message .= sprintf( __( 'View Ticket: %s', 'grt-ticket' ), admin_url( 'admin.php?page=grt-ticket-chat&ticket_id=' . $ticket_id ) );
 
 					try {
 						wp_mail( $agent_user->user_email, $agent_subject, $agent_message );
 					} catch ( \Throwable $e ) {
+						// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Essential for debugging.
 						error_log( 'GRT Ticket Agent Email Error: ' . $e->getMessage() );
 					}
 				}
@@ -251,8 +292,11 @@ class GRT_Ticket_Ajax {
 
 			// Email Confirmation to User
 			$site_name = get_bloginfo( 'name' );
-			$user_subject = sprintf( __( '[%s] Ticket #%d Created: %s', 'grt-ticket' ), $site_name, $ticket_id, $title );
+			/* translators: 1: Site name, 2: Ticket ID, 3: Ticket title */
+			$user_subject = sprintf( __( '[%1$s] Ticket #%2$d Created: %3$s', 'grt-ticket' ), $site_name, $ticket_id, $title );
+			/* translators: %s: User name */
 			$user_message = sprintf( __( 'Hello %s,', 'grt-ticket' ), $user_name ) . "\r\n\r\n";
+			/* translators: %d: Ticket ID */
 			$user_message .= sprintf( __( 'Thank you for contacting support. Your ticket #%d has been created successfully.', 'grt-ticket' ), $ticket_id ) . "\r\n\r\n";
 			
 			// Generate Frontend Ticket URL
@@ -260,10 +304,12 @@ class GRT_Ticket_Ajax {
 			$ticket_base_url = $page ? get_permalink( $page->ID ) : site_url( '/grt-ticket/' );
 			$ticket_view_url = trailingslashit( $ticket_base_url ) . 'ticket/' . $ticket_id . '/';
 			
+			/* translators: %s: Ticket URL */
 			$user_message .= sprintf( __( 'View Ticket: %s', 'grt-ticket' ), $ticket_view_url ) . "\r\n\r\n";
 			
 			$user_message .= sprintf( __( 'You can reply directly to this email to add more information to your ticket.', 'grt-ticket' ) ) . "\r\n\r\n";
 			$user_message .= sprintf( __( 'Ticket Details:', 'grt-ticket' ) ) . "\r\n";
+			/* translators: %s: Ticket title */
 			$user_message .= sprintf( __( 'Subject: %s', 'grt-ticket' ), $title ) . "\r\n";
 			$user_message .= sprintf( __( 'Description:', 'grt-ticket' ) ) . "\r\n";
 			$user_message .= wp_strip_all_tags( $description ) . "\r\n\r\n";
@@ -273,6 +319,7 @@ class GRT_Ticket_Ajax {
 				try {
 					wp_mail( $user_email, $user_subject, $user_message );
 				} catch ( \Throwable $e ) {
+					// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Essential for debugging.
 					error_log( 'GRT Ticket Email Error: ' . $e->getMessage() );
 				}
 			}
@@ -299,12 +346,20 @@ class GRT_Ticket_Ajax {
 				'priority'    => $priority,
 			) );
 
-			// Set guest access cookie
-			if ( ! is_user_logged_in() ) {
-				$cookie_name = 'grt_ticket_guest_' . $ticket_id;
-				$cookie_value = hash_hmac( 'sha256', $ticket_id . $user_email, wp_salt() );
-				setcookie( $cookie_name, $cookie_value, time() + 7 * DAY_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN );
+			// Set guest access cookie (Always set it for the ticket owner upon creation as a backup)
+			if ( $user_id && ! is_user_logged_in() ) {
+				// Only if we somehow failed to login, or strictly for guest fallback if session is lost
+				// But wait, if we are logged in, we don't need guest cookie?
+				// Actually, if auth cookie fails to persist, this guest cookie is the only way they can see the ticket immediately.
+				// So we should force set it if we just created the ticket and we are the "user".
 			}
+			
+			// Always set guest cookie for new tickets submitted by users (whether logged in or not)
+			// This ensures that even if they are logged in but session expires or is lost, they can access this specific ticket via the cookie.
+			// It is secure because it is hashed with the ticket ID and user email.
+			$cookie_name = 'grt_ticket_guest_' . $ticket_id;
+			$cookie_value = hash_hmac( 'sha256', $ticket_id . $user_email, wp_salt() );
+			setcookie( $cookie_name, $cookie_value, time() + 7 * DAY_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN );
 
 			// Add initial message
 			GRT_Ticket_Database::add_message( array(
@@ -324,6 +379,7 @@ class GRT_Ticket_Ajax {
 		}
 
 		} catch ( \Throwable $e ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Essential for debugging.
 			error_log( 'GRT Ticket Submit Error: ' . $e->getMessage() );
 			// We show a generic error to the user, but include the message for debugging since this is a support system
 			wp_send_json_error( array( 'message' => __( 'Server error: ', 'grt-ticket' ) . $e->getMessage() ) );
@@ -348,7 +404,8 @@ class GRT_Ticket_Ajax {
 			wp_send_json_error( array( 'message' => __( 'Ticket ID and message or attachment are required.', 'grt-ticket' ) ) );
 		}
 
-		$ticket_id = (int) $_POST['ticket_id'];
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Cast to integer.
+		$ticket_id = isset( $_POST['ticket_id'] ) ? (int) wp_unslash( $_POST['ticket_id'] ) : 0;
 		$ticket = GRT_Ticket_Database::get_ticket( $ticket_id );
 
 		if ( ! $ticket ) {
@@ -384,10 +441,10 @@ class GRT_Ticket_Ajax {
 
 		// Handle file upload
 		$attachment_url = '';
-		if ( ! empty( $_FILES['attachment'] ) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK ) {
+		if ( ! empty( $_FILES['attachment'] ) && isset( $_FILES['attachment']['error'] ) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK ) {
 			// Validate file type
 			$allowed_types = array( 'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'application/pdf' );
-			$file_type = $_FILES['attachment']['type'];
+			$file_type = isset( $_FILES['attachment']['type'] ) ? sanitize_mime_type( $_FILES['attachment']['type'] ) : '';
 
 			if ( ! in_array( $file_type, $allowed_types, true ) ) {
 				wp_send_json_error( array( 'message' => __( 'Only image files (JPEG, PNG, GIF) and PDF files are allowed.', 'grt-ticket' ) ) );
@@ -395,7 +452,8 @@ class GRT_Ticket_Ajax {
 
 			// Validate file size (5MB max)
 			$max_size = 5 * 1024 * 1024; // 5MB
-			if ( $_FILES['attachment']['size'] > $max_size ) {
+			$file_size = isset( $_FILES['attachment']['size'] ) ? (int) $_FILES['attachment']['size'] : 0;
+			if ( $file_size > $max_size ) {
 				wp_send_json_error( array( 'message' => __( 'Image size must be less than 5MB.', 'grt-ticket' ) ) );
 			}
 
@@ -413,11 +471,11 @@ class GRT_Ticket_Ajax {
 		}
 
 		// Prepare message data
-		$message_content = ! empty( $_POST['message'] ) ? $_POST['message'] : '';
+		$message_content = ! empty( $_POST['message'] ) ? wp_kses_post( wp_unslash( $_POST['message'] ) ) : '';
 		
 		// If message is empty but we have an attachment, use a placeholder or empty string
 		// We ensure it's not null, but let's make sure it's at least an empty string
-		$is_internal_raw = isset( $_POST['is_internal'] ) ? $_POST['is_internal'] : '';
+		$is_internal_raw = isset( $_POST['is_internal'] ) ? sanitize_text_field( wp_unslash( $_POST['is_internal'] ) ) : '';
 		$is_internal = filter_var( $is_internal_raw, FILTER_VALIDATE_BOOLEAN ) ? 1 : 0;
 		if ( $sender_type === 'user' ) {
 			$is_internal = 0; // Users cannot send internal notes
@@ -459,9 +517,12 @@ class GRT_Ticket_Ajax {
 				$emails = array_filter( $emails, 'is_email' );
 				
 				if ( ! empty( $emails ) ) {
-					$subject = sprintf( __( '[%s] New Message on Ticket #%d', 'grt-ticket' ), $site_name, $ticket_id );
+					/* translators: 1: Site name, 2: Ticket ID */
+					$subject = sprintf( __( '[%1$s] New Message on Ticket #%2$d', 'grt-ticket' ), $site_name, $ticket_id );
+					/* translators: %s: Sender name */
 					$body = sprintf( __( 'New message from %s:', 'grt-ticket' ), $sender_name ) . "\r\n\r\n";
 					$body .= wp_strip_all_tags( $message_content ) . "\r\n\r\n";
+					/* translators: %s: Ticket URL */
 					$body .= sprintf( __( 'View Ticket: %s', 'grt-ticket' ), admin_url( 'admin.php?page=grt-ticket-chat&ticket_id=' . $ticket_id ) );
 					
 					// Check if email notifications are enabled
@@ -470,6 +531,7 @@ class GRT_Ticket_Ajax {
 							try {
 								wp_mail( $email, $subject, $body );
 							} catch ( \Throwable $e ) {
+								// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Essential for debugging.
 								error_log( 'GRT Ticket Email Error: ' . $e->getMessage() );
 							}
 						}
@@ -489,9 +551,11 @@ class GRT_Ticket_Ajax {
 			} else {
 				// Notify User (if admin replied) - BUT ONLY IF NOT INTERNAL NOTE
 				if ( ! $is_internal && is_email( $ticket->user_email ) ) {
-					$subject = sprintf( __( '[%s] Update on Ticket #%d', 'grt-ticket' ), $site_name, $ticket_id );
+					/* translators: 1: Site name, 2: Ticket ID */
+					$subject = sprintf( __( '[%1$s] Update on Ticket #%2$d', 'grt-ticket' ), $site_name, $ticket_id );
+					/* translators: %s: User name */
 					$body = sprintf( __( 'Hello %s,', 'grt-ticket' ), $ticket->user_name ) . "\r\n\r\n";
-					$body .= sprintf( __( 'You have received a new reply from support:', 'grt-ticket' ) ) . "\r\n\r\n";
+					$body .= __( 'You have received a new reply from support:', 'grt-ticket' ) . "\r\n\r\n";
 					$body .= wp_strip_all_tags( $message_content ) . "\r\n\r\n";
 					
 					// Check if email notifications are enabled
@@ -499,6 +563,7 @@ class GRT_Ticket_Ajax {
 						try {
 							wp_mail( $ticket->user_email, $subject, $body );
 						} catch ( \Throwable $e ) {
+							// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Essential for debugging.
 							error_log( 'GRT Ticket Email Error: ' . $e->getMessage() );
 						}
 					}
@@ -517,6 +582,7 @@ class GRT_Ticket_Ajax {
 		}
 
 		} catch ( \Throwable $e ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Essential for debugging.
 			error_log( 'GRT Ticket Send Message Error: ' . $e->getMessage() );
 			wp_send_json_error( array( 'message' => __( 'Server error: ', 'grt-ticket' ) . $e->getMessage() ) );
 		}
@@ -529,12 +595,15 @@ class GRT_Ticket_Ajax {
 	 */
 	public function grt_ticket_get_messages() {
 		// Verify nonce
-		if ( ! isset( $_POST['nonce'] ) || ( ! wp_verify_nonce( $_POST['nonce'], 'grt_ticket_nonce' ) && ! wp_verify_nonce( $_POST['nonce'], 'grt_ticket_public_nonce' ) ) ) {
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
+		if ( empty( $nonce ) || ( ! wp_verify_nonce( $nonce, 'grt_ticket_nonce' ) && ! wp_verify_nonce( $nonce, 'grt_ticket_public_nonce' ) ) ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid security token.', 'grt-ticket' ) ) );
 		}
 
-		$ticket_id = isset( $_POST['ticket_id'] ) ? (int) $_POST['ticket_id'] : 0;
-		$since_id  = isset( $_POST['since_id'] ) ? (int) $_POST['since_id'] : 0;
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Cast to integer.
+		$ticket_id = isset( $_POST['ticket_id'] ) ? (int) wp_unslash( $_POST['ticket_id'] ) : 0;
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Cast to integer.
+		$since_id  = isset( $_POST['since_id'] ) ? (int) wp_unslash( $_POST['since_id'] ) : 0;
 
 		if ( ! $ticket_id ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid ticket ID.', 'grt-ticket' ) ) );
@@ -586,11 +655,13 @@ class GRT_Ticket_Ajax {
 	 */
 	public function update_typing_status() {
 		// Verify nonce
-		if ( ! isset( $_POST['nonce'] ) || ( ! wp_verify_nonce( $_POST['nonce'], 'grt_ticket_nonce' ) && ! wp_verify_nonce( $_POST['nonce'], 'grt_ticket_public_nonce' ) ) ) {
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
+		if ( empty( $nonce ) || ( ! wp_verify_nonce( $nonce, 'grt_ticket_nonce' ) && ! wp_verify_nonce( $nonce, 'grt_ticket_public_nonce' ) ) ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid security token.', 'grt-ticket' ) ) );
 		}
 
-		$ticket_id = isset( $_POST['ticket_id'] ) ? (int) $_POST['ticket_id'] : 0;
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Cast to integer.
+		$ticket_id = isset( $_POST['ticket_id'] ) ? (int) wp_unslash( $_POST['ticket_id'] ) : 0;
 		$is_typing = isset( $_POST['is_typing'] ) && $_POST['is_typing'] === 'true';
 
 		if ( ! $ticket_id ) {
@@ -630,12 +701,12 @@ class GRT_Ticket_Ajax {
 			if ( empty( $_POST['user_email'] ) ) {
 				wp_send_json_error( array( 'message' => __( 'User email is required.', 'grt-ticket' ) ) );
 			}
-			$args['user_email'] = sanitize_email( $_POST['user_email'] );
+			$args['user_email'] = sanitize_email( wp_unslash( $_POST['user_email'] ) );
 		}
 
 		// Optional status filter
 		if ( ! empty( $_POST['status'] ) ) {
-			$args['status'] = sanitize_text_field( $_POST['status'] );
+			$args['status'] = sanitize_text_field( wp_unslash( $_POST['status'] ) );
 		}
 
 		$tickets = GRT_Ticket_Database::get_tickets( $args );
@@ -661,7 +732,8 @@ class GRT_Ticket_Ajax {
 			wp_send_json_error( array( 'message' => __( 'Ticket ID is required.', 'grt-ticket' ) ) );
 		}
 
-		$ticket_id = (int) $_POST['ticket_id'];
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Cast to integer.
+		$ticket_id = (int) wp_unslash( $_POST['ticket_id'] );
 		$result = GRT_Ticket_Database::update_ticket_status( $ticket_id, 'solved' );
 
 		if ( $result ) {
@@ -685,7 +757,8 @@ class GRT_Ticket_Ajax {
 		// Verify nonce
 		check_ajax_referer( 'grt_ticket_nonce', 'nonce' );
 
-		$ticket_id = isset( $_POST['ticket_id'] ) ? (int) $_POST['ticket_id'] : 0;
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Cast to integer.
+		$ticket_id = isset( $_POST['ticket_id'] ) ? (int) wp_unslash( $_POST['ticket_id'] ) : 0;
 
 		if ( ! $ticket_id ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid ticket ID.', 'grt-ticket' ) ) );
@@ -709,9 +782,11 @@ class GRT_Ticket_Ajax {
 		// Verify nonce
 		check_ajax_referer( 'grt_ticket_nonce', 'nonce' );
 
-		$ticket_id = isset( $_POST['ticket_id'] ) ? (int) $_POST['ticket_id'] : 0;
-		$rating    = isset( $_POST['rating'] ) ? (int) $_POST['rating'] : 0;
-		$feedback  = isset( $_POST['feedback'] ) ? sanitize_textarea_field( $_POST['feedback'] ) : '';
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Cast to integer.
+		$ticket_id = isset( $_POST['ticket_id'] ) ? (int) wp_unslash( $_POST['ticket_id'] ) : 0;
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Cast to integer.
+		$rating    = isset( $_POST['rating'] ) ? (int) wp_unslash( $_POST['rating'] ) : 0;
+		$feedback  = isset( $_POST['feedback'] ) ? sanitize_textarea_field( wp_unslash( $_POST['feedback'] ) ) : '';
 
 		if ( ! $ticket_id || $rating < 1 || $rating > 5 ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid data.', 'grt-ticket' ) ) );
@@ -829,6 +904,7 @@ class GRT_Ticket_Ajax {
 			return;
 		}
 
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- File array handling via media_handle_upload.
 		$file = $_FILES['profile_image'];
 		
 		// Use media_handle_sideload or similar, but for direct upload we can use wp_handle_upload
@@ -870,7 +946,8 @@ class GRT_Ticket_Ajax {
 			return;
 		}
 
-		$fields_json = stripslashes( $_POST['fields'] );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- JSON data is decoded and fields are sanitized individually below.
+		$fields_json = wp_unslash( $_POST['fields'] );
 		$fields = json_decode( $fields_json, true );
 
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
@@ -934,8 +1011,10 @@ class GRT_Ticket_Ajax {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'grt-ticket' ) ) );
 		}
 
-		$ticket_id = isset( $_POST['ticket_id'] ) ? (int) $_POST['ticket_id'] : 0;
-		$agent_id  = isset( $_POST['agent_id'] ) ? (int) $_POST['agent_id'] : 0;
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Cast to integer.
+		$ticket_id = isset( $_POST['ticket_id'] ) ? (int) wp_unslash( $_POST['ticket_id'] ) : 0;
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Cast to integer.
+		$agent_id  = isset( $_POST['agent_id'] ) ? (int) wp_unslash( $_POST['agent_id'] ) : 0;
 
 		if ( ! $ticket_id ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid ticket ID.', 'grt-ticket' ) ) );
@@ -949,10 +1028,14 @@ class GRT_Ticket_Ajax {
 				$agent = get_userdata( $agent_id );
 				if ( $agent ) {
 					$ticket = GRT_Ticket_Database::get_ticket( $ticket_id );
-					$subject = sprintf( __( '[%s] You have been assigned to Ticket #%d', 'grt-ticket' ), get_bloginfo( 'name' ), $ticket_id );
+					/* translators: 1: Site name, 2: Ticket ID */
+					$subject = sprintf( __( '[%1$s] You have been assigned to Ticket #%2$d', 'grt-ticket' ), get_bloginfo( 'name' ), $ticket_id );
+					/* translators: %s: Agent name */
 					$message = sprintf( __( 'Hello %s,', 'grt-ticket' ), $agent->display_name ) . "\r\n\r\n";
 					$message .= sprintf( __( 'You have been assigned to the following ticket:', 'grt-ticket' ) ) . "\r\n\r\n";
-					$message .= sprintf( __( 'Ticket #%d: %s', 'grt-ticket' ), $ticket_id, $ticket->title ) . "\r\n";
+					/* translators: 1: Ticket ID, 2: Ticket title */
+					$message .= sprintf( __( 'Ticket #%1$d: %2$s', 'grt-ticket' ), $ticket_id, $ticket->title ) . "\r\n";
+					/* translators: %s: Ticket URL */
 					$message .= sprintf( __( 'View Ticket: %s', 'grt-ticket' ), admin_url( 'admin.php?page=grt-ticket-chat&ticket_id=' . $ticket_id ) ) . "\r\n\r\n";
 					
 					wp_mail( $agent->user_email, $subject, $message );
@@ -977,8 +1060,8 @@ class GRT_Ticket_Ajax {
 
 		check_ajax_referer( 'grt_ticket_settings_nonce', 'nonce' );
 
-		$url = isset( $_POST['supabase_url'] ) ? sanitize_text_field( $_POST['supabase_url'] ) : '';
-		$key = isset( $_POST['supabase_key'] ) ? sanitize_text_field( $_POST['supabase_key'] ) : '';
+		$url = isset( $_POST['supabase_url'] ) ? sanitize_text_field( wp_unslash( $_POST['supabase_url'] ) ) : '';
+		$key = isset( $_POST['supabase_key'] ) ? sanitize_text_field( wp_unslash( $_POST['supabase_key'] ) ) : '';
 
 		if ( empty( $url ) || empty( $key ) ) {
 			wp_send_json_error( array( 'message' => __( 'Missing URL or Key.', 'grt-ticket' ) ) );
@@ -996,7 +1079,8 @@ class GRT_Ticket_Ajax {
 		) );
 
 		if ( is_wp_error( $response ) ) {
-			wp_send_json_error( array( 'message' => __( 'Connection failed: ' . $response->get_error_message(), 'grt-ticket' ) ) );
+			/* translators: %s: Error message */
+			wp_send_json_error( array( 'message' => sprintf( __( 'Connection failed: %s', 'grt-ticket' ), $response->get_error_message() ) ) );
 		}
 
 		$code = wp_remote_retrieve_response_code( $response );
@@ -1009,7 +1093,8 @@ class GRT_Ticket_Ajax {
 			wp_send_json_error( array( 'message' => __( 'Authentication failed. Check your Secret Key.', 'grt-ticket' ) ) );
 		} else {
 			$body = wp_remote_retrieve_body( $response );
-			wp_send_json_error( array( 'message' => sprintf( __( 'Error %d: %s', 'grt-ticket' ), $code, $body ) ) );
+			/* translators: 1: Error code, 2: Error message */
+			wp_send_json_error( array( 'message' => sprintf( __( 'Error %1$d: %2$s', 'grt-ticket' ), $code, $body ) ) );
 		}
 	}
 
@@ -1025,8 +1110,8 @@ class GRT_Ticket_Ajax {
 
 		check_ajax_referer( 'grt_ticket_settings_nonce', 'nonce' );
 
-		$url = isset( $_POST['supabase_url'] ) ? sanitize_text_field( $_POST['supabase_url'] ) : '';
-		$key = isset( $_POST['supabase_key'] ) ? sanitize_text_field( $_POST['supabase_key'] ) : '';
+		$url = isset( $_POST['supabase_url'] ) ? sanitize_text_field( wp_unslash( $_POST['supabase_url'] ) ) : '';
+		$key = isset( $_POST['supabase_key'] ) ? sanitize_text_field( wp_unslash( $_POST['supabase_key'] ) ) : '';
 
 		if ( empty( $url ) || empty( $key ) ) {
 			wp_send_json_error( array( 'message' => __( 'Missing URL or Key.', 'grt-ticket' ) ) );
@@ -1057,7 +1142,8 @@ class GRT_Ticket_Ajax {
 		) );
 
 		if ( is_wp_error( $response ) ) {
-			wp_send_json_error( array( 'message' => __( 'Connection failed: ' . $response->get_error_message(), 'grt-ticket' ) ) );
+			/* translators: %s: Error message */
+			wp_send_json_error( array( 'message' => sprintf( __( 'Connection failed: %s', 'grt-ticket' ), $response->get_error_message() ) ) );
 		}
 
 		$code = wp_remote_retrieve_response_code( $response );
@@ -1076,7 +1162,8 @@ class GRT_Ticket_Ajax {
 
 			wp_send_json_success( array( 'message' => __( 'Write test successful! Message pushed and deleted.', 'grt-ticket' ) ) );
 		} else {
-			wp_send_json_error( array( 'message' => sprintf( __( 'Write failed (Error %d): %s', 'grt-ticket' ), $code, $body ) ) );
+			/* translators: 1: Error code, 2: Error message */
+			wp_send_json_error( array( 'message' => sprintf( __( 'Write failed (Error %1$d): %2$s', 'grt-ticket' ), $code, $body ) ) );
 		}
 	}
 
@@ -1168,8 +1255,8 @@ class GRT_Ticket_Ajax {
 			return;
 		}
 
-		$action = isset( $_POST['bulk_action'] ) ? sanitize_text_field( $_POST['bulk_action'] ) : '';
-		$ticket_ids = isset( $_POST['ticket_ids'] ) ? array_map( 'intval', $_POST['ticket_ids'] ) : array();
+		$action = isset( $_POST['bulk_action'] ) ? sanitize_text_field( wp_unslash( $_POST['bulk_action'] ) ) : '';
+		$ticket_ids = isset( $_POST['ticket_ids'] ) ? array_map( 'intval', wp_unslash( $_POST['ticket_ids'] ) ) : array();
 
 		if ( empty( $action ) || empty( $ticket_ids ) ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid request.', 'grt-ticket' ) ) );
@@ -1204,7 +1291,8 @@ class GRT_Ticket_Ajax {
 		}
 
 		if ( $success_count > 0 ) {
-			wp_send_json_success( array( 'message' => sprintf( __( 'Successfully processed %d tickets.', 'grt-ticket' ), $success_count ) ) );
+			/* translators: %d: Number of processed tickets */
+			wp_send_json_success( array( 'message' => sprintf( _n( 'Successfully processed %d ticket.', 'Successfully processed %d tickets.', $success_count, 'grt-ticket' ), $success_count ) ) );
 		} else {
 			wp_send_json_error( array( 'message' => __( 'Failed to process selected tickets.', 'grt-ticket' ) ) );
 		}

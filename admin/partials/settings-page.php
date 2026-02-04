@@ -16,7 +16,9 @@ if ( isset( $_POST['grt_ticket_save_settings'] ) && check_admin_referer( 'grt_ti
 	// Handle Categories
 	$categories_data = array();
 	if ( isset( $_POST['grt_categories'] ) && is_array( $_POST['grt_categories'] ) ) {
-		foreach ( $_POST['grt_categories'] as $cat ) {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Context: Array structure sanitized in loop below.
+		$categories_input = wp_unslash( $_POST['grt_categories'] );
+		foreach ( $categories_input as $cat ) {
 			if ( ! empty( $cat['name'] ) ) {
 				$categories_data[] = array(
 					'name'     => sanitize_text_field( $cat['name'] ),
@@ -28,52 +30,52 @@ if ( isset( $_POST['grt_ticket_save_settings'] ) && check_admin_referer( 'grt_ti
 	}
 	update_option( 'grt_ticket_categories', json_encode( $categories_data ) );
 	
-	update_option( 'grt_ticket_admin_name', sanitize_text_field( $_POST['grt_ticket_admin_name'] ) );
+	update_option( 'grt_ticket_admin_name', isset( $_POST['grt_ticket_admin_name'] ) ? sanitize_text_field( wp_unslash( $_POST['grt_ticket_admin_name'] ) ) : '' );
 	update_option( 'grt_ticket_enable_email_notifications', isset( $_POST['grt_ticket_enable_email_notifications'] ) ? 1 : 0 );
-	update_option( 'grt_ticket_notification_emails', sanitize_textarea_field( $_POST['grt_ticket_notification_emails'] ) );
-	update_option( 'grt_ticket_per_page', absint( $_POST['grt_ticket_per_page'] ) );
-	update_option( 'grt_ticket_poll_interval', absint( $_POST['grt_ticket_poll_interval'] ) );
+	update_option( 'grt_ticket_notification_emails', isset( $_POST['grt_ticket_notification_emails'] ) ? sanitize_textarea_field( wp_unslash( $_POST['grt_ticket_notification_emails'] ) ) : '' );
+	update_option( 'grt_ticket_per_page', isset( $_POST['grt_ticket_per_page'] ) ? absint( $_POST['grt_ticket_per_page'] ) : 20 );
+	update_option( 'grt_ticket_poll_interval', isset( $_POST['grt_ticket_poll_interval'] ) ? absint( $_POST['grt_ticket_poll_interval'] ) : 3000 );
 	
 	// WhatsApp Settings
 	update_option( 'grt_ticket_enable_whatsapp', isset( $_POST['grt_ticket_enable_whatsapp'] ) ? 1 : 0 );
-	update_option( 'grt_ticket_twilio_sid', sanitize_text_field( $_POST['grt_ticket_twilio_sid'] ) );
-	update_option( 'grt_ticket_twilio_token', sanitize_text_field( $_POST['grt_ticket_twilio_token'] ) );
-	update_option( 'grt_ticket_twilio_from', sanitize_text_field( $_POST['grt_ticket_twilio_from'] ) );
-	update_option( 'grt_ticket_whatsapp_admin_number', sanitize_text_field( $_POST['grt_ticket_whatsapp_admin_number'] ) );
+	update_option( 'grt_ticket_twilio_sid', isset( $_POST['grt_ticket_twilio_sid'] ) ? sanitize_text_field( wp_unslash( $_POST['grt_ticket_twilio_sid'] ) ) : '' );
+	update_option( 'grt_ticket_twilio_token', isset( $_POST['grt_ticket_twilio_token'] ) ? sanitize_text_field( wp_unslash( $_POST['grt_ticket_twilio_token'] ) ) : '' );
+	update_option( 'grt_ticket_twilio_from', isset( $_POST['grt_ticket_twilio_from'] ) ? sanitize_text_field( wp_unslash( $_POST['grt_ticket_twilio_from'] ) ) : '' );
+	update_option( 'grt_ticket_whatsapp_admin_number', isset( $_POST['grt_ticket_whatsapp_admin_number'] ) ? sanitize_text_field( wp_unslash( $_POST['grt_ticket_whatsapp_admin_number'] ) ) : '' );
 
 	// Direct Contact Settings
 	update_option( 'grt_ticket_enable_direct_call', isset( $_POST['grt_ticket_enable_direct_call'] ) ? 1 : 0 );
 	update_option( 'grt_ticket_enable_direct_sms', isset( $_POST['grt_ticket_enable_direct_sms'] ) ? 1 : 0 );
-	update_option( 'grt_ticket_support_phone', sanitize_text_field( $_POST['grt_ticket_support_phone'] ) );
-	update_option( 'grt_ticket_sms_body', sanitize_textarea_field( $_POST['grt_ticket_sms_body'] ) );
+	update_option( 'grt_ticket_support_phone', isset( $_POST['grt_ticket_support_phone'] ) ? sanitize_text_field( wp_unslash( $_POST['grt_ticket_support_phone'] ) ) : '' );
+	update_option( 'grt_ticket_sms_body', isset( $_POST['grt_ticket_sms_body'] ) ? sanitize_textarea_field( wp_unslash( $_POST['grt_ticket_sms_body'] ) ) : '' );
 	
 	// Email Piping Settings
 	update_option( 'grt_ticket_enable_piping', isset( $_POST['grt_ticket_enable_piping'] ) ? 1 : 0 );
-	update_option( 'grt_ticket_imap_host', sanitize_text_field( $_POST['grt_ticket_imap_host'] ) );
-	update_option( 'grt_ticket_imap_port', absint( $_POST['grt_ticket_imap_port'] ) );
-	update_option( 'grt_ticket_imap_user', sanitize_email( $_POST['grt_ticket_imap_user'] ) );
+	update_option( 'grt_ticket_imap_host', isset( $_POST['grt_ticket_imap_host'] ) ? sanitize_text_field( wp_unslash( $_POST['grt_ticket_imap_host'] ) ) : '' );
+	update_option( 'grt_ticket_imap_port', isset( $_POST['grt_ticket_imap_port'] ) ? absint( $_POST['grt_ticket_imap_port'] ) : 993 );
+	update_option( 'grt_ticket_imap_user', isset( $_POST['grt_ticket_imap_user'] ) ? sanitize_email( wp_unslash( $_POST['grt_ticket_imap_user'] ) ) : '' );
 	// Only update password if provided (to avoid clearing it on empty save)
 	if ( ! empty( $_POST['grt_ticket_imap_pass'] ) ) {
-		update_option( 'grt_ticket_imap_pass', sanitize_text_field( $_POST['grt_ticket_imap_pass'] ) );
+		update_option( 'grt_ticket_imap_pass', sanitize_text_field( wp_unslash( $_POST['grt_ticket_imap_pass'] ) ) );
 	}
 	update_option( 'grt_ticket_imap_ssl', isset( $_POST['grt_ticket_imap_ssl'] ) ? 1 : 0 );
 
 	// Supabase Settings
 	update_option( 'grt_ticket_enable_supabase', isset( $_POST['grt_ticket_enable_supabase'] ) ? 1 : 0 );
-	update_option( 'grt_ticket_supabase_url', sanitize_text_field( $_POST['grt_ticket_supabase_url'] ) );
-	update_option( 'grt_ticket_supabase_anon_key', sanitize_text_field( $_POST['grt_ticket_supabase_anon_key'] ) );
+	update_option( 'grt_ticket_supabase_url', isset( $_POST['grt_ticket_supabase_url'] ) ? sanitize_text_field( wp_unslash( $_POST['grt_ticket_supabase_url'] ) ) : '' );
+	update_option( 'grt_ticket_supabase_anon_key', isset( $_POST['grt_ticket_supabase_anon_key'] ) ? sanitize_text_field( wp_unslash( $_POST['grt_ticket_supabase_anon_key'] ) ) : '' );
 	// Only update secret if provided (password field)
 	if ( ! empty( $_POST['grt_ticket_supabase_service_role'] ) ) {
-		update_option( 'grt_ticket_supabase_service_role', sanitize_text_field( $_POST['grt_ticket_supabase_service_role'] ) );
+		update_option( 'grt_ticket_supabase_service_role', sanitize_text_field( wp_unslash( $_POST['grt_ticket_supabase_service_role'] ) ) );
 	}
 
 	// Automation Settings
-	update_option( 'grt_ticket_auto_close_days', absint( $_POST['grt_ticket_auto_close_days'] ) );
+	update_option( 'grt_ticket_auto_close_days', isset( $_POST['grt_ticket_auto_close_days'] ) ? absint( $_POST['grt_ticket_auto_close_days'] ) : 0 );
 
 	// Webhooks & Integrations Settings
-	update_option( 'grt_ticket_slack_webhook', sanitize_url( $_POST['grt_ticket_slack_webhook'] ) );
-	update_option( 'grt_ticket_discord_webhook', sanitize_url( $_POST['grt_ticket_discord_webhook'] ) );
-	update_option( 'grt_ticket_zapier_webhook', sanitize_url( $_POST['grt_ticket_zapier_webhook'] ) );
+	update_option( 'grt_ticket_slack_webhook', isset( $_POST['grt_ticket_slack_webhook'] ) ? sanitize_url( wp_unslash( $_POST['grt_ticket_slack_webhook'] ) ) : '' );
+	update_option( 'grt_ticket_discord_webhook', isset( $_POST['grt_ticket_discord_webhook'] ) ? sanitize_url( wp_unslash( $_POST['grt_ticket_discord_webhook'] ) ) : '' );
+	update_option( 'grt_ticket_zapier_webhook', isset( $_POST['grt_ticket_zapier_webhook'] ) ? sanitize_url( wp_unslash( $_POST['grt_ticket_zapier_webhook'] ) ) : '' );
 
 	echo '<div class="notice notice-success"><p>' . esc_html__( 'Settings saved successfully!', 'grt-ticket' ) . '</p></div>';
 }
@@ -171,9 +173,9 @@ $zapier_webhook = get_option( 'grt_ticket_zapier_webhook', '' );
 							<div id="grt-categories-wrapper">
 								<?php foreach ( $categories as $index => $cat ) : ?>
 									<div class="grt-category-item">
-										<input type="text" name="grt_categories[<?php echo $index; ?>][name]" value="<?php echo esc_attr( $cat['name'] ); ?>" placeholder="<?php esc_attr_e( 'Category Name', 'grt-ticket' ); ?>" class="regular-text">
+										<input type="text" name="grt_categories[<?php echo esc_attr( $index ); ?>][name]" value="<?php echo esc_attr( $cat['name'] ); ?>" placeholder="<?php esc_attr_e( 'Category Name', 'grt-ticket' ); ?>" class="regular-text">
 										
-										<select name="grt_categories[<?php echo $index; ?>][agent_id]" class="grt-cat-agent-select">
+										<select name="grt_categories[<?php echo esc_attr( $index ); ?>][agent_id]" class="grt-cat-agent-select">
 											<option value="0"><?php esc_html_e( 'Select Agent', 'grt-ticket' ); ?></option>
 											<?php foreach ( $agents as $agent ) : ?>
 												<option value="<?php echo esc_attr( $agent->ID ); ?>" <?php selected( isset( $cat['agent_id'] ) ? $cat['agent_id'] : 0, $agent->ID ); ?>>
@@ -183,7 +185,7 @@ $zapier_webhook = get_option( 'grt_ticket_zapier_webhook', '' );
 										</select>
 
 										<div class="grt-image-upload-wrapper">
-											<input type="hidden" name="grt_categories[<?php echo $index; ?>][image]" value="<?php echo esc_attr( $cat['image'] ); ?>" class="grt-cat-image-url">
+											<input type="hidden" name="grt_categories[<?php echo esc_attr( $index ); ?>][image]" value="<?php echo esc_attr( $cat['image'] ); ?>" class="grt-cat-image-url">
 											<div class="grt-image-preview">
 												<?php if ( ! empty( $cat['image'] ) ) : ?>
 													<img src="<?php echo esc_url( $cat['image'] ); ?>" alt="Preview">
@@ -606,7 +608,7 @@ $zapier_webhook = get_option( 'grt_ticket_zapier_webhook', '' );
 					type: 'POST',
 					data: {
 						action: 'grt_test_supabase_connection',
-						nonce: '<?php echo wp_create_nonce( 'grt_ticket_settings_nonce' ); ?>',
+						nonce: '<?php echo esc_js( wp_create_nonce( 'grt_ticket_settings_nonce' ) ); ?>',
 						supabase_url: url,
 						supabase_key: key
 					},
@@ -646,7 +648,7 @@ $zapier_webhook = get_option( 'grt_ticket_zapier_webhook', '' );
 					type: 'POST',
 					data: {
 						action: 'grt_test_supabase_push',
-						nonce: '<?php echo wp_create_nonce( 'grt_ticket_settings_nonce' ); ?>',
+						nonce: '<?php echo esc_js( wp_create_nonce( 'grt_ticket_settings_nonce' ) ); ?>',
 						supabase_url: url,
 						supabase_key: key
 					},
