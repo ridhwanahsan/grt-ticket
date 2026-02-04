@@ -203,10 +203,52 @@
         });
 
         // Auto-resize textarea
+        let typingTimer;
+        let isTyping = false;
+        const typingInterval = 3000;
+        let lastTypingSent = 0;
+
         $('#grt-chat-input').on('input', function () {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
+
+            // Typing logic
+            if (!isTyping) {
+                isTyping = true;
+                sendTypingStatus(true);
+            }
+            
+            lastTypingSent = Date.now();
+            
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(function() {
+                isTyping = false;
+                sendTypingStatus(false);
+            }, 2000);
         });
+
+        // Periodic typing update while actively typing
+        setInterval(function() {
+            if (isTyping && (Date.now() - lastTypingSent > typingInterval)) {
+                sendTypingStatus(true);
+                lastTypingSent = Date.now();
+            }
+        }, 1000);
+
+        function sendTypingStatus(status) {
+            $.ajax({
+                url: grtTicketPublic.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'grt_ticket_update_typing_status',
+                    nonce: grtTicketPublic.nonce,
+                    ticket_id: ticketId,
+                    is_typing: status
+                },
+                success: function() {},
+                error: function() {}
+            });
+        }
 
         // Send message
         $('#grt-chat-send-btn').on('click', function () {
@@ -507,6 +549,13 @@
                         if (response.data.messages.length > 0) {
                             appendMessages(response.data.messages);
                             scrollToBottom();
+                        }
+
+                        // Handle Typing Indicator
+                        if (response.data.is_typing) {
+                            $('.grt-typing-indicator').fadeIn();
+                        } else {
+                            $('.grt-typing-indicator').fadeOut();
                         }
 
                         // Check if ticket status changed (solved/closed vs open)

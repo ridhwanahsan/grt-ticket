@@ -156,6 +156,9 @@ $is_solved = 'solved' === $ticket->status || 'closed' === $ticket->status;
 				<?php esc_html_e( '✓ This ticket has been marked as solved. No further messages can be sent.', 'grt-ticket' ); ?>
 			</div>
 		<?php else : ?>
+			<div class="grt-typing-indicator" style="display: none; padding: 10px; color: #666; font-style: italic; font-size: 13px;">
+				<?php esc_html_e( 'User is typing...', 'grt-ticket' ); ?>
+			</div>
 			<div class="grt-chat-input-container">
 				<?php
 				// Get canned responses

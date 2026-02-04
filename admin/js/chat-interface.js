@@ -129,14 +129,57 @@
             }
         });
 
-        // Auto-resize textarea
-        $('#grt-chat-input').on('input', function () {
+        // Typing Status Logic
+        let typingTimer;
+        let isTyping = false;
+        const typingInterval = 3000; // Send update every 3s
+        let lastTypingSent = 0;
+
+        $('#grt-chat-input').on('input', function() {
+            // Auto-resize
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
+
+            // Typing logic
+            if (!isTyping) {
+                isTyping = true;
+                sendTypingStatus(true);
+            }
             
-            // Check if it exceeds max-height (defined in CSS, e.g. 200px)
-            // If scrollHeight > clientHeight when max-height is reached, it will scroll automatically
+            lastTypingSent = Date.now();
+            
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(function() {
+                isTyping = false;
+                sendTypingStatus(false);
+            }, 2000); // Stop typing after 2s of inactivity
         });
+
+        // Periodic typing update while actively typing
+        setInterval(function() {
+            if (isTyping && (Date.now() - lastTypingSent > typingInterval)) {
+                sendTypingStatus(true);
+                lastTypingSent = Date.now();
+            }
+        }, 1000);
+
+        function sendTypingStatus(status) {
+            $.ajax({
+                url: grtTicketAdmin.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'grt_ticket_update_typing_status',
+                    nonce: grtTicketAdmin.nonce,
+                    ticket_id: ticketId,
+                    is_typing: status
+                },
+                success: function() {}, // Silent success
+                error: function() {} // Silent error
+            });
+        }
+
+        // Auto-resize textarea (removed separate handler to merge with input)
+
 
         // Mark as solved
         $('#grt-chat-solve-btn').on('click', function () {
@@ -379,9 +422,18 @@
                     since_id: lastMessageId
                 },
                 success: function (response) {
-                    if (response.success && response.data.messages.length > 0) {
-                        appendMessages(response.data.messages);
-                        scrollToBottom();
+                    if (response.success) {
+                        if (response.data.messages.length > 0) {
+                            appendMessages(response.data.messages);
+                            scrollToBottom();
+                        }
+
+                        // Handle Typing Indicator
+                        if (response.data.is_typing) {
+                            $('.grt-typing-indicator').fadeIn();
+                        } else {
+                            $('.grt-typing-indicator').fadeOut();
+                        }
                     }
                 },
                 error: function (xhr, status, error) {

@@ -257,6 +257,9 @@ $sms_body = get_option( 'grt_ticket_sms_body', 'Hello, I need help with my ticke
 				<?php endif; ?>
 			</div>
 		<?php else : ?>
+			<div class="grt-typing-indicator" style="display: none; padding: 10px; color: #666; font-style: italic; font-size: 13px;">
+				<?php esc_html_e( 'Agent is typing...', 'grt-ticket' ); ?>
+			</div>
 			<div class="grt-chat-input-container">
 				<div id="grt-attachment-preview" class="grt-attachment-preview" style="display: none;">
 					<div id="grt-preview-content"></div>

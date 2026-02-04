@@ -15,6 +15,68 @@
         $(document).on('change', '.grt-assign-agent-list', function () {
             assignAgent($(this));
         });
+
+        // Bulk Actions: Select All
+        $('#cb-select-all-1').on('change', function () {
+            $('input[name="ticket[]"]').prop('checked', $(this).is(':checked'));
+        });
+
+        // Bulk Actions: Apply
+        $('.grt-bulk-action-apply').on('click', function (e) {
+            e.preventDefault();
+            
+            if (typeof grtTicketAdmin === 'undefined') {
+                console.error('GRT Ticket: grtTicketAdmin is missing.');
+                alert('System Error: Configuration missing. Please reload the page.');
+                return;
+            }
+
+            const action = $('#bulk-action-selector-top').val();
+            if (action === '-1') {
+                alert('Please select an action.');
+                return;
+            }
+
+            const selectedTickets = [];
+            $('input[name="ticket[]"]:checked').each(function () {
+                selectedTickets.push($(this).val());
+            });
+
+            if (selectedTickets.length === 0) {
+                alert('Please select at least one ticket.');
+                return;
+            }
+
+            if (action === 'delete' && !confirm('Are you sure you want to delete selected tickets?')) {
+                return;
+            }
+
+            const $button = $(this);
+            $button.prop('disabled', true).val('Applying...');
+
+            $.ajax({
+                url: grtTicketAdmin.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'grt_bulk_action',
+                    bulk_action: action,
+                    ticket_ids: selectedTickets,
+                    nonce: grtTicketAdmin.nonce
+                },
+                success: function (response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert(response.data.message || 'Failed to apply bulk action.');
+                        $button.prop('disabled', false).val('Apply');
+                    }
+                },
+                error: function () {
+                    alert('An error occurred. Please try again.');
+                    $button.prop('disabled', false).val('Apply');
+                }
+            });
+        });
     });
 
     /**

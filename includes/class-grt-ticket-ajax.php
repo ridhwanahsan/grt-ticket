@@ -568,9 +568,50 @@ class GRT_Ticket_Ajax {
 			$messages = array_values( $messages );
 		}
 
+		// Check if other party is typing
+		$other_type_suffix = $is_admin ? 'user' : 'admin';
+		$other_typing_key = 'grt_typing_' . $ticket_id . '_' . $other_type_suffix;
+		$is_other_typing = get_transient( $other_typing_key ) ? true : false;
+
 		wp_send_json_success( array(
 			'messages' => $messages,
+			'is_typing' => $is_other_typing
 		) );
+	}
+
+	/**
+	 * Update typing status.
+	 *
+	 * @since    1.0.0
+	 */
+	public function update_typing_status() {
+		// Verify nonce
+		if ( ! isset( $_POST['nonce'] ) || ( ! wp_verify_nonce( $_POST['nonce'], 'grt_ticket_nonce' ) && ! wp_verify_nonce( $_POST['nonce'], 'grt_ticket_public_nonce' ) ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid security token.', 'grt-ticket' ) ) );
+		}
+
+		$ticket_id = isset( $_POST['ticket_id'] ) ? (int) $_POST['ticket_id'] : 0;
+		$is_typing = isset( $_POST['is_typing'] ) && $_POST['is_typing'] === 'true';
+
+		if ( ! $ticket_id ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid ticket ID.', 'grt-ticket' ) ) );
+		}
+
+		// Determine user type
+		$is_admin = current_user_can( 'manage_options' );
+		$type_suffix = $is_admin ? 'admin' : 'user';
+		
+		// Set transient key: grt_typing_{ticket_id}_{admin|user}
+		$key = 'grt_typing_' . $ticket_id . '_' . $type_suffix;
+
+		if ( $is_typing ) {
+			// Set transient for 5 seconds (client should ping every 3s)
+			set_transient( $key, true, 5 );
+		} else {
+			delete_transient( $key );
+		}
+
+		wp_send_json_success();
 	}
 
 	/**
@@ -1107,6 +1148,65 @@ class GRT_Ticket_Ajax {
 				'body'    => json_encode( $zapier_data ),
 				'blocking' => false,
 			) );
+		}
+	}
+
+	/**
+	 * Process Bulk Actions.
+	 *
+	 * @since 1.1.2
+	 */
+	public function process_bulk_action() {
+		// Verify nonce
+		if ( ! check_ajax_referer( 'grt_ticket_nonce', 'nonce', false ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed. Please refresh the page and try again.', 'grt-ticket' ) ) );
+			return;
+		}
+
+		if ( ! current_user_can( 'manage_options' ) && ! current_user_can( 'edit_others_posts' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'grt-ticket' ) ) );
+			return;
+		}
+
+		$action = isset( $_POST['bulk_action'] ) ? sanitize_text_field( $_POST['bulk_action'] ) : '';
+		$ticket_ids = isset( $_POST['ticket_ids'] ) ? array_map( 'intval', $_POST['ticket_ids'] ) : array();
+
+		if ( empty( $action ) || empty( $ticket_ids ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid request.', 'grt-ticket' ) ) );
+			return;
+		}
+
+		$success_count = 0;
+		$error_count = 0;
+
+		foreach ( $ticket_ids as $ticket_id ) {
+			$result = false;
+			switch ( $action ) {
+				case 'delete':
+					$result = GRT_Ticket_Database::delete_ticket( $ticket_id );
+					break;
+				case 'close':
+					$result = GRT_Ticket_Database::update_ticket_status( $ticket_id, 'closed' );
+					break;
+				case 'open':
+					$result = GRT_Ticket_Database::update_ticket_status( $ticket_id, 'open' );
+					break;
+				case 'solved':
+					$result = GRT_Ticket_Database::update_ticket_status( $ticket_id, 'solved' );
+					break;
+			}
+
+			if ( $result ) {
+				$success_count++;
+			} else {
+				$error_count++;
+			}
+		}
+
+		if ( $success_count > 0 ) {
+			wp_send_json_success( array( 'message' => sprintf( __( 'Successfully processed %d tickets.', 'grt-ticket' ), $success_count ) ) );
+		} else {
+			wp_send_json_error( array( 'message' => __( 'Failed to process selected tickets.', 'grt-ticket' ) ) );
 		}
 	}
 }

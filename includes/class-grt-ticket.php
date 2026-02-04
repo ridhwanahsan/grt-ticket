@@ -191,9 +191,14 @@ class GRT_Ticket {
 		// Profile Image Upload
 		$this->loader->add_action( 'wp_ajax_grt_upload_profile_image', $plugin_ajax, 'upload_profile_image' );
 
+		// Typing Status
+		$this->loader->add_action( 'wp_ajax_grt_ticket_update_typing_status', $plugin_ajax, 'update_typing_status' );
+		$this->loader->add_action( 'wp_ajax_nopriv_grt_ticket_update_typing_status', $plugin_ajax, 'update_typing_status' );
+
 		// Admin only AJAX
 		$this->loader->add_action( 'wp_ajax_grt_ticket_mark_solved', $plugin_ajax, 'mark_solved' );
 		$this->loader->add_action( 'wp_ajax_grt_ticket_delete', $plugin_ajax, 'delete_ticket' );
+		$this->loader->add_action( 'wp_ajax_grt_bulk_action', $plugin_ajax, 'process_bulk_action' );
 		$this->loader->add_action( 'wp_ajax_grt_ticket_assign_agent', $plugin_ajax, 'assign_ticket' );
 		$this->loader->add_action( 'wp_ajax_grt_save_form_builder', $plugin_ajax, 'save_form_builder' );
 		$this->loader->add_action( 'wp_ajax_grt_test_supabase_connection', $plugin_ajax, 'test_supabase_connection' );

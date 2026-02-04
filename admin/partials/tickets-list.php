@@ -123,6 +123,21 @@ $agents = get_users( array( 'role__in' => array( 'administrator', 'editor' ) ) )
 		<?php endif; ?>
 	</form>
 
+	<div class="tablenav top" style="margin-bottom: 10px;">
+		<div class="alignleft actions bulkactions">
+			<label for="bulk-action-selector-top" class="screen-reader-text"><?php esc_html_e( 'Select bulk action', 'grt-ticket' ); ?></label>
+			<select name="action" id="bulk-action-selector-top">
+				<option value="-1"><?php esc_html_e( 'Bulk Actions', 'grt-ticket' ); ?></option>
+				<option value="delete"><?php esc_html_e( 'Delete', 'grt-ticket' ); ?></option>
+				<option value="close"><?php esc_html_e( 'Close', 'grt-ticket' ); ?></option>
+				<option value="open"><?php esc_html_e( 'Open', 'grt-ticket' ); ?></option>
+				<option value="solved"><?php esc_html_e( 'Mark as Solved', 'grt-ticket' ); ?></option>
+			</select>
+			<input type="submit" id="doaction" class="button action grt-bulk-action-apply" value="<?php esc_attr_e( 'Apply', 'grt-ticket' ); ?>">
+		</div>
+		<br class="clear">
+	</div>
+
 	<?php if ( empty( $tickets ) ) : ?>
 		<div class="notice notice-info">
 			<p><?php esc_html_e( 'No tickets found.', 'grt-ticket' ); ?></p>
@@ -198,7 +213,7 @@ $agents = get_users( array( 'role__in' => array( 'administrator', 'editor' ) ) )
 							</a>
 						</td>
 						<td>
-							<select class="grt-agent-select" data-ticket-id="<?php echo esc_attr( $ticket->id ); ?>">
+							<select class="grt-assign-agent-list" data-ticket-id="<?php echo esc_attr( $ticket->id ); ?>">
 								<option value="0"><?php esc_html_e( 'Unassigned', 'grt-ticket' ); ?></option>
 								<?php foreach ( $agents as $agent ) : ?>
 									<option value="<?php echo esc_attr( $agent->ID ); ?>" <?php selected( $ticket->assigned_agent_id, $agent->ID ); ?>>
@@ -226,83 +241,3 @@ $agents = get_users( array( 'role__in' => array( 'administrator', 'editor' ) ) )
 		</table>
 	<?php endif; ?>
 </div>
-
-<script>
-jQuery(document).ready(function($) {
-    // Assign Agent via Select
-    $('.grt-agent-select').on('change', function() {
-        var $select = $(this);
-        var ticketId = $select.data('ticket-id');
-        var agentId = $select.val();
-        
-        $select.prop('disabled', true);
-        
-        $.ajax({
-            url: ajaxurl,
-            type: 'POST',
-            data: {
-                action: 'grt_ticket_assign_agent',
-                ticket_id: ticketId,
-                agent_id: agentId,
-                nonce: '<?php echo wp_create_nonce( "grt_ticket_nonce" ); ?>'
-            },
-            success: function(response) {
-                if (response.success) {
-                    // Optional: Show a small success indicator or notification
-                } else {
-                    alert(response.data.message || 'Failed to assign agent');
-                    // Revert selection if needed, but for now we keep it simple
-                }
-            },
-            error: function() {
-                alert('Network error occurred');
-            },
-            complete: function() {
-                $select.prop('disabled', false);
-            }
-        });
-    });
-
-    // Delete Ticket
-    $('.grt-delete-ticket').on('click', function() {
-        if (!confirm('<?php esc_html_e( "Are you sure you want to delete this ticket?", "grt-ticket" ); ?>')) {
-            return;
-        }
-
-        var $button = $(this);
-        var ticketId = $button.data('ticket-id');
-        var $row = $button.closest('tr');
-
-        $button.prop('disabled', true);
-
-        $.ajax({
-            url: ajaxurl,
-            type: 'POST',
-            data: {
-                action: 'grt_ticket_delete',
-                ticket_id: ticketId,
-                nonce: '<?php echo wp_create_nonce( "grt_ticket_nonce" ); ?>'
-            },
-            success: function(response) {
-                if (response.success) {
-                    $row.fadeOut(function() {
-                        $(this).remove();
-                    });
-                } else {
-                    alert(response.data.message || 'Failed to delete ticket');
-                    $button.prop('disabled', false);
-                }
-            },
-            error: function() {
-                alert('Network error occurred');
-                $button.prop('disabled', false);
-            }
-        });
-    });
-
-    // Bulk Actions (Select All)
-    $('#cb-select-all-1').on('change', function() {
-        $('input[name="ticket[]"]').prop('checked', $(this).is(':checked'));
-    });
-});
-</script>
