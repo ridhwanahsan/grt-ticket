@@ -1,0 +1,205 @@
+/* GRT Ticket Admin - Tickets List Styles */
+
+.grt-ticket-wrap {
+    margin: 20px 20px 0 0;
+}
+
+.grt-ticket-header {
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-left: 4px solid #2271b1;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.grt-ticket-header h1 {
+    margin: 0 0 10px 0;
+    font-size: 24px;
+}
+
+/* Tickets Table */
+.grt-tickets-table {
+    width: 100%;
+    background: #fff;
+    border-collapse: separate;
+    border-spacing: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.grt-tickets-table th,
+.grt-tickets-table td {
+    padding: 16px 20px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f1;
+    vertical-align: middle;
+}
+
+.grt-tickets-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #eee;
+}
+
+.grt-tickets-table tr:hover td {
+    background: #fcfcfc;
+}
+
+.grt-tickets-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Checkbox Column */
+.grt-tickets-table .check-column {
+    width: 30px;
+    padding-left: 15px;
+}
+
+/* ID Column */
+.id-column {
+    color: #646970;
+    font-family: monospace;
+    font-size: 14px;
+}
+
+/* Requester Info */
+.grt-requester-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.grt-user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #eee;
+}
+
+.grt-user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.grt-user-name {
+    font-weight: 600;
+    color: #1d2327;
+    font-size: 14px;
+}
+
+.grt-user-sub {
+    font-size: 12px;
+    color: #8c8f94;
+    margin-top: 2px;
+}
+
+/* Priority Info */
+.grt-priority-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.grt-priority-info.priority-high {
+    color: #d63638;
+}
+
+.grt-priority-info.priority-medium {
+    color: #d88e00; /* Darker yellow/orange */
+}
+
+.grt-priority-info.priority-low {
+    color: #2271b1;
+}
+
+.grt-priority-info .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Subject */
+.grt-ticket-subject {
+    color: #1d2327;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.grt-ticket-subject:hover {
+    color: #2271b1;
+}
+
+/* Agent Select */
+.grt-agent-select {
+    max-width: 150px;
+    background: transparent;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 13px;
+    color: #3c434a;
+    box-shadow: none;
+}
+
+.grt-agent-select:hover {
+    border-color: #2271b1;
+    color: #2271b1;
+}
+
+/* Status Badge */
+.grt-ticket-status {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px; /* Pill shape */
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 80px;
+    border: 1px solid transparent;
+}
+
+.grt-ticket-status.status-open {
+    background: #e6f7eb;
+    color: #28a745;
+    border-color: #c3e6cb;
+}
+
+.grt-ticket-status.status-solved {
+    background: #e8f0fe;
+    color: #1a73e8;
+    border-color: #d2e3fc;
+}
+
+.grt-ticket-status.status-closed {
+    background: #f1f3f4;
+    color: #5f6368;
+    border-color: #dadce0;
+}
+
+/* Actions */
+.grt-ticket-actions {
+    white-space: nowrap;
+}
+
+.grt-ticket-actions .button {
+    padding: 0 8px !important;
+    min-width: 32px;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.grt-ticket-actions .dashicons {
+    font-size: 16px;
+    line-height: 1.5;
+}

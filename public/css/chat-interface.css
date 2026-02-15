@@ -1,0 +1,855 @@
+/* GRT Ticket Public - Chat Interface Styles */
+
+/* Rating System */
+.grt-rating-section {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.grt-rating-section h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.grt-rating-stars {
+    font-size: 24px;
+    color: #ddd;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.grt-star {
+    transition: color 0.2s;
+}
+
+.grt-star:hover,
+.grt-star.hover,
+.grt-star.selected {
+    color: #ffc107;
+}
+
+#grt-rating-feedback {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical;
+    min-height: 60px;
+}
+
+.grt-rating-display {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.grt-stars.readonly {
+    font-size: 24px;
+    color: #ddd;
+}
+
+.grt-stars.readonly .grt-star.selected {
+    color: #ffc107;
+}
+
+.grt-feedback-text {
+    font-style: italic;
+    color: #666;
+    margin-top: 10px;
+}
+
+/* Chat Interface */
+.grt-chat-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #f0f0f1;
+    z-index: 99999;
+    display: flex;
+    box-sizing: border-box;
+}
+
+.grt-chat-container * {
+    box-sizing: border-box;
+}
+
+/* Chat Sidebar */
+.grt-chat-sidebar {
+    width: 300px;
+    background: #f8f9fa;
+    border-right: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.grt-chat-sidebar-header {
+    padding: 20px;
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.grt-chat-sidebar-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+.grt-new-ticket-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    background: #667eea;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background 0.2s, transform 0.1s;
+    border: none;
+    line-height: 1.2;
+}
+
+.grt-new-ticket-btn:hover {
+    background: #5a67d8;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.grt-plus-icon {
+    font-size: 16px;
+    margin-right: 4px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+/* Sidebar Tabs */
+.grt-sidebar-tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+}
+
+.grt-tab-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: #f9f9f9;
+    cursor: pointer;
+    font-weight: 600;
+    color: #666;
+    border-bottom: 2px solid transparent;
+}
+
+.grt-tab-btn.active {
+    background: #fff;
+    color: #0073aa;
+    border-bottom: 2px solid #0073aa;
+}
+
+.grt-tab-content {
+    display: none;
+    flex: 1; 
+}
+
+.grt-tab-content.active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Profile Tab Styles */
+.grt-profile-section {
+    padding: 20px;
+    text-align: center;
+}
+
+.grt-profile-image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.grt-profile-icon.big {
+    width: 100px;
+    height: 100px;
+    font-size: 40px;
+    margin: 0 auto;
+}
+
+.grt-profile-upload-text {
+    font-size: 12px;
+    color: #888;
+    margin-top: 5px;
+}
+
+.grt-profile-info {
+    text-align: left;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #eee;
+}
+
+.grt-profile-info p {
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+.grt-profile-info strong {
+    display: inline-block;
+    width: 80px;
+    color: #555;
+}
+
+/* ... existing code ... */
+.grt-chat-tickets-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.grt-chat-ticket-item {
+    display: block;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    background: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #333;
+    transition: all 0.2s;
+    border: 1px solid #eee;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.grt-chat-ticket-item:hover {
+    background: #fff;
+    border-color: #667eea;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.grt-chat-ticket-item.active {
+    background: #667eea;
+    border-color: #667eea;
+    color: #fff;
+    box-shadow: 0 2px 5px rgba(102, 126, 234, 0.3);
+}
+
+.grt-chat-ticket-item h4 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: inherit;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.grt-chat-ticket-item p {
+    margin: 0;
+    font-size: 16px;
+    color: #777;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.grt-chat-ticket-item.active p {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Status Badges in Sidebar */
+.grt-chat-ticket-item .grt-ticket-status {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    background: #eee;
+    color: #555;
+}
+
+.grt-chat-ticket-item.active .grt-ticket-status {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.grt-chat-ticket-item .status-open {
+    color: #008a20;
+    background: #e5f5fa;
+}
+
+.grt-chat-ticket-item.active .status-open {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.grt-chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    overflow: hidden;
+    height: 100%;
+}
+
+/* Enhanced Chat Header */
+.grt-chat-header {
+    padding: 15px 20px;
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+    z-index: 10;
+    flex-shrink: 0;
+    height: 70px;
+}
+
+.grt-sidebar-toggle {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 8px;
+    border-radius: 50%;
+    margin-right: 15px;
+    color: #555;
+    transition: background 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+}
+
+.grt-sidebar-toggle:hover {
+    background: #f0f0f1;
+    color: #333;
+}
+
+.grt-chat-header-content {
+    flex: 1;
+    overflow: hidden;
+    min-width: 0; /* Enable truncation in flex item */
+}
+
+.grt-chat-header-content h3 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.grt-chat-header-content p {
+    margin: 0;
+    font-size: 16px;
+    color: #777;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.grt-chat-header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: 15px;
+    flex-shrink: 0;
+}
+
+/* Profile Styles */
+.grt-profile-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #333;
+    padding: 4px 10px 4px 4px;
+    border-radius: 20px;
+    transition: background 0.2s;
+    background: #f9f9f9;
+    border: 1px solid #eee;
+}
+
+.grt-profile-link:hover {
+    background: #f0f0f1;
+    border-color: #ddd;
+}
+
+.grt-profile-wrapper {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.grt-profile-icon {
+    width: 32px;
+    height: 32px;
+    background: #667eea;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+    margin-right: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.grt-profile-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.grt-profile-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.grt-profile-icon:hover .grt-profile-overlay {
+    opacity: 1;
+}
+
+.grt-profile-overlay .dashicons {
+    color: #fff;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+
+.grt-profile-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: #444;
+}
+
+.grt-direct-contact-header {
+    display: flex;
+    gap: 10px;
+}
+
+.grt-direct-contact-header .grt-action-btn {
+    padding: 6px 12px;
+    font-size: 16px;
+}
+
+.grt-logout-btn {
+    color: #d63638;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.grt-logout-btn:hover {
+    text-decoration: underline;
+}
+
+.grt-ticket-status {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.grt-ticket-status.status-open {
+    background: #e5f5fa;
+    color: #008a20;
+}
+
+.grt-ticket-status.status-closed,
+.grt-ticket-status.status-solved {
+    background: #f0f0f1;
+    color: #646970;
+}
+
+.grt-chat-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: #f0f0f1;
+    display: flex;
+    flex-direction: column;
+}
+
+.grt-chat-message {
+    max-width: 80%;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+}
+
+.grt-chat-message.user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.grt-chat-message.agent,
+.grt-chat-message.admin {
+    align-self: flex-start;
+}
+
+.grt-message-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    max-width: calc(100% - 44px);
+}
+
+.grt-chat-message.user .grt-message-content-wrapper {
+    align-items: flex-end;
+}
+
+.grt-message-avatar {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    margin-top: auto; /* Align to bottom */
+    margin-bottom: 20px; /* Space for time if outside bubble? No time is inside wrapper */
+    margin-bottom: 4px; /* Slight offset */
+}
+
+.grt-message-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.grt-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #ddd;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.grt-message-sender {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 4px;
+}
+
+.grt-chat-message.user .grt-message-sender {
+    display: none; /* Hide sender name for user to clean up UI, or keep it? Let's keep it but small */
+    text-align: right;
+}
+
+.grt-message-bubble {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    line-height: 1.5;
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+.grt-chat-message.user .grt-message-bubble {
+    background: #667eea;
+    color: #fff;
+    border-top-right-radius: 2px;
+}
+
+.grt-chat-message.agent .grt-message-bubble,
+.grt-chat-message.admin .grt-message-bubble {
+    background: #fff;
+    color: #333;
+    border-top-left-radius: 2px;
+}
+
+.grt-chat-input-container {
+    padding: 20px;
+    background: #fff;
+    border-top: 1px solid #ddd;
+    flex-shrink: 0;
+}
+
+.grt-chat-input-bar {
+    display: flex;
+    align-items: flex-end;
+    background: #f4f4f4;
+    border-radius: 26px;
+    padding: 10px;
+    border: 1px solid transparent;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.grt-chat-input-bar:focus-within {
+    border-color: #d1d1d1;
+    background: #fff;
+    box-shadow: 0 0 0 1px #d1d1d1;
+}
+
+.grt-chat-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 8px 10px;
+    min-height: 44px; /* Ensure height for one line */
+    max-height: 200px;
+    overflow-y: auto !important;
+    resize: none;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #333;
+    outline: none;
+    box-shadow: none;
+    font-family: inherit;
+}
+
+/* Custom Scrollbar for Input */
+.grt-chat-input::-webkit-scrollbar {
+    width: 6px;
+}
+
+.grt-chat-input::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.grt-chat-input::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.grt-chat-input:focus {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    outline: none;
+}
+
+.grt-chat-attach-btn {
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 8px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    margin-right: 5px;
+    width: 40px;
+    height: 40px;
+}
+
+.grt-chat-attach-btn:hover {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.grt-chat-attach-btn .dashicons {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.grt-chat-send-btn {
+    background: #667eea;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: background 0.2s;
+    font-size: 16px;
+    font-weight: 500;
+    align-self: flex-end; /* Align to bottom */
+    margin-bottom: 4px; /* Fine tune alignment */
+    height: 32px;
+    width: auto;
+}
+
+.grt-chat-send-btn:hover {
+    background: #5a67d8;
+}
+
+.grt-chat-send-btn .dashicons {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+}
+
+/* Legacy button styles for other elements */
+.grt-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.grt-btn-primary {
+    background: #667eea;
+    color: #fff;
+}
+
+.grt-btn-primary:hover {
+    background: #5a67d8;
+}
+
+.grt-btn-secondary {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.grt-btn-secondary:hover {
+    background: #cbd5e0;
+}
+
+.grt-attach-btn {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.grt-attach-btn:hover {
+    color: #333;
+}
+
+.grt-attachment-preview {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: #f0f0f1;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.grt-remove-attachment {
+    background: none;
+    border: none;
+    color: #d63638;
+    font-size: 20px;
+    cursor: pointer;
+    margin-left: auto;
+}
+
+.grt-message-attachment img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-top: 5px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.grt-message-attachment img:hover {
+    opacity: 0.9;
+}
+
+/* Sidebar Toggle Button */
+.grt-sidebar-toggle {
+    background: none;
+    border: none;
+    color: #333;
+    cursor: pointer;
+    margin-right: 15px;
+    padding: 5px;
+    font-size: 24px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.grt-sidebar-toggle:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* Sidebar Collapsed State */
+.grt-chat-container.sidebar-collapsed .grt-chat-sidebar {
+    width: 0;
+    border-right: none;
+}
+
+.grt-chat-container.sidebar-collapsed .grt-chat-main {
+    width: 100%;
+}
+
+/* Smooth transition */
+.grt-chat-sidebar {
+    transition: width 0.3s ease;
+}
+
+/* Responsive adjustment */
+@media screen and (max-width: 768px) {
+    .grt-chat-container .grt-chat-sidebar {
+        position: absolute;
+        z-index: 1000;
+        height: 100%;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        transform: translateX(0);
+        width: 300px;
+    }
+    
+    .grt-chat-container.sidebar-collapsed .grt-chat-sidebar {
+        transform: translateX(-100%);
+        width: 300px;
+    }
+
+    /* On mobile, maybe default to collapsed? */
+    /* Let JS handle default state based on screen size if needed */
+}
