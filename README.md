@@ -1,18 +1,20 @@
 # GRT Ticket - Professional WordPress Support Ticket System
 
-**Version:** 1.1.2  
+**Version:** 1.1.4  
 **Requires at least:** 5.0  
-**Tested up to:** 6.7  
+**Tested up to:** 6.9  
 **Requires PHP:** 7.4  
 **License:** GPLv2 or later  
 
-A complete, professional support ticket system with real-time chat functionality, designed for seamless customer support directly within your WordPress site.
+A support ticket system with real-time chat, email piping, custom fields, and Webhook integrations (Slack/Discord/Zapier).
 
 ## Description
 
 GRT Ticket is a powerful, modern support ticket management plugin for WordPress that bridges the gap between simple contact forms and complex helpdesk software. It provides a **full-screen, real-time chat interface** for users and admins, making support feel personal and immediate.
 
 Unlike standard ticketing plugins, GRT Ticket offers a distraction-free experience with a beautiful UI, AJAX-powered live updates, and smart features like guest submission and direct contact options.
+
+**Note on Minified JS**: The `public/js/supabase.js` file is a minified build of the Supabase JS client. Source code available at: https://github.com/supabase/supabase-js
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/9ac1849a-40e4-47c5-b864-ed1cc7671070" width="80%" alt="GRT Ticket Dashboard" style="border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" />
@@ -37,7 +39,7 @@ Unlike standard ticketing plugins, GRT Ticket offers a distraction-free experien
 *   **Zapier Integration**: Connect with thousands of other apps (like Trello, Asana, Google Sheets) via Zapier webhooks.
 
 ### 👤 Seamless Guest Experience (New!)
-*   **Instant Access**: Guests can view and reply to their tickets immediately after submission without needing to log in (via secure cookie).
+*   **Instant Access**: Guests can view and reply to their tickets immediately after submission via secure cookie (no login required).
 *   **Smart Links**: Email notifications contain direct access links to the frontend ticket view.
 
 ### ⚡ Supabase Integration
@@ -52,7 +54,7 @@ Unlike standard ticketing plugins, GRT Ticket offers a distraction-free experien
 *   **Custom Fields Builder**: Admins can create dynamic forms with Text, Number, Date, URL, and Select fields to capture specific ticket details.
 *   **Full-Screen Live Chat**: A distraction-free, WhatsApp-like chat interface for real-time communication.
 *   **Modern Ticket Form**: Beautifully designed submission form with custom category icons and validation.
-*   **Guest Ticket Submission**: Users don't need an account to submit tickets. The system automatically creates an account and handles secure password generation.
+*   **Guest Ticket Submission**: Users can submit tickets without an account. Access is managed via secure cookies (no account creation required).
 *   **User Dashboard**: Logged-in users can view their profile, track recent tickets, and see status updates.
 *   **User Profile & Avatars**: Users can update their profile information and upload custom avatars with a modern camera overlay.
 *   **File Attachments**: Support for image (JPG, PNG, GIF) and PDF uploads directly within the chat.
@@ -84,7 +86,7 @@ Unlike other plugins that charge for essential features, GRT Ticket includes the
 *   <mark>**Auto-Assignment**</mark>: Smart routing of tickets to specific agents based on the issue category.
 *   <mark>**Agent Performance Analytics**</mark>: Detailed insights into agent productivity with visual stats on assigned and solved tickets.
 *   <mark>**Real-time Chat**</mark>: Full-screen, real-time communication interface for users and admins without relying on external services.
-*   <mark>**Guest Ticket Submission**</mark>: Seamless support for non-logged-in users with automatic secure account creation.
+*   <mark>**Guest Ticket Submission**</mark>: Seamless support for non-logged-in users with secure cookie access.
 
 ## ⚡ Supabase Configuration (Real-Time Chat)
 
@@ -123,35 +125,7 @@ To enable ultra-fast real-time chat, GRT Ticket integrates with Supabase. Follow
     ```
     *   This table stores temporary real-time messages. Your WordPress database remains the primary storage.
 
-## � Webhooks Configuration Guide
-
-GRT Ticket allows you to send notifications to external services like Slack, Discord, and Zapier when a new ticket is created. Here's how to set them up:
-
-### 1. Slack Integration
-1.  Go to [api.slack.com/apps](https://api.slack.com/apps) and create a new app.
-2.  Enable **Incoming Webhooks** from the features menu.
-3.  Click **Activate Incoming Webhooks** to turn it on.
-4.  Click **Add New Webhook to Workspace** and select the channel where you want notifications to appear.
-5.  Copy the **Webhook URL** (it looks like `https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX`).
-6.  Paste this URL into **GRT Ticket > Settings > Webhooks & Integrations > Slack Webhook URL**.
-
-### 2. Discord Integration
-1.  Open Discord and go to the server settings of your desired server.
-2.  Navigate to **Integrations > Webhooks**.
-3.  Click **New Webhook**.
-4.  Name your webhook (e.g., "Support Bot") and choose the channel.
-5.  Click **Copy Webhook URL** (it looks like `https://discord.com/api/webhooks/123456789/abcdef...`).
-6.  Paste this URL into **GRT Ticket > Settings > Webhooks & Integrations > Discord Webhook URL**.
-
-### 3. Zapier Integration
-1.  Log in to Zapier and click **Create Zap**.
-2.  For the **Trigger**, search for and select **Webhooks by Zapier**.
-3.  Choose **Catch Hook** as the event and click Continue.
-4.  Copy the **Webhook URL** provided by Zapier (it looks like `https://hooks.zapier.com/hooks/catch/123456/abcdef/`).
-5.  Paste this URL into **GRT Ticket > Settings > Webhooks & Integrations > Zapier Webhook URL**.
-6.  Send a test ticket to verify Zapier receives the data (JSON format).
-
-## �📦 Installation
+## 📦 Installation
 
 1.  **Upload**: Upload the `grt-ticket` folder to the `/wp-content/plugins/` directory.
 2.  **Activate**: Activate the plugin through the 'Plugins' menu in WordPress.
@@ -172,7 +146,7 @@ Add the following shortcode to any page to display the ticket form and user dash
 [grt_ticket]
 ```
 
-*   **Guest Users**: Will see the ticket submission form and a "Login" tab.
+*   **Guest Users**: Will see the ticket submission form (no login required).
 *   **Logged-in Users**: Will see their recent tickets list and profile details.
 
 ### Managing Tickets
@@ -182,6 +156,23 @@ Add the following shortcode to any page to display the ticket form and user dash
 4.  Update the ticket status to **Solved** when finished.
 
 ## 📋 Changelog
+
+### 1.1.4
+*   **Security**: Removed all user creation and auto-login functionality to prevent security risks.
+*   **Security**: Implemented secure cookie-based access for guest tickets.
+*   **Security**: Fixed escaping issues in shortcodes and admin pages.
+*   **Security**: Added missing nonces and permission checks in AJAX handlers.
+*   **Fix**: Removed debug.log and added source code documentation for minified JS.
+*   **Fix**: Added 'ridhwanahsann' to contributors list.
+
+### 1.1.3
+*   **Improvement**: Minor bug fixes and performance improvements.
+
+### 1.1.2
+*   **Feature**: **Webhooks & Integrations** - Added support for Slack, Discord, and Zapier notifications.
+*   **Feature**: **Guest Access** - Implemented secure cookie-based access for guests (no login required to view own ticket).
+*   **Improvement**: Updated email notifications to include direct frontend links to tickets.
+*   **Improvement**: Added "Webhooks & Integrations" tab in Settings.
 
 ### 1.1.1
 *   **Feature**: Automatic creation of the support portal page upon activation.
@@ -220,7 +211,7 @@ Add the following shortcode to any page to display the ticket form and user dash
 *   **Security**: Improved input validation and capability checks.
 
 ### 1.0.3
-*   **Feature**: Added Guest Ticket Submission with auto-account creation.
+*   **Feature**: Added Guest Ticket Submission.
 *   **Feature**: Introduced Twilio integration for SMS/WhatsApp notifications.
 *   **Update**: Refined email notification templates.
 
